@@ -1,0 +1,48 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/policy/policy",
+    "pages/news/news",
+    "pages/mymessage/mymessage"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8",
+    "enablePullDownRefresh": true
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#3cc51f",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "/static/icon/Home.png",
+        "selectedIconPath": "/static/icon/Home-selected.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/policy/policy",
+        "iconPath": "/static/icon/policy.png",
+        "selectedIconPath": "/static/icon/policy-selected.png",
+        "text": "政策"
+      },
+      {
+        "pagePath": "pages/news/news",
+        "iconPath": "/static/icon/new.png",
+        "selectedIconPath": "/static/icon/new-selected.png",
+        "text": "新闻"
+      },
+      {
+        "pagePath": "pages/mymessage/mymessage",
+        "iconPath": "/static/icon/my.png",
+        "selectedIconPath": "/static/icon/my-selected.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "usingComponents": {}
+}

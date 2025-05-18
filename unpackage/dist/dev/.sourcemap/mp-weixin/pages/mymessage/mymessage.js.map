@@ -1,0 +1,1 @@
+{"version":3,"file":"mymessage.js","sources":["D:/Hbuild/HBuilderX.4.64.2025042916/HBuilderX/plugins/uniapp-cli-vite/uniPage:/cGFnZXMvbXltZXNzYWdlL215bWVzc2FnZS52dWU"],"sourcesContent":["import MiniProgramPage from 'E:/project/uniapp/uniapp-news/pages/mymessage/mymessage.vue'\nwx.createPage(MiniProgramPage)"],"names":[],"mappings":";;;;;;;AACA,GAAG,WAAW,eAAe;"}
