@@ -1,1 +1,1 @@
-<view> 主页 </view>
+<view class="container"><custom-navbar u-i="95642f44-0" bind:__l="__l"/></view>

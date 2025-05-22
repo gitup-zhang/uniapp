@@ -1,1 +1,1 @@
-<view> 新闻 </view>
+<detail-navbar wx:if="{{a}}" u-i="26b1a250-0" bind:__l="__l" u-p="{{a}}"></detail-navbar><view> 新闻 </view>

@@ -1,1 +1,1 @@
-<view> 政策 </view>
+<detail-navbar wx:if="{{a}}" u-i="52720678-0" bind:__l="__l" u-p="{{a}}"></detail-navbar><view> 政策 </view>
