@@ -13,7 +13,7 @@
 
       <!-- 头像 + 名字 + 签名 -->
       <view class="header-content">
-        <image class="avatar" src="/static/avatar.png" mode="aspectFill"></image>
+        <image class="avatar" src="/static/picture.jpg" mode="aspectFill"></image>
         <view class="user-info">
           <text class="username">胡歌</text>
           <text class="slogan">在阳光灿烂的日子里睡觉呀</text>
@@ -25,7 +25,7 @@
     <view class="main-content">
       <view class="card">
         <view class="top-section">
-          <image class="icon" src="/static/fire.png" mode="aspectFit"></image>
+          <image class="icon" src="/static/icon/fire.png" mode="aspectFit"></image>
           <view class="title-group">
             <text class="card-title">累计在线天数</text>
             <text class="card-number">{{ daysOnline }}</text>
@@ -71,7 +71,7 @@ export default {
 
 .header {
   background: linear-gradient(to right, #ff4d4f, #ff7a7a);
-  height: 300px;
+  height: 320px;
   padding: 0 20px;
   position: relative;
 
@@ -84,7 +84,7 @@ export default {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 35rpx;
+	margin-top: 35px;
 	// 修改我的垂直位置
 
     .title-text {
@@ -102,7 +102,7 @@ export default {
   .header-content {
     display: flex;
     align-items: center;
-    padding-top: 50rpx;
+    padding-top: 90px;
 
     .avatar {
       width: 70px;
@@ -183,6 +183,9 @@ export default {
   .bottom-item {
     flex: 1;
     text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 
     .bottom-number {
       font-size: 18px;
