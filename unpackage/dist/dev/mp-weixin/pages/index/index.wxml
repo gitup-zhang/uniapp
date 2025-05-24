@@ -1,1 +1,1 @@
-<view class="container"><custom-navbar u-i="95642f44-0" bind:__l="__l"/></view>
+<view class="container"><custom-navbar u-i="95642f44-0" bind:__l="__l"/><show-infor-vue u-i="95642f44-1" bind:__l="__l"></show-infor-vue></view>

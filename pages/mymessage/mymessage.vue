@@ -4,7 +4,8 @@
       <view class="status-bar"></view>
 
       <!-- 顶部栏 -->
-      <view class="header-top-bar">
+	  <view class="border-box" :style="{height:statusBarHeight+'px'}"></view>
+      <view class="header-top-bar" >
         <text class="title-text">我的</text>
         <view class="settings-icon">
           <uni-icons type="gear-filled" size="22" color="#fff"></uni-icons>
@@ -52,16 +53,11 @@
     </view>
   </view>
 </template>
-<script>
-export default {
-  data() {
-    return {
-      daysOnline: 112,
-      newsViews: 457,
-      policyViews: 113
-    }
-  }
-}
+<script setup>
+import {ref} from 'vue'
+ let SYSTEMINFO=uni.getSystemInfoSync()
+ let statusBarHeight=ref(SYSTEMINFO.statusBarHeight)
+ console.log(statusBarHeight)
 </script>
 <style lang="scss">
 .container {
@@ -76,15 +72,15 @@ export default {
   position: relative;
 
 
-  .status-bar {
-    height: var(--status-bar-height);
-  }
+  // .status-bar {
+  //   height: var(--status-bar-height);
+  // }
 
   .header-top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-	margin-top: 35px;
+	//margin-top: 35px;
 	// 修改我的垂直位置
 
     .title-text {

@@ -1,8 +1,9 @@
 "use strict";
 if (!Math) {
-  CustomNavbar();
+  (CustomNavbar + showInforVue)();
 }
 const CustomNavbar = () => "../../components/CustomNavbar/CustomNavbar.js";
+const showInforVue = () => "../../components/show-infor/show-infor.js";
 const _sfc_main = {
   __name: "index",
   setup(__props) {

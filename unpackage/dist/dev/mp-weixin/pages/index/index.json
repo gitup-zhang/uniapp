@@ -2,6 +2,7 @@
   "navigationBarTitleText": "首页",
   "navigationStyle": "custom",
   "usingComponents": {
-    "custom-navbar": "../../components/CustomNavbar/CustomNavbar"
+    "custom-navbar": "../../components/CustomNavbar/CustomNavbar",
+    "show-infor-vue": "../../components/show-infor/show-infor"
   }
 }
