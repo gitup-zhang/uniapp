@@ -19,8 +19,8 @@ const _sfc_main = {
           size: "22",
           color: "#fff"
         }),
-        c: common_assets._imports_0,
-        d: common_assets._imports_1,
+        c: common_assets._imports_0$1,
+        d: common_assets._imports_1$1,
         e: common_vendor.t(_ctx.daysOnline),
         f: common_vendor.t(_ctx.newsViews),
         g: common_vendor.t(_ctx.policyViews)

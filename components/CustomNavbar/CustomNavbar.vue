@@ -31,6 +31,7 @@ onMounted(() => {
   box-sizing: border-box;
   z-index: 1000;
   overflow: hidden;
+  margin-bottom: 30rpx;
 }
 .navbar-bg {
   position: absolute;
