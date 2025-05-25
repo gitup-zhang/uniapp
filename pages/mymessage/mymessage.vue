@@ -1,11 +1,11 @@
 <template>
   <view class="container">
     <view class="header">
-      <view class="status-bar"></view>
+      <!-- 状态栏预留高度 -->
+      <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
 
       <!-- 顶部栏 -->
-	  <view class="border-box" :style="{height:statusBarHeight+'px'}"></view>
-      <view class="header-top-bar" >
+      <view class="header-top-bar">
         <text class="title-text">我的</text>
         <view class="settings-icon">
           <uni-icons type="gear-filled" size="22" color="#fff"></uni-icons>
@@ -53,6 +53,7 @@
     </view>
   </view>
 </template>
+
 <script setup>
 import {ref} from 'vue'
  let SYSTEMINFO=uni.getSystemInfoSync()
@@ -63,49 +64,50 @@ import {ref} from 'vue'
 .container {
   min-height: 100vh;
   background-color: #f5f5f5;
+  padding-bottom: env(safe-area-inset-bottom); // 防止底部内容被遮挡
 }
 
 .header {
   background: linear-gradient(to right, #ff4d4f, #ff7a7a);
-  height: 320px;
-  padding: 0 20px;
+  padding: 0 20rpx;
+  padding-top: env(safe-area-inset-top); // 适配刘海屏顶部
   position: relative;
+  height: 600rpx;
+  box-sizing: border-box;
 
-
-  // .status-bar {
-  //   height: var(--status-bar-height);
-  // }
+  .status-bar {
+    height: var(--status-bar-height); // 或动态赋值
+  }
 
   .header-top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-	//margin-top: 35px;
-	// 修改我的垂直位置
+    padding-top: 20rpx;
 
     .title-text {
-      font-size: 20px;
+      font-size: 36rpx;
       font-weight: bold;
       color: #fff;
     }
 
     .settings-icon {
-      width: 30px;
-      height: 30px;
+      width: 60rpx;
+      height: 60rpx;
     }
   }
 
   .header-content {
     display: flex;
     align-items: center;
-    padding-top: 90px;
+    padding-top: 150rpx;
 
     .avatar {
-      width: 70px;
-      height: 70px;
+      width: 140rpx;
+      height: 140rpx;
       border-radius: 50%;
-      border: 2px solid #fff;
-      margin-right: 15px;
+      border: 4rpx solid #fff;
+      margin-right: 30rpx;
     }
 
     .user-info {
@@ -114,13 +116,13 @@ import {ref} from 'vue'
       color: #fff;
 
       .username {
-        font-size: 20px;
+        font-size: 40rpx;
         font-weight: bold;
-        margin-bottom: 4px;
+        margin-bottom: 8rpx;
       }
 
       .slogan {
-        font-size: 14px;
+        font-size: 28rpx;
         opacity: 0.9;
       }
     }
@@ -130,26 +132,26 @@ import {ref} from 'vue'
 .main-content {
   position: relative;
   z-index: 2;
-  padding: 0 16px;
-  margin-top: -50px;
+  padding: 0 32rpx;
+  margin-top: -100rpx;
 }
 
 .card {
   background-color: #fff;
-  border-radius: 14px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  padding: 20px;
+  border-radius: 28rpx;
+  box-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.08);
+  padding: 40rpx;
 }
 
 .top-section {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 40rpx;
 
   .icon {
-    width: 30px;
-    height: 30px;
-    margin-right: 10px;
+    width: 60rpx;
+    height: 60rpx;
+    margin-right: 20rpx;
   }
 
   .title-group {
@@ -158,15 +160,15 @@ import {ref} from 'vue'
 
     .card-title {
       font-weight: bold;
-      font-size: 16px;
+      font-size: 32rpx;
       color: #333;
     }
 
     .card-number {
-      font-size: 24px;
+      font-size: 48rpx;
       font-weight: bold;
       color: #ff4d4f;
-      margin-top: 4px;
+      margin-top: 8rpx;
     }
   }
 }
@@ -179,28 +181,29 @@ import {ref} from 'vue'
   .bottom-item {
     flex: 1;
     text-align: center;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
     .bottom-number {
-      font-size: 18px;
+      font-size: 36rpx;
       font-weight: bold;
       color: #333;
     }
 
     .bottom-label {
-      font-size: 13px;
+      font-size: 26rpx;
       color: #888;
-      margin-top: 2px;
+      margin-top: 4rpx;
     }
   }
 
   .vertical-line {
-    width: 1px;
-    height: 40px;
+    width: 2rpx;
+    height: 80rpx;
     background-color: #eee;
-    margin: 0 10px;
+    margin: 0 20rpx;
   }
 }
+
 </style>

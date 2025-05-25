@@ -19,6 +19,23 @@
 		  </view>
 		</view>
 	</showInforVue>
+	<!-- 公告信息 -->
+	 <view class="notice-card-container">
+	     <view class="notice-card">
+	       <view class="notice-card-left">
+	         <text class="notice-card-title">系统</text>
+	         <text class="notice-card-title">公告</text>
+	       </view>
+	       <view class="notice-card-right">
+			<swiper class="notice-card-right" autoplay="true" vertical="true" interval="4000" circular="true">
+			<swiper-item v-for="item in notice">
+	         <text class="notice-card-desc">{{item}}</text>
+			 </swiper-item>
+			 </swiper>
+	       </view>
+	     </view>
+	   </view>
+	<!-- 政策和新闻 -->
 	 <showInforVue :isshow="true" title="精选政策" >
 	 <view class="news-item">
 	     <image class="news-image" src="/static/3044eb7c01d942fc96e5d5bd8282ee19.jpg" mode="aspectFill"></image>
@@ -45,8 +62,13 @@
 
 
 <script setup>
+import {ref} from 'vue'
 import CustomNavbar from '@/components/CustomNavbar/CustomNavbar.vue'
 import showInforVue from '../../components/show-infor/show-infor.vue';
+
+let notice=ref(["公告1.。。。。。。。。。","公告2.。。。。。。。。。。。","公告3.。。。。。。。。。。。。。"])
+
+
 
 </script>
 
@@ -159,5 +181,52 @@ import showInforVue from '../../components/show-infor/show-infor.vue';
   border-radius: 10rpx; /* 增大圆角 */
   align-self: flex-start; /* 标签靠左对齐 */
   line-height: 1; /* 确保文字垂直居中 */
+}
+/* 公告布局 */
+.notice-card-container {
+  padding: 0rpx 30rpx; /* 与其他卡片一致的外部边距 */
+  margin-bottom: 40rpx;
+  background-color: #f5f5f5;
+}
+
+.notice-card {
+  background-color: #ffffff;
+  border-radius: 20rpx;
+  padding: 25rpx;
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.notice-card-left {
+  width: 120rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+}
+
+.notice-card-title {
+  font-weight: bold;
+  font-size: 32rpx;
+  color: #000;
+  line-height: 40rpx;
+}
+
+.notice-card-right {
+  flex: 1;
+  height: 60rpx;
+  align-items: center;
+  justify-content: center;
+  
+}
+
+.notice-card-desc {
+   color: #666666;
+    font-size: 28rpx;
+    white-space: nowrap;
+    line-height: 60rpx; /* 与swiper高度一致 */
 }
 </style>
