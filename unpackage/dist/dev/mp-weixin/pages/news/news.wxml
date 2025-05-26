@@ -1,1 +1,1 @@
-<detail-navbar wx:if="{{a}}" u-i="26b1a250-0" bind:__l="__l" u-p="{{a}}"></detail-navbar><view> 新闻 </view>
+<detail-navbar wx:if="{{a}}" u-i="26b1a250-0" bind:__l="__l" u-p="{{a}}"></detail-navbar><uni-search-bar wx:if="{{e}}" bindconfirm="{{b}}" bindcancel="{{c}}" u-i="26b1a250-1" bind:__l="__l" bindupdateModelValue="{{d}}" u-p="{{e}}"></uni-search-bar><uni-segmented-control wx:if="{{g}}" bindclickItem="{{f}}" u-i="26b1a250-2" bind:__l="__l" u-p="{{g}}"></uni-segmented-control>
