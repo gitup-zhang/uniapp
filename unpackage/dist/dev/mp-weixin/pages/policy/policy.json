@@ -1,7 +1,5 @@
 {
   "navigationBarTitleText": "政策",
   "navigationStyle": "custom",
-  "usingComponents": {
-    "detail-navbar": "../../components/DetailNavbar/DetailNavbar"
-  }
+  "usingComponents": {}
 }

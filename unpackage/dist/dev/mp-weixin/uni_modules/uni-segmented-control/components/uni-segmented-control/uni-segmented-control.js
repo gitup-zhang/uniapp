@@ -1,5 +1,5 @@
 "use strict";
-const common_vendor = require("../../../../../common/vendor.js");
+const common_vendor = require("../../../../common/vendor.js");
 const _sfc_main = {
   name: "UniSegmentedControl",
   emits: ["clickItem"],
@@ -74,6 +74,6 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     d: $props.styleType === "text" ? "" : $props.activeColor
   };
 }
-const Component = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-52668560"]]);
+const Component = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-86aa1171"]]);
 wx.createComponent(Component);
-//# sourceMappingURL=../../../../../../.sourcemap/mp-weixin/node-modules/@dcloudio/uni-ui/lib/uni-segmented-control/uni-segmented-control.js.map
+//# sourceMappingURL=../../../../../.sourcemap/mp-weixin/uni_modules/uni-segmented-control/components/uni-segmented-control/uni-segmented-control.js.map

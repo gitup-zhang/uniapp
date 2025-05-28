@@ -1,0 +1,21 @@
+
+.filter-container.data-v-24bc9d41 {
+  display: flex;
+  justify-content: flex-start;
+  padding: 10rpx 20rpx;
+  background-color: #ffffff;
+}
+.filter-item.data-v-24bc9d41 {
+  width: 200rpx; /* 你可以根据实际设计需求调整 */
+  margin-right: 20rpx;
+  background-color: #ffffff;
+  border-radius: 50rpx;
+  padding: 10rpx 20rpx;
+  font-size: 26rpx;
+  color: #333;
+  text-align: center;
+}
+.filter-item.data-v-24bc9d41:last-child {
+  margin-right: 0;
+}
+

@@ -4,6 +4,7 @@
   "usingComponents": {
     "detail-navbar": "../../components/DetailNavbar/DetailNavbar",
     "uni-search-bar": "../../uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar",
-    "uni-segmented-control": "../../node-modules/@dcloudio/uni-ui/lib/uni-segmented-control/uni-segmented-control"
+    "uni-segmented-control": "../../uni_modules/uni-segmented-control/components/uni-segmented-control/uni-segmented-control",
+    "uni-data-select": "../../uni_modules/uni-data-select/components/uni-data-select/uni-data-select"
   }
 }
