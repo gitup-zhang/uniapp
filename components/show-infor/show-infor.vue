@@ -6,29 +6,23 @@
                 <view class="title-indicator"></view>
                 <text class="title-text">{{props.title}}</text>
               </view>
-              <view v-if="props.isshow" class="more-text" @click="handleMore">更多信息 ></view>
+              <!-- <view v-if="props.isshow" class="more-text" @click="handleMore">更多信息 ></view> -->
+			  <slot name="more"></slot>
     </view>
-		<slot></slot>
+		<slot name="body"></slot>
     </view>
   </view>
 </template>
 
 <script setup>
 const props = defineProps({
-  isshow: {
-    type: Boolean,
-    default: true
-  },
   title: {
     type: String,
     default: ''
   }
 })
 
-function handleMore() {
-	console.log(props.isshow)
-  // 点击事件逻辑
-}
+
 
 
 </script>

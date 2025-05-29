@@ -17,7 +17,6 @@ const _sfc_main = {
         c: common_assets._imports_1,
         d: common_vendor.o((...args) => _ctx.goToNews && _ctx.goToNews(...args)),
         e: common_vendor.p({
-          isshow: false,
           title: "为您推荐"
         }),
         f: common_vendor.f(common_vendor.unref(notice), (item, k0, i0) => {
@@ -25,16 +24,16 @@ const _sfc_main = {
             a: common_vendor.t(item)
           };
         }),
-        g: common_assets._imports_2
+        g: common_vendor.o((...args) => _ctx.handleMore && _ctx.handleMore(...args)),
+        h: common_assets._imports_2
       }, {}, {
-        h: common_vendor.p({
-          isshow: true,
+        i: common_vendor.p({
           title: "精选政策"
         }),
-        i: common_assets._imports_2
+        j: common_vendor.o((...args) => _ctx.handleMore && _ctx.handleMore(...args)),
+        k: common_assets._imports_2
       }, {}, {
-        j: common_vendor.p({
-          isshow: true,
+        l: common_vendor.p({
           title: "精选政策"
         })
       });

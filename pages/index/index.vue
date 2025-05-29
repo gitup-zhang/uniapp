@@ -2,7 +2,8 @@
   <view class="container">
     <CustomNavbar />
     <!-- 页面内容 -->
-	<showInforVue :isshow="false" title="为您推荐" >
+	<showInforVue  title="为您推荐" >
+		<template v-slot:body>
 		<view class="recommend-list">
 		  <view class="recommend-item" @click="goToPolicy">
 		    <view class="icon-wrapper policy-icon">
@@ -18,6 +19,7 @@
 		    <text class="label">行业新闻</text>
 		  </view>
 		</view>
+		</template>
 	</showInforVue>
 	<!-- 公告信息 -->
 	 <view class="notice-card-container">
@@ -36,7 +38,12 @@
 	     </view>
 	   </view>
 	<!-- 政策和新闻 -->
-	 <showInforVue :isshow="true" title="精选政策" >
+	 <showInforVue  title="精选政策" >
+		 <template v-slot:more>
+			 <view  class="more-text" @click="handleMore">更多信息 ></view>
+		 </template>
+		 
+		<template v-slot:body>
 	 <view class="news-item">
 	     <image class="news-image" src="/static/3044eb7c01d942fc96e5d5bd8282ee19.jpg" mode="aspectFill"></image>
 	     <view class="news-content">
@@ -45,8 +52,13 @@
 	       <view v-if="true" class="hot-tag">最热</view>
 	     </view>
 	   </view>
+	   </template> 
   </showInforVue>
-  <showInforVue :isshow="true" title="精选政策" >
+  <showInforVue  title="精选政策" >
+	  <template v-slot:more>
+		  <view  class="more-text" @click="handleMore">更多信息 ></view>
+	  </template>
+	  <template v-slot:body>
   	 <view class="news-item">
   	     <image class="news-image" src="/static/3044eb7c01d942fc96e5d5bd8282ee19.jpg" mode="aspectFill"></image>
   	     <view class="news-content">
@@ -55,6 +67,7 @@
   	       <view v-if="true" class="hot-tag">最热</view>
   	     </view>
   	   </view>
+	   </template>
   </showInforVue>
   </view>
  

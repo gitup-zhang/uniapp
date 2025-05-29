@@ -1,18 +1,18 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 if (!Array) {
-  const _easycom_DetailNavbar2 = common_vendor.resolveComponent("DetailNavbar");
+  const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_search_bar2 = common_vendor.resolveComponent("uni-search-bar");
   const _easycom_uni_segmented_control2 = common_vendor.resolveComponent("uni-segmented-control");
-  const _easycom_uni_data_select2 = common_vendor.resolveComponent("uni-data-select");
-  (_easycom_DetailNavbar2 + _easycom_uni_search_bar2 + _easycom_uni_segmented_control2 + _easycom_uni_data_select2)();
+  const _easycom_uni_card2 = common_vendor.resolveComponent("uni-card");
+  (_easycom_uni_nav_bar2 + _easycom_uni_search_bar2 + _easycom_uni_segmented_control2 + _easycom_uni_card2)();
 }
-const _easycom_DetailNavbar = () => "../../components/DetailNavbar/DetailNavbar.js";
+const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_search_bar = () => "../../uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar.js";
 const _easycom_uni_segmented_control = () => "../../uni_modules/uni-segmented-control/components/uni-segmented-control/uni-segmented-control.js";
-const _easycom_uni_data_select = () => "../../uni_modules/uni-data-select/components/uni-data-select/uni-data-select.js";
+const _easycom_uni_card = () => "../../uni_modules/uni-card/components/uni-card/uni-card.js";
 if (!Math) {
-  (_easycom_DetailNavbar + _easycom_uni_search_bar + _easycom_uni_segmented_control + _easycom_uni_data_select)();
+  (_easycom_uni_nav_bar + _easycom_uni_search_bar + _easycom_uni_segmented_control + _easycom_uni_card)();
 }
 const _sfc_main = {
   __name: "news",
@@ -26,28 +26,33 @@ const _sfc_main = {
     ];
     const value = common_vendor.computed(() => classify.map((item) => item.value));
     function search() {
-      common_vendor.index.__f__("log", "at pages/news/news.vue:52", searchbar.value);
+      common_vendor.index.__f__("log", "at pages/news/news.vue:89", searchbar.value);
     }
     function cancel() {
       searchbar.value = "";
     }
-    const brandOptions = [
-      { value: 0, text: "苹果" },
-      { value: 1, text: "华为" },
-      { value: 2, text: "小米" }
-    ];
-    const typeOptions = [
-      { value: 0, text: "保护壳" },
-      { value: 1, text: "贴膜" },
-      { value: 2, text: "充电器" }
-    ];
-    const selectedBrand = common_vendor.ref(null);
-    const selectedType = common_vendor.ref(null);
-    common_vendor.ref(null);
+    const currentDropdown = common_vendor.ref(null);
+    const selectedDomain = common_vendor.ref("政策领域");
+    const selectedTime = common_vendor.ref("发布时间");
+    const domainList = ["全部", "教育", "科技", "医疗"];
+    const timeList = ["全部", "最近一周", "最近一月", "最近一年"];
+    function toggleDropdown(type) {
+      currentDropdown.value = currentDropdown.value === type ? null : type;
+    }
+    function selectOption(type, value2) {
+      if (type === "domain") {
+        selectedDomain.value = value2;
+      } else if (type === "time") {
+        selectedTime.value = value2;
+      }
+      currentDropdown.value = null;
+    }
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: common_vendor.p({
-          title: "新闻"
+          statusBar: "true",
+          backgroundColor: "#903749",
+          fixed: "true"
         }),
         b: common_vendor.o(search),
         c: common_vendor.o(cancel),
@@ -63,19 +68,44 @@ const _sfc_main = {
           styleType: "text",
           activeColor: "#ff0000"
         }),
-        h: common_vendor.o(($event) => selectedBrand.value = $event),
-        i: common_vendor.p({
-          localdata: brandOptions,
-          placeholder: "品牌",
-          modelValue: selectedBrand.value
-        }),
-        j: common_vendor.o(($event) => selectedType.value = $event),
-        k: common_vendor.p({
-          localdata: typeOptions,
-          placeholder: "类型",
-          modelValue: selectedType.value
+        h: common_vendor.t(selectedDomain.value),
+        i: currentDropdown.value === "domain" ? 1 : "",
+        j: common_vendor.o(($event) => toggleDropdown("domain")),
+        k: common_vendor.t(selectedTime.value),
+        l: currentDropdown.value === "time" ? 1 : "",
+        m: common_vendor.o(($event) => toggleDropdown("time")),
+        n: currentDropdown.value === "domain"
+      }, currentDropdown.value === "domain" ? {
+        o: common_vendor.f(domainList, (item, k0, i0) => {
+          return {
+            a: common_vendor.t(item),
+            b: item,
+            c: common_vendor.o(($event) => selectOption("domain", item), item),
+            d: selectedDomain.value === item ? 1 : ""
+          };
         })
-      };
+      } : {}, {
+        p: currentDropdown.value === "time"
+      }, currentDropdown.value === "time" ? {
+        q: common_vendor.f(timeList, (item, k0, i0) => {
+          return {
+            a: common_vendor.t(item),
+            b: item,
+            c: common_vendor.o(($event) => selectOption("time", item), item),
+            d: selectedTime.value === item ? 1 : ""
+          };
+        })
+      } : {}, {
+        r: common_vendor.f(10, (item, k0, i0) => {
+          return {
+            a: "24bc9d41-3-" + i0
+          };
+        }),
+        s: common_vendor.p({
+          title: "基础卡片",
+          extra: "额外信息"
+        })
+      });
     };
   }
 };

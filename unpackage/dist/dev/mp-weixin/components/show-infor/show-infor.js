@@ -3,10 +3,6 @@ const common_vendor = require("../../common/vendor.js");
 const _sfc_main = {
   __name: "show-infor",
   props: {
-    isshow: {
-      type: Boolean,
-      default: true
-    },
     title: {
       type: String,
       default: ""
@@ -14,16 +10,10 @@ const _sfc_main = {
   },
   setup(__props) {
     const props = __props;
-    function handleMore() {
-      common_vendor.index.__f__("log", "at components/show-infor/show-infor.vue:29", props.isshow);
-    }
     return (_ctx, _cache) => {
-      return common_vendor.e({
-        a: common_vendor.t(props.title),
-        b: props.isshow
-      }, props.isshow ? {
-        c: common_vendor.o(handleMore)
-      } : {});
+      return {
+        a: common_vendor.t(props.title)
+      };
     };
   }
 };
