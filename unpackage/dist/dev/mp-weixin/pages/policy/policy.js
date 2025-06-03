@@ -18,6 +18,12 @@ const _sfc_main = {
   __name: "policy",
   setup(__props) {
     const searchbar = common_vendor.ref("");
+    function search() {
+      common_vendor.index.__f__("log", "at pages/policy/policy.vue:83", "搜索关键词:", searchbar.value);
+    }
+    function cancel() {
+      searchbar.value = "";
+    }
     const current = common_vendor.ref(0);
     const classify = [
       { key: "all", value: "全部" },
@@ -25,11 +31,8 @@ const _sfc_main = {
       { key: "k2", value: "分类2" }
     ];
     const value = common_vendor.computed(() => classify.map((item) => item.value));
-    function search() {
-      common_vendor.index.__f__("log", "at pages/policy/policy.vue:89", searchbar.value);
-    }
-    function cancel() {
-      searchbar.value = "";
+    function onClickItem(e) {
+      current.value = e.currentIndex;
     }
     const currentDropdown = common_vendor.ref(null);
     const selectedDomain = common_vendor.ref("政策领域");
@@ -61,7 +64,7 @@ const _sfc_main = {
           placeholder: "搜索行业政策",
           modelValue: searchbar.value
         }),
-        f: common_vendor.o(_ctx.onClickItem),
+        f: common_vendor.o(onClickItem),
         g: common_vendor.p({
           current: current.value,
           values: value.value,
@@ -98,7 +101,8 @@ const _sfc_main = {
       } : {}, {
         r: common_vendor.f(10, (item, k0, i0) => {
           return {
-            a: "e4e5fb8d-3-" + i0
+            a: item,
+            b: "e4e5fb8d-3-" + i0
           };
         }),
         s: common_vendor.p({

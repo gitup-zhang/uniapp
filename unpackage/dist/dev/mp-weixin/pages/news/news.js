@@ -18,6 +18,12 @@ const _sfc_main = {
   __name: "news",
   setup(__props) {
     const searchbar = common_vendor.ref("");
+    function search() {
+      common_vendor.index.__f__("log", "at pages/news/news.vue:78", "搜索关键词:", searchbar.value);
+    }
+    function cancel() {
+      searchbar.value = "";
+    }
     const current = common_vendor.ref(0);
     const classify = [
       { key: "all", value: "全部" },
@@ -25,14 +31,11 @@ const _sfc_main = {
       { key: "k2", value: "分类2" }
     ];
     const value = common_vendor.computed(() => classify.map((item) => item.value));
-    function search() {
-      common_vendor.index.__f__("log", "at pages/news/news.vue:89", searchbar.value);
-    }
-    function cancel() {
-      searchbar.value = "";
+    function onClickItem(e) {
+      current.value = e.currentIndex;
     }
     const currentDropdown = common_vendor.ref(null);
-    const selectedDomain = common_vendor.ref("政策领域");
+    const selectedDomain = common_vendor.ref("新闻领域");
     const selectedTime = common_vendor.ref("发布时间");
     const domainList = ["全部", "教育", "科技", "医疗"];
     const timeList = ["全部", "最近一周", "最近一月", "最近一年"];
@@ -46,6 +49,11 @@ const _sfc_main = {
         selectedTime.value = value2;
       }
       currentDropdown.value = null;
+    }
+    function onClick() {
+      common_vendor.index.navigateTo({
+        url: "/pages/detail/detailnew"
+      });
     }
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -61,7 +69,7 @@ const _sfc_main = {
           placeholder: "搜索行业新闻",
           modelValue: searchbar.value
         }),
-        f: common_vendor.o(_ctx.onClickItem),
+        f: common_vendor.o(onClickItem),
         g: common_vendor.p({
           current: current.value,
           values: value.value,
@@ -101,9 +109,12 @@ const _sfc_main = {
             a: "24bc9d41-3-" + i0
           };
         }),
-        s: common_vendor.p({
+        s: common_vendor.o(onClick),
+        t: common_vendor.p({
           title: "基础卡片",
-          extra: "额外信息"
+          ["sub-title"]: "副标题",
+          extra: "额外信息",
+          thumbnail: "/static/3044eb7c01d942fc96e5d5bd8282ee19.jpg"
         })
       });
     };

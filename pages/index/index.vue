@@ -5,14 +5,14 @@
 	<showInforVue  title="为您推荐" >
 		<template v-slot:body>
 		<view class="recommend-list">
-		  <view class="recommend-item" @click="goToPolicy">
+		  <view class="recommend-item" @click="handleMoremsg">
 		    <view class="icon-wrapper policy-icon">
 		      <image src="/static/policy.png" class="icon-image" mode="aspectFit" />
 		    </view>
 		    <text class="label">政府政策</text>
 		  </view>
 		
-		  <view class="recommend-item" @click="goToNews">
+		  <view class="recommend-item" @click="handleMorenew">
 		    <view class="icon-wrapper news-icon">
 		      <image src="/static/news.png" class="icon-image" mode="aspectFit" />
 		    </view>
@@ -40,7 +40,7 @@
 	<!-- 政策和新闻 -->
 	 <showInforVue  title="精选政策" >
 		 <template v-slot:more>
-			 <view  class="more-text" @click="handleMore">更多信息 ></view>
+			 <view  class="more-text" @click="handleMoremsg">更多信息 ></view>
 		 </template>
 		 
 		<template v-slot:body>
@@ -54,9 +54,9 @@
 	   </view>
 	   </template> 
   </showInforVue>
-  <showInforVue  title="精选政策" >
+  <showInforVue  title="精选新闻" >
 	  <template v-slot:more>
-		  <view  class="more-text" @click="handleMore">更多信息 ></view>
+		  <view  class="more-text" @click="handleMorenew">更多信息 ></view>
 	  </template>
 	  <template v-slot:body>
   	 <view class="news-item">
@@ -81,7 +81,32 @@ import showInforVue from '../../components/show-infor/show-infor.vue';
 
 let notice=ref(["公告1.。。。。。。。。。","公告2.。。。。。。。。。。。","公告3.。。。。。。。。。。。。。"])
 
+// 获取更多新闻和政策
+function handleMorenew(){
+	uni.switchTab({
+		url: '../news/news'
+	});
 
+}
+function handleMoremsg(){
+	uni.switchTab({
+		url: '../policy/policy'
+	});
+}
+// 接口
+const getImage = async () => {	
+	console.log(111111111)
+	uni.request({
+	    url: '/api/example/ListExample', //仅为示例，并非真实接口地址。
+	    success: (res) => {
+	        console.log(res);
+	        
+	    }
+	});
+	
+}
+
+    
 
 </script>
 

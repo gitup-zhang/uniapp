@@ -3,7 +3,9 @@
     "pages/index/index",
     "pages/policy/policy",
     "pages/news/news",
-    "pages/mymessage/mymessage"
+    "pages/mymessage/mymessage",
+    "pages/detail/detailnew",
+    "pages/detail/detailpolicy"
   ],
   "window": {
     "navigationBarTextStyle": "white",
