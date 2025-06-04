@@ -68,6 +68,7 @@
       extra="额外信息" 
       v-for="item in 10" 
       :key="item"
+	  @click="OnClick"
     >
       <text>这是一个基础卡片示例，此示例展示了一个标题加标题额外信息的标准卡片。</text>
     </uni-card>
@@ -118,6 +119,12 @@ function selectOption(type, value) {
     selectedTime.value = value
   }
   currentDropdown.value = null
+}
+// 获取详细政策
+function OnClick(){
+	uni.navigateTo({
+		url: '/pages/detail/detailpolicy'
+	});
 }
 </script>
 <style scoped>

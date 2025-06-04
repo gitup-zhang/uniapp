@@ -32,7 +32,17 @@
   align-items: flex-end;
   padding-bottom: 10px;
   pointer-events: none;
-  transform: translateY(20rpx); /* 替代 margin-top */
+  transform: translateY(10px); /* 替代 margin-top */
 }
+/* 标题样式 */
+.example-body.data-v-c1c6fe6d {
+
+		display: block;
+
+		padding: 10px;
+}
+/* 	.mb-10 {
+		margin-bottom: 10px;
+	} */
 
 

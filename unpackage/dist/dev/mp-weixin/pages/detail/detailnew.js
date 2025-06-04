@@ -2,11 +2,15 @@
 const common_vendor = require("../../common/vendor.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
-  _easycom_uni_nav_bar2();
+  const _easycom_uni_title2 = common_vendor.resolveComponent("uni-title");
+  const _easycom_uni_section2 = common_vendor.resolveComponent("uni-section");
+  (_easycom_uni_nav_bar2 + _easycom_uni_title2 + _easycom_uni_section2)();
 }
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
+const _easycom_uni_title = () => "../../node-modules/@dcloudio/uni-ui/lib/uni-title/uni-title.js";
+const _easycom_uni_section = () => "../../uni_modules/uni-section/components/uni-section/uni-section.js";
 if (!Math) {
-  _easycom_uni_nav_bar();
+  (_easycom_uni_nav_bar + _easycom_uni_title + _easycom_uni_section)();
 }
 const _sfc_main = {
   __name: "detailnew",
@@ -23,6 +27,18 @@ const _sfc_main = {
           fixed: "true",
           border: false,
           leftIcon: "left"
+        }),
+        c: common_vendor.p({
+          type: "h1",
+          title: "新闻标题"
+        }),
+        d: common_vendor.p({
+          title: "竖线装饰",
+          type: "line",
+          titleFontSize: "16px"
+        }),
+        e: common_vendor.f(50, (iten, k0, i0) => {
+          return {};
         })
       };
     };

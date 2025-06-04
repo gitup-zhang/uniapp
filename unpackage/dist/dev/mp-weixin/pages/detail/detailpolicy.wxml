@@ -1,1 +1,1 @@
-<view></view>
+<uni-nav-bar wx:if="{{b}}" class="data-v-fef9ca7d" u-s="{{['d']}}" bindclickLeft="{{a}}" u-i="fef9ca7d-0" bind:__l="__l" u-p="{{b}}"><view class="navbar-center data-v-fef9ca7d"><text class="navbar-title data-v-fef9ca7d">政策</text></view></uni-nav-bar>

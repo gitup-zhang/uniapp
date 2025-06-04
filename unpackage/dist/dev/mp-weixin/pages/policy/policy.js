@@ -19,7 +19,7 @@ const _sfc_main = {
   setup(__props) {
     const searchbar = common_vendor.ref("");
     function search() {
-      common_vendor.index.__f__("log", "at pages/policy/policy.vue:83", "搜索关键词:", searchbar.value);
+      common_vendor.index.__f__("log", "at pages/policy/policy.vue:84", "搜索关键词:", searchbar.value);
     }
     function cancel() {
       searchbar.value = "";
@@ -49,6 +49,11 @@ const _sfc_main = {
         selectedTime.value = value2;
       }
       currentDropdown.value = null;
+    }
+    function OnClick() {
+      common_vendor.index.navigateTo({
+        url: "/pages/detail/detailpolicy"
+      });
     }
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -102,7 +107,8 @@ const _sfc_main = {
         r: common_vendor.f(10, (item, k0, i0) => {
           return {
             a: item,
-            b: "e4e5fb8d-3-" + i0
+            b: common_vendor.o(OnClick, item),
+            c: "e4e5fb8d-3-" + i0
           };
         }),
         s: common_vendor.p({
