@@ -64,19 +64,23 @@
 
     <!-- 新闻卡片列表 -->
     <uni-card 
-      title="基础卡片" 
-      extra="额外信息" 
-      v-for="item in 10" 
-      :key="item"
+      :title="item.policy_title" 
+      :extra="item.creation_time" 
+      v-for="item in listpolicy.listpolicy" 
+      :key="item.id"
 	  @click="OnClick"
     >
-      <text>这是一个基础卡片示例，此示例展示了一个标题加标题额外信息的标准卡片。</text>
+      <text>{{item.brief_content}}</text>
     </uni-card>
   </view>
 </template>
 <script setup>
-import { ref, computed } from 'vue'
-
+import { ref, computed ,onMounted} from 'vue'
+import {usePolicyStore} from '@/store/PolicyList.js'
+ const listpolicy = usePolicyStore()
+onMounted(()=>{
+	listpolicy.getlistpolicy()
+})
 // 搜索栏
 const searchbar = ref("")
 
