@@ -78,33 +78,35 @@
 import {ref} from 'vue'
 import CustomNavbar from '@/components/CustomNavbar/CustomNavbar.vue'
 import showInforVue from '../../components/show-infor/show-infor.vue';
+import { getPolicyList , getExampleList} from '@/new-apis/policy.js'
+
 
 let notice=ref(["公告1.。。。。。。。。。","公告2.。。。。。。。。。。。","公告3.。。。。。。。。。。。。。"])
 
 // 获取更多新闻和政策
 function handleMorenew(){
-	uni.switchTab({
-		url: '../news/news'
-	});
+	// uni.switchTab({
+	// 	url: '../news/news'
+	// });
 
 }
 function handleMoremsg(){
-	uni.switchTab({
-		url: '../policy/policy'
-	});
+	// uni.switchTab({
+	// 	url: '../policy/policy'
+	// });
+	getPolicyList({
+	      
+	    }).then(res => {
+	      console.log('示例数据：', res);
+	    });
+	getExampleList({
+	      
+	    }).then(res => {
+	      console.log('示例数据：', res);
+	    });
 }
-// 接口
-const getImage = async () => {	
-	console.log(111111111)
-	uni.request({
-	    url: '/api/example/ListExample', //仅为示例，并非真实接口地址。
-	    success: (res) => {
-	        console.log(res);
-	        
-	    }
-	});
-	
-}
+// 接口测试
+
 
     
 

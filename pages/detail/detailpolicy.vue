@@ -14,6 +14,12 @@
       </view>
     </template>
   </uni-nav-bar>
+  <view class="example-body">
+  				<uni-title type="h1" title="政策标题"></uni-title>
+	</view>
+	<uni-section class="mb-10" title="竖线装饰"  type="line" titleFontSize="16px"></uni-section>
+	<view v-for="iten in 50">政策详情</view>
+  
 </template>
 
 <script setup>
@@ -58,6 +64,16 @@ function onBack() {
   pointer-events: none;
   transform: translateY(10px); /* 替代 margin-top */
 }
+/* 标题样式 */
+	.example-body {
+		/* #ifndef APP-NVUE */
+		display: block;
+		/* #endif */
+		padding: 10px;
+	}
+/* 	.mb-10 {
+		margin-bottom: 10px;
+	} */
 
 
 </style>
