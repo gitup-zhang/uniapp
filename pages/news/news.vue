@@ -62,6 +62,8 @@
       </view>
     </view>
 
+
+
     <!-- 新闻卡片列表 -->
 <uni-card title="基础卡片" sub-title="副标题" extra="额外信息" thumbnail="/static/3044eb7c01d942fc96e5d5bd8282ee19.jpg" @click="onClick" v-for="item in 10">
 				<text class="uni-body">这是一个带头像和双标题的基础卡片，此示例展示了一个完整的卡片。</text>
