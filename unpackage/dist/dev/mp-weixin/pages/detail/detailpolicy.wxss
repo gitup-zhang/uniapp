@@ -1,5 +1,3 @@
-
-/* 标题样式 */
 .navbar-title.data-v-fef9ca7d {
   font-size: 20px;
   font-weight: bold;
@@ -8,6 +6,7 @@
 }
 
 /* 居中容器，垂直对齐与左侧保持一致 */
+
 /* .navbar-center {
   position: absolute;
   left: 0;
@@ -35,4 +34,15 @@
   transform: translateY(10px); /* 替代 margin-top */
 }
 
+/* 标题样式 */
+.example-body.data-v-fef9ca7d {
+
+		display: block;
+
+		padding: 10px;
+}
+
+/* 	.mb-10 {
+		margin-bottom: 10px;
+	} */
 

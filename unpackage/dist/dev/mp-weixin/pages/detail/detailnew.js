@@ -7,7 +7,7 @@ if (!Array) {
   (_easycom_uni_nav_bar2 + _easycom_uni_title2 + _easycom_uni_section2)();
 }
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
-const _easycom_uni_title = () => "../../node-modules/@dcloudio/uni-ui/lib/uni-title/uni-title.js";
+const _easycom_uni_title = () => "../../uni_modules/uni-title/components/uni-title/uni-title.js";
 const _easycom_uni_section = () => "../../uni_modules/uni-section/components/uni-section/uni-section.js";
 if (!Math) {
   (_easycom_uni_nav_bar + _easycom_uni_title + _easycom_uni_section)();

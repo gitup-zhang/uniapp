@@ -4,7 +4,6 @@
   "usingComponents": {
     "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar",
     "uni-search-bar": "../../uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar",
-    "uni-segmented-control": "../../uni_modules/uni-segmented-control/components/uni-segmented-control/uni-segmented-control",
     "uni-card": "../../uni_modules/uni-card/components/uni-card/uni-card"
   }
 }

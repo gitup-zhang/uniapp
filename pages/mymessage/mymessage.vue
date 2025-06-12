@@ -57,10 +57,12 @@
 <script setup>
 import {ref} from 'vue'
  let SYSTEMINFO=uni.getSystemInfoSync()
+ // 获取状态栏高度
  let statusBarHeight=ref(SYSTEMINFO.statusBarHeight)
- console.log(statusBarHeight)
+
 </script>
 <style lang="scss">
+// @import "../../style/message.css";
 .container {
   min-height: 100vh;
   background-color: #f5f5f5;
@@ -205,5 +207,4 @@ import {ref} from 'vue'
     margin: 0 20rpx;
   }
 }
-
 </style>

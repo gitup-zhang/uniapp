@@ -2,6 +2,8 @@
   "navigationBarTitleText": "",
   "navigationStyle": "custom",
   "usingComponents": {
-    "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar"
+    "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar",
+    "uni-title": "../../uni_modules/uni-title/components/uni-title/uni-title",
+    "uni-section": "../../uni_modules/uni-section/components/uni-section/uni-section"
   }
 }

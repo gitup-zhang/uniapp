@@ -12,13 +12,13 @@
     @cancel="cancel">
   </uni-search-bar>
 
-  <uni-segmented-control
+  <!-- <uni-segmented-control
     :current="current"
     :values="value"
     @clickItem="onClickItem"
     styleType="text"
     activeColor="#ff0000"
-  ></uni-segmented-control>
+  ></uni-segmented-control> -->
 
   <!-- 主容器 -->
   <view class="container">
@@ -65,10 +65,10 @@
     <!-- 新闻卡片列表 -->
     <uni-card 
       :title="item.policy_title" 
-      :extra="item.creation_time" 
+      :extra="Dataformat(item.release_time)" 
       v-for="item in listpolicy.listpolicy" 
       :key="item.id"
-	  @click="OnClick"
+	  @click="OnClick(item.id)"
     >
       <text>{{item.brief_content}}</text>
     </uni-card>
@@ -77,32 +77,12 @@
 <script setup>
 import { ref, computed ,onMounted} from 'vue'
 import {usePolicyStore} from '@/store/PolicyList.js'
- const listpolicy = usePolicyStore()
-onMounted(()=>{
-	listpolicy.getlistpolicy()
-})
+import dayjs from 'dayjs'
+// 从pinia中获得对象
+const listpolicy = usePolicyStore()
+
 // 搜索栏
 const searchbar = ref("")
-
-function search() {
-  console.log("搜索关键词:", searchbar.value)
-}
-
-function cancel() {
-  searchbar.value = ""
-}
-
-// 分段器
-const current = ref(0)
-const classify = [
-  { key: "all", value: "全部" },
-  { key: "k1", value: "分类1" },
-  { key: "k2", value: "分类2" }
-]
-const value = computed(() => classify.map(item => item.value))
-function onClickItem(e) {
-  current.value = e.currentIndex
-}
 
 // 下拉筛选逻辑
 const currentDropdown = ref(null)
@@ -112,6 +92,34 @@ const selectedTime = ref('发布时间')
 const domainList = ['全部', '教育', '科技', '医疗']
 const timeList = ['全部', '最近一周', '最近一月', '最近一年']
 
+
+onMounted(()=>{
+	listpolicy.getlistpolicy()
+})
+
+// 搜索栏函数
+function search() {
+  console.log("搜索关键词:", searchbar.value)
+}
+
+function cancel() {
+  searchbar.value = ""
+}
+
+// 分段器
+// const current = ref(0)
+// const classify = [
+//   { key: "all", value: "全部" },
+//   { key: "k1", value: "分类1" },
+//   { key: "k2", value: "分类2" }
+// ]
+// const value = computed(() => classify.map(item => item.value))
+// function onClickItem(e) {
+//   current.value = e.currentIndex
+// }
+
+
+// 下拉菜单函数
 function toggleDropdown(type) {
   currentDropdown.value = currentDropdown.value === type ? null : type
 }
@@ -125,93 +133,17 @@ function selectOption(type, value) {
   currentDropdown.value = null
 }
 // 获取详细政策
-function OnClick(){
+function OnClick(id){
 	uni.navigateTo({
-		url: '/pages/detail/detailpolicy'
+		url: `/pages/detail/detailpolicy?id=${id}`
 	});
 }
+// 时间格式化函数
+function Dataformat(timeStr){
+	return dayjs(timeStr).format('YYYY-MM-DD HH:mm:ss')
+}
+
 </script>
 <style scoped>
-/* 导航栏 */
-.navbar-title {
-  font-size: 20px;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 10px;
-  text-align: left;
-}
-
-/* 页面容器 */
-.container {
-  background-color: #f5f5f5;
-  min-height: 100vh;
-}
-
-/* 筛选包裹容器：用于相对定位 */
-.filter-wrapper {
-  position: relative;
-  z-index: 1;
-}
-
-/* 筛选栏 */
-.filter-bar {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 20rpx 30rpx;
-  background-color: #fff;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
-  position: relative;
-}
-
-/* 筛选项 */
-.filter-item {
-  display: flex;
-  align-items: center;
-  font-size: 30rpx;
-  color: #333;
-  font-weight: bold;
-  margin-right: 40rpx;
-}
-
-/* 下拉箭头 */
-.arrow {
-  width: 0;
-  height: 0;
-  border-left: 10rpx solid transparent;
-  border-right: 10rpx solid transparent;
-  border-top: 12rpx solid #999;
-  margin-left: 10rpx;
-  transition: transform 0.2s ease;
-}
-
-.arrow.open {
-  transform: rotate(180deg);
-}
-
-/* 下拉列表浮动样式 */
-.dropdown-list {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background-color: #fff;
-  padding: 10rpx 0;
-  border-top: 1rpx solid #eee;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
-  z-index: 10;
-}
-
-/* 下拉项 */
-.dropdown-item {
-  padding: 20rpx 30rpx;
-  font-size: 28rpx;
-  color: #333;
-}
-
-/* 选中状态 */
-.dropdown-item.selected {
-  color: #007aff;
-  font-weight: bold;
-}
+@import "../../style/new_policy.css";
 </style>

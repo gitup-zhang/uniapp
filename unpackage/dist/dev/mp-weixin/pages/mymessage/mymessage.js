@@ -14,7 +14,6 @@ const _sfc_main = {
   setup(__props) {
     let SYSTEMINFO = common_vendor.index.getSystemInfoSync();
     let statusBarHeight = common_vendor.ref(SYSTEMINFO.statusBarHeight);
-    common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:61", statusBarHeight);
     return (_ctx, _cache) => {
       return {
         a: common_vendor.unref(statusBarHeight) + "px",

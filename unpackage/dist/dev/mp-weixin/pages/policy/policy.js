@@ -1,59 +1,55 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const store_PolicyList = require("../../store/PolicyList.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_search_bar2 = common_vendor.resolveComponent("uni-search-bar");
-  const _easycom_uni_segmented_control2 = common_vendor.resolveComponent("uni-segmented-control");
   const _easycom_uni_card2 = common_vendor.resolveComponent("uni-card");
-  (_easycom_uni_nav_bar2 + _easycom_uni_search_bar2 + _easycom_uni_segmented_control2 + _easycom_uni_card2)();
+  (_easycom_uni_nav_bar2 + _easycom_uni_search_bar2 + _easycom_uni_card2)();
 }
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_search_bar = () => "../../uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar.js";
-const _easycom_uni_segmented_control = () => "../../uni_modules/uni-segmented-control/components/uni-segmented-control/uni-segmented-control.js";
 const _easycom_uni_card = () => "../../uni_modules/uni-card/components/uni-card/uni-card.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_search_bar + _easycom_uni_segmented_control + _easycom_uni_card)();
+  (_easycom_uni_nav_bar + _easycom_uni_search_bar + _easycom_uni_card)();
 }
 const _sfc_main = {
   __name: "policy",
   setup(__props) {
+    const listpolicy = store_PolicyList.usePolicyStore();
     const searchbar = common_vendor.ref("");
-    function search() {
-      common_vendor.index.__f__("log", "at pages/policy/policy.vue:84", "搜索关键词:", searchbar.value);
-    }
-    function cancel() {
-      searchbar.value = "";
-    }
-    const current = common_vendor.ref(0);
-    const classify = [
-      { key: "all", value: "全部" },
-      { key: "k1", value: "分类1" },
-      { key: "k2", value: "分类2" }
-    ];
-    const value = common_vendor.computed(() => classify.map((item) => item.value));
-    function onClickItem(e) {
-      current.value = e.currentIndex;
-    }
     const currentDropdown = common_vendor.ref(null);
     const selectedDomain = common_vendor.ref("政策领域");
     const selectedTime = common_vendor.ref("发布时间");
     const domainList = ["全部", "教育", "科技", "医疗"];
     const timeList = ["全部", "最近一周", "最近一月", "最近一年"];
+    common_vendor.onMounted(() => {
+      listpolicy.getlistpolicy();
+    });
+    function search() {
+      common_vendor.index.__f__("log", "at pages/policy/policy.vue:102", "搜索关键词:", searchbar.value);
+    }
+    function cancel() {
+      searchbar.value = "";
+    }
     function toggleDropdown(type) {
       currentDropdown.value = currentDropdown.value === type ? null : type;
     }
-    function selectOption(type, value2) {
+    function selectOption(type, value) {
       if (type === "domain") {
-        selectedDomain.value = value2;
+        selectedDomain.value = value;
       } else if (type === "time") {
-        selectedTime.value = value2;
+        selectedTime.value = value;
       }
       currentDropdown.value = null;
     }
-    function OnClick() {
+    function OnClick(id) {
       common_vendor.index.navigateTo({
-        url: "/pages/detail/detailpolicy"
+        url: `/pages/detail/detailpolicy?id=${id}`
       });
+    }
+    function Dataformat(timeStr) {
+      return common_vendor.dayjs(timeStr).format("YYYY-MM-DD HH:mm:ss");
     }
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -69,22 +65,15 @@ const _sfc_main = {
           placeholder: "搜索行业政策",
           modelValue: searchbar.value
         }),
-        f: common_vendor.o(onClickItem),
-        g: common_vendor.p({
-          current: current.value,
-          values: value.value,
-          styleType: "text",
-          activeColor: "#ff0000"
-        }),
-        h: common_vendor.t(selectedDomain.value),
-        i: currentDropdown.value === "domain" ? 1 : "",
-        j: common_vendor.o(($event) => toggleDropdown("domain")),
-        k: common_vendor.t(selectedTime.value),
-        l: currentDropdown.value === "time" ? 1 : "",
-        m: common_vendor.o(($event) => toggleDropdown("time")),
-        n: currentDropdown.value === "domain"
+        f: common_vendor.t(selectedDomain.value),
+        g: currentDropdown.value === "domain" ? 1 : "",
+        h: common_vendor.o(($event) => toggleDropdown("domain")),
+        i: common_vendor.t(selectedTime.value),
+        j: currentDropdown.value === "time" ? 1 : "",
+        k: common_vendor.o(($event) => toggleDropdown("time")),
+        l: currentDropdown.value === "domain"
       }, currentDropdown.value === "domain" ? {
-        o: common_vendor.f(domainList, (item, k0, i0) => {
+        m: common_vendor.f(domainList, (item, k0, i0) => {
           return {
             a: common_vendor.t(item),
             b: item,
@@ -93,9 +82,9 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        p: currentDropdown.value === "time"
+        n: currentDropdown.value === "time"
       }, currentDropdown.value === "time" ? {
-        q: common_vendor.f(timeList, (item, k0, i0) => {
+        o: common_vendor.f(timeList, (item, k0, i0) => {
           return {
             a: common_vendor.t(item),
             b: item,
@@ -104,16 +93,17 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        r: common_vendor.f(10, (item, k0, i0) => {
+        p: common_vendor.f(common_vendor.unref(listpolicy).listpolicy, (item, k0, i0) => {
           return {
-            a: item,
-            b: common_vendor.o(OnClick, item),
-            c: "e4e5fb8d-3-" + i0
+            a: common_vendor.t(item.brief_content),
+            b: item.id,
+            c: common_vendor.o(($event) => OnClick(item.id), item.id),
+            d: "e4e5fb8d-2-" + i0,
+            e: common_vendor.p({
+              title: item.policy_title,
+              extra: Dataformat(item.release_time)
+            })
           };
-        }),
-        s: common_vendor.p({
-          title: "基础卡片",
-          extra: "额外信息"
         })
       });
     };
