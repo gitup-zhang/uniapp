@@ -1,4 +1,26 @@
-/* 导航栏 */
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 页面主容器 */
+.container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+/* 滚动区域 */
+.news-scroll {
+  flex: 1;
+  overflow-y: scroll;
+}
+
+/* 导航栏标题 */
 .navbar-title {
   font-size: 20px;
   font-weight: bold;
@@ -7,13 +29,7 @@
   text-align: left;
 }
 
-/* 页面容器 */
-.container {
-  background-color: #f5f5f5;
-  min-height: 100vh;
-}
-
-/* 筛选包裹容器：用于相对定位 */
+/* 筛选容器 */
 .filter-wrapper {
   position: relative;
   z-index: 1;
@@ -30,7 +46,7 @@
   position: relative;
 }
 
-/* 筛选项 */
+/* 筛选项样式 */
 .filter-item {
   display: flex;
   align-items: center;
@@ -40,7 +56,7 @@
   margin-right: 40rpx;
 }
 
-/* 下拉箭头 */
+/* 下拉箭头样式 */
 .arrow {
   width: 0;
   height: 0;
@@ -55,7 +71,7 @@
   transform: rotate(180deg);
 }
 
-/* 下拉列表浮动样式 */
+/* 下拉列表样式 */
 .dropdown-list {
   position: absolute;
   top: 100%;
@@ -75,27 +91,7 @@
   color: #333;
 }
 
-/* 选中状态 */
 .dropdown-item.selected {
   color: #007aff;
   font-weight: bold;
 }
-/* 点赞转发评论 */
-.card-actions-item {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-	}
-.card-actions-item-text {
-	font-size: 12px;
-	color: #666;
-	margin-left: 5px;
-}
-.card-actions {
-		display: flex;
-		flex-direction: row;
-		justify-content: space-around;
-		align-items: center;
-		height: 45px;
-		border-top: 1px #eee solid;
-	}

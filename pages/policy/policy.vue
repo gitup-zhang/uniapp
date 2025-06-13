@@ -1,77 +1,69 @@
-<template>  
-  <uni-nav-bar statusBar="true" backgroundColor="#903749" fixed="true">
-    <template v-slot:left>
-      <view class="navbar-title">政策</view>
-    </template>
-  </uni-nav-bar>
+<template>
+  <view class="page">
+    <!-- 顶部固定导航栏 -->
+    <uni-nav-bar statusBar="true" backgroundColor="#903749" fixed="true">
+      <template v-slot:left>
+        <view class="navbar-title">新闻</view>
+      </template>
+    </uni-nav-bar>
 
-  <uni-search-bar 
-    @confirm="search" 
-    placeholder="搜索行业政策" 
-    v-model="searchbar" 
-    @cancel="cancel">
-  </uni-search-bar>
+    <!-- 搜索栏 -->
+    <uni-search-bar 
+      @confirm="search" 
+      placeholder="搜索行业新闻" 
+      v-model="searchbar" 
+      @cancel="cancel">
+    </uni-search-bar>
 
-  <!-- <uni-segmented-control
-    :current="current"
-    :values="value"
-    @clickItem="onClickItem"
-    styleType="text"
-    activeColor="#ff0000"
-  ></uni-segmented-control> -->
-
-  <!-- 主容器 -->
-  <view class="container">
-    <!-- 筛选容器：用于相对定位 -->
-    <view class="filter-wrapper">
-      <view class="filter-bar">
-        <view class="filter-item" @click="toggleDropdown('domain')">
-          {{ selectedDomain }}
-          <view class="arrow" :class="{ open: currentDropdown === 'domain' }"></view>
+    <!-- 主体内容区域 -->
+    <view class="container">
+      <!-- 筛选区域 -->
+      <view class="filter-wrapper">
+        <view class="filter-bar">
+          <view class="filter-item" @click="toggleDropdown('domain')">
+            {{ selectedDomain }}
+            <view class="arrow" :class="{ open: currentDropdown === 'domain' }"></view>
+          </view>
+          <view class="filter-item" @click="toggleDropdown('time')">
+            {{ selectedTime }}
+            <view class="arrow" :class="{ open: currentDropdown === 'time' }"></view>
+          </view>
         </view>
-        <view class="filter-item" @click="toggleDropdown('time')">
-          {{ selectedTime }}
-          <view class="arrow" :class="{ open: currentDropdown === 'time' }"></view>
-        </view>
-      </view>
 
-      <!-- 下拉菜单：政策领域 -->
-      <view v-if="currentDropdown === 'domain'" class="dropdown-list">
-        <view
-          class="dropdown-item"
-          v-for="item in domainList"
-          :key="item"
-          @click="selectOption('domain', item)"
-          :class="{ selected: selectedDomain === item }"
-        >
-          {{ item }}
+        <!-- 下拉菜单：政策领域 -->
+        <view v-if="currentDropdown === 'domain'" class="dropdown-list">
+          <view class="dropdown-item" v-for="item in domainList" :key="item"
+            @click="selectOption('domain', item)" :class="{ selected: selectedDomain === item }">
+            {{ item }}
+          </view>
         </view>
-      </view>
 
-      <!-- 下拉菜单：发布时间 -->
-      <view v-if="currentDropdown === 'time'" class="dropdown-list">
-        <view
-          class="dropdown-item"
-          v-for="item in timeList"
-          :key="item"
-          @click="selectOption('time', item)"
-          :class="{ selected: selectedTime === item }"
-        >
-          {{ item }}
+        <!-- 下拉菜单：发布时间 -->
+        <view v-if="currentDropdown === 'time'" class="dropdown-list">
+          <view class="dropdown-item" v-for="item in timeList" :key="item"
+            @click="selectOption('time', item)" :class="{ selected: selectedTime === item }">
+            {{ item }}
+          </view>
         </view>
       </view>
+
+      <!-- 新闻列表滚动区域 -->
+      <scroll-view class="news-scroll" scroll-y="true">
+        <view>
+ 
+          		<uni-card 
+                :title="item.policy_title" 
+                :extra="Dataformat(item.release_time)" 
+                v-for="item in listpolicy.listpolicy" 
+                :key="item.id"
+          	  @click="OnClick(item.id)"
+              >
+                <text>{{item.brief_content}}</text>
+              </uni-card>
+  
+        </view>
+      </scroll-view>
     </view>
-
-    <!-- 新闻卡片列表 -->
-    <uni-card 
-      :title="item.policy_title" 
-      :extra="Dataformat(item.release_time)" 
-      v-for="item in listpolicy.listpolicy" 
-      :key="item.id"
-	  @click="OnClick(item.id)"
-    >
-      <text>{{item.brief_content}}</text>
-    </uni-card>
   </view>
 </template>
 <script setup>
