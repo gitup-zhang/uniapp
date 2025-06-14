@@ -7,17 +7,15 @@
       </template>
     </uni-nav-bar>
 
-    <!-- 搜索栏 -->
-    <uni-search-bar 
-      @confirm="search" 
-      placeholder="搜索行业新闻" 
-      v-model="searchbar" 
-      @cancel="cancel">
-    </uni-search-bar>
+    <!-- 搜索栏 + 筛选栏固定区域 -->
+    <view class="fixed-top">
+      <uni-search-bar 
+        @confirm="search" 
+        placeholder="搜索行业新闻" 
+        v-model="searchbar" 
+        @cancel="cancel">
+      </uni-search-bar>
 
-    <!-- 主体内容区域 -->
-    <view class="container">
-      <!-- 筛选区域 -->
       <view class="filter-wrapper">
         <view class="filter-bar">
           <view class="filter-item" @click="toggleDropdown('domain')">
@@ -30,7 +28,7 @@
           </view>
         </view>
 
-        <!-- 下拉菜单：政策领域 -->
+        <!-- 下拉菜单 -->
         <view v-if="currentDropdown === 'domain'" class="dropdown-list">
           <view class="dropdown-item" v-for="item in domainList" :key="item"
             @click="selectOption('domain', item)" :class="{ selected: selectedDomain === item }">
@@ -38,7 +36,6 @@
           </view>
         </view>
 
-        <!-- 下拉菜单：发布时间 -->
         <view v-if="currentDropdown === 'time'" class="dropdown-list">
           <view class="dropdown-item" v-for="item in timeList" :key="item"
             @click="selectOption('time', item)" :class="{ selected: selectedTime === item }">
@@ -46,26 +43,26 @@
           </view>
         </view>
       </view>
-
-      <!-- 新闻列表滚动区域 -->
-      <scroll-view class="news-scroll" scroll-y="true">
-        <view>
- 
-          		<uni-card 
-                :title="item.policy_title" 
-                :extra="Dataformat(item.release_time)" 
-                v-for="item in listpolicy.listpolicy" 
-                :key="item.id"
-          	  @click="OnClick(item.id)"
-              >
-                <text>{{item.brief_content}}</text>
-              </uni-card>
-  
-        </view>
-      </scroll-view>
     </view>
+
+    <!-- 新闻列表区域 -->
+    <scroll-view class="news-scroll" scroll-y="true">
+      <view>
+        <uni-card 
+                        :title="item.policy_title" 
+                        :extra="Dataformat(item.release_time)" 
+                        v-for="item in listpolicy.listpolicy" 
+                        :key="item.id"
+                  	  @click="OnClick(item.id)"
+                      >
+                        <text>{{item.brief_content}}</text>
+                      </uni-card>
+      </view>
+    </scroll-view>
   </view>
 </template>
+
+
 <script setup>
 import { ref, computed ,onMounted} from 'vue'
 import {usePolicyStore} from '@/store/PolicyList.js'
@@ -91,6 +88,7 @@ onMounted(()=>{
 
 // 搜索栏函数
 function search() {
+listpolicy.searchpolicy({'policyTitle':searchbar.value})
   console.log("搜索关键词:", searchbar.value)
 }
 
@@ -134,8 +132,9 @@ function OnClick(id){
 function Dataformat(timeStr){
 	return dayjs(timeStr).format('YYYY-MM-DD HH:mm:ss')
 }
-
 </script>
-<style scoped>
-@import "../../style/new_policy.css";
+
+<style>
+@import url("../../style/new_policy.css");
+
 </style>

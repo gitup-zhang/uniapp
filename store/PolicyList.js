@@ -28,10 +28,36 @@ export const usePolicyStore = defineStore('policylist', () => {
       uni.hideLoading()
     }
   }
+  
+  // 搜索框
+  const searchpolicy=async(params)=>{
+	  
+	  uni.showLoading({
+	    title: '加载中...',
+	    mask: true
+	  })
+	  
+	  try {
+	  	message.value=""
+
+	    const res = await getPolicyList(params) 
+		
+	    console.log('示例数据：', res.data)
+	    listpolicy.value = res.data           // 正常赋值
+	  } catch (error) {
+
+		  console.log(error)
+	  	// message.value=error.data.error
+	   //  console.log(message.value)
+	  } finally {
+	    uni.hideLoading()
+	  }
+  }
 
   return {
     getlistpolicy,
     listpolicy,
-	message
+	message,
+	searchpolicy,
   }
 })
