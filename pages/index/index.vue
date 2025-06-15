@@ -7,14 +7,14 @@
 		<view class="recommend-list">
 		  <view class="recommend-item" @click="handleMoremsg">
 		    <view class="icon-wrapper policy-icon">
-		      <image src="/static/policy.png" class="icon-image" mode="aspectFit" />
+		      <image src="/static/icon/policy_index.png" class="icon-image" mode="aspectFit" />
 		    </view>
 		    <text class="label">政府政策</text>
 		  </view>
 		
 		  <view class="recommend-item" @click="handleMorenew">
 		    <view class="icon-wrapper news-icon">
-		      <image src="/static/news.png" class="icon-image" mode="aspectFit" />
+		      <image src="/static/icon/new_index.png" class="icon-image" mode="aspectFit" />
 		    </view>
 		    <text class="label">行业新闻</text>
 		  </view>
