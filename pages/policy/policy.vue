@@ -88,7 +88,7 @@ onMounted(()=>{
 
 // 搜索栏函数
 function search() {
-listpolicy.searchpolicy({'policyTitle':searchbar.value})
+ listpolicy.searchpolicy({'policyTitle':searchbar.value})
   console.log("搜索关键词:", searchbar.value)
 }
 
@@ -96,17 +96,6 @@ function cancel() {
   searchbar.value = ""
 }
 
-// 分段器
-// const current = ref(0)
-// const classify = [
-//   { key: "all", value: "全部" },
-//   { key: "k1", value: "分类1" },
-//   { key: "k2", value: "分类2" }
-// ]
-// const value = computed(() => classify.map(item => item.value))
-// function onClickItem(e) {
-//   current.value = e.currentIndex
-// }
 
 
 // 下拉菜单函数
