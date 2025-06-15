@@ -94,18 +94,9 @@ function handleMoremsg(){
 	uni.switchTab({
 		url: '../policy/policy'
 	});
-	// getPolicyList({
-	      
-	//     }).then(res => {
-	//       console.log('示例数据：', res);
-	//     });
-	// getExampleList({
-	      
-	//     }).then(res => {
-	//       console.log('示例数据：', res);
-	//     });
+	
 }
-// 接口测试
+
 
 
     
