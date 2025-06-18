@@ -30,8 +30,8 @@
 	       </view>
 	       <view class="notice-card-right">
 			<swiper class="notice-card-right" autoplay="true" vertical="true" interval="4000" circular="true">
-			<swiper-item v-for="item in notice">
-	         <text class="notice-card-desc">{{item}}</text>
+			<swiper-item v-for="item in usenotice.notice" :key="item.id">
+	         <text class="notice-card-desc">{{item.content}}</text>
 			 </swiper-item>
 			 </swiper>
 	       </view>
@@ -75,13 +75,14 @@
 
 
 <script setup>
-import {ref} from 'vue'
+import {ref,onMounted} from 'vue'
 import CustomNavbar from '@/components/CustomNavbar/CustomNavbar.vue'
 import showInforVue from '../../components/show-infor/show-infor.vue';
-import { getPolicyList , getExampleList} from '@/new-apis/policy.js'
+import {useNoticeStore} from '@/store/Notice.js'
 
+// 获得公告对象
+const usenotice=useNoticeStore()
 
-let notice=ref(["公告1.。。。。。。。。。","公告2.。。。。。。。。。。。","公告3.。。。。。。。。。。。。。"])
 
 // 获取更多新闻和政策
 function handleMorenew(){
@@ -98,7 +99,10 @@ function handleMoremsg(){
 }
 
 
-
+// 初始化
+onMounted(()=>{
+	usenotice.getnoticestore()
+})
     
 
 </script>

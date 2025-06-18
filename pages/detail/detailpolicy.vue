@@ -18,7 +18,10 @@
   				<uni-title type="h1" :title="policydetail.detail.policy_title"></uni-title>
 	</view>
 	<uni-section class="mb-10" title="新闻详情"  type="line" titleFontSize="16px"></uni-section>
+	
+	
 	<mp-html :content="content" :container-style="style"/>
+		<!-- <tinymce v-model="content"></tinymce> -->
   
 </template>
 
@@ -27,6 +30,7 @@ import { onLoad } from '@dcloudio/uni-app'
 import {ref,onMounted} from 'vue'
 import {usePolicyDetailStore} from '@/store/PolicyDetail.js'
 import mpHtml from '@/uni_modules/mp-html/components/mp-html/mp-html.vue'
+import tinymce from '@/components/Tinymce/index.vue'
 
 
 
@@ -36,7 +40,7 @@ let id=ref()
 const content=ref("")
 // 富文本样式
 const style="padding:20rpx;background:#fff;border-radius:12rpx;box-shadow:0 0 20rpx rgba(0,0,0,0.05);"
-
+// 获得pinia对象
 const policydetail=usePolicyDetailStore()
 
 
