@@ -30,7 +30,7 @@
 
         <!-- 下拉菜单 -->
         <view v-if="currentDropdown === 'domain'" class="dropdown-list">
-          <view class="dropdown-item" v-for="item in domainList" :key="item"
+          <view class="dropdown-item" v-for="item in listpolicy.policyfieldlist" :key="item"
             @click="selectOption('domain', item)" :class="{ selected: selectedDomain === item }">
             {{ item }}
           </view>
@@ -78,12 +78,13 @@ const currentDropdown = ref(null)
 const selectedDomain = ref('政策领域')
 const selectedTime = ref('发布时间')
 
-const domainList = ['全部', '教育', '科技', '医疗']
+// const domainList = ['全部', '教育', '科技', '医疗']
 const timeList = ['全部', '最近一周', '最近一月', '最近一年']
 
 
 onMounted(()=>{
 	listpolicy.getlistpolicy()
+	listpolicy.policyfield()
 })
 
 // 搜索栏函数

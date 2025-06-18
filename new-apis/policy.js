@@ -16,3 +16,8 @@ export function getPolicyList(params) {
 export function getPolicyDetail(params){
 	return http.get(`/policy/GetPolicyContent/${params}`)
 }
+
+// 获取政策领域
+export function getPolicyField(){
+	return http.get('/fieldType')
+}
