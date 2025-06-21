@@ -66,7 +66,7 @@
 <script setup>
 import { ref, computed ,onMounted} from 'vue'
 import {usePolicyStore} from '@/store/PolicyList.js'
-import dayjs from 'dayjs'
+import { Dataformat } from '../../utils/data'
 // 从pinia中获得对象
 const listpolicy = usePolicyStore()
 
@@ -118,10 +118,7 @@ function OnClick(id){
 		url: `/pages/detail/detailpolicy?id=${id}`
 	});
 }
-// 时间格式化函数
-function Dataformat(timeStr){
-	return dayjs(timeStr).format('YYYY-MM-DD HH:mm:ss')
-}
+
 </script>
 
 <style>

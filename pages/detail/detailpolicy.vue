@@ -49,7 +49,7 @@ onLoad(async(option) => {
   console.log('接收到的ID：', id)
   await policydetail.getpolicydetail(id)
   content.value=policydetail.detail.policy_content
-  console.log(111111111111111)
+  
   console.log(content.value)
 })
 

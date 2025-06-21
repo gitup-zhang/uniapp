@@ -49,17 +49,15 @@
     <scroll-view class="news-scroll" scroll-y="true">
       <view>
         <uni-card
-          v-for="item in 10"
-          :key="item"
-          title="基础卡片"
-          sub-title="副标题"
-          extra="额外信息"
+          v-for="item in listnew.listnew"
+          :key="item.id"
+          :title="item.new_title"
+          :extra="Dataformat(item.release_time)"
+          
           thumbnail="/static/3044eb7c01d942fc96e5d5bd8282ee19.jpg"
-          @click="onClick"
+          @click="onClick(item.id)"
         >
-          <text class="uni-body">
-            这是一个带头像和双标题的基础卡片，此示例展示了一个完整的卡片。
-          </text>
+          <text class="uni-body">{{item.brief_content}}</text>
         </uni-card>
       </view>
     </scroll-view>
@@ -68,7 +66,12 @@
 
 
 <script setup>
-import { ref } from 'vue'
+import { ref ,onMounted} from 'vue'
+import { useNewStore } from '../../store/NewList'
+import { Dataformat } from '../../utils/data'
+// 从pinia中获取对象
+const listnew=useNewStore()
+
 
 const searchbar = ref("")
 const currentDropdown = ref(null)
@@ -96,11 +99,17 @@ function selectOption(type, value) {
   currentDropdown.value = null
 }
 
-function onClick() {
+function onClick(id) {
   uni.navigateTo({
-    url: '/pages/detail/detailnew'
+    url: `/pages/detail/detailnew?id=${id}`
   })
 }
+
+// 钩子函数
+onMounted(()=>{
+	listnew.getlistnew()
+	
+})
 </script>
 
 <style>
