@@ -45,7 +45,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 20rpx 30rpx;
+/*  padding: 20rpx 30rpx; */
+padding: 10rpx ;
   background-color: #fff;
 }
 
@@ -56,6 +57,7 @@
   color: #333;
   font-weight: bold;
   margin-right: 40rpx;
+  margin-left: 30rpx;
 }
 
 .arrow {
@@ -78,7 +80,7 @@
   left: 0;
   width: 100%;
   background-color: #fff;
-  padding: 10rpx 0;
+  padding: 20rpx 0;
   border-top: 1rpx solid #eee;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
   z-index: 10;
