@@ -6,14 +6,14 @@
       <view class="header-top-bar">
         <text class="title-text">我的</text>
         <view class="settings-icon" @click="openset">
-          <uni-icons type="gear-filled" size="22" color="#fff" />
+          <uni-icons type="gear-filled" size="22" color="#fff" v-if="userInfo.signal"/>
         </view>
       </view>
       <view class="header-content">
-        <image class="avatar" src="/static/picture.jpg" mode="aspectFill"></image>
+        <image class="avatar"  :src="userInfo.info.Image ? userInfo.info.Image : '/static/icon/empty.png'" mode="aspectFill"></image>
         <view class="user-info">
-          <text class="username">{{ userInfo.username || '未登录' }}</text>
-          <text class="slogan">{{ userInfo.slogan || '请登录后设置个人签名' }}</text>
+          <text class="username" @click="admin">{{ userInfo.info.username || '点击登录' }}</text>
+          <text class="slogan">{{ userInfo.info.slogan || '请登录后设置个人签名' }}</text>
         </view>
       </view>
     </view>
@@ -23,23 +23,23 @@
                   <image class="icon" src="/static/icon/fire.png" mode="aspectFit"></image>
                   <view class="title-group">
                     <text class="card-title">累计在线天数</text>
-                    <text class="card-number">{{ daysOnline }}</text>
+                    <text class="card-number">{{ userInfo.info.daysOnline }}</text>
                   </view>
                 </view>
         
                 <view class="bottom-section">
                   <view class="bottom-item">
-                    <text class="bottom-number">{{ newsViews }}</text>
+                    <text class="bottom-number">{{ userInfo.info.newsViews }}</text>
                     <text class="bottom-label">查看新闻数</text>
                   </view>
                   <view class="vertical-line"></view>
                   <view class="bottom-item">
-                    <text class="bottom-number">{{ policyViews }}</text>
+                    <text class="bottom-number">{{ userInfo.info.policyViews }}</text>
                     <text class="bottom-label">查看政策数</text>
                   </view>
                   <view class="vertical-line"></view>
                   <view class="bottom-item">
-                    <text class="bottom-number">人工智能</text>
+                    <text class="bottom-number">{{ userInfo.info.field }}</text>
                     <text class="bottom-label">关注领域</text>
                   </view>
                 </view>
@@ -73,24 +73,19 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed ,onMounted} from 'vue'
 import uniPopup from '@dcloudio/uni-ui/lib/uni-popup/uni-popup.vue'
+import {useInfoStore} from '@/store/Info.js'
+
+// 初始化pinia对象
+const userInfo=useInfoStore()
 
 // 获取系统信息
 const SYSTEMINFO = uni.getSystemInfoSync()
 const popupRef = ref(null)
 const statusBarHeight = ref(SYSTEMINFO.statusBarHeight)
 
-// 用户信息
-const userInfo = ref({
-  username: '胡歌',
-  slogan: '在阳光灿烂的日子里睡觉呀'
-})
 
-// 统计数据
-const daysOnline = ref(128)
-const newsViews = ref(342)
-const policyViews = ref(125)
 
 // 底部导航栏高度（默认50px，可根据实际情况调整）
 const tabBarHeight = ref(50)
@@ -104,6 +99,20 @@ const popupStyle = computed(() => ({
   'margin': '0 auto',
   'background-color': 'transparent' // 外层透明，让圆角显示
 }))
+// 页面挂载钩子
+onMounted(()=>{
+	// userInfo.getinfo()
+	
+	
+})
+// 登录功能
+function admin(){
+	if(userInfo.signal){
+		console.log("已登录")
+	}else{
+		userInfo.getinfo()
+	}
+}
 
 // 打开弹窗
 function openset() {
@@ -124,7 +133,7 @@ function logout() {
     success: (res) => {
       if (res.confirm) {
         // 清空用户信息
-        userInfo.value = {}
+        userInfo.deleteinfo()
         // 关闭弹窗
         closePopup()
         // 提示用户
