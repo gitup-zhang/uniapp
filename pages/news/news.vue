@@ -54,7 +54,7 @@
           :title="item.new_title"
           :extra="Dataformat(item.release_time)"
           
-          thumbnail="/static/3044eb7c01d942fc96e5d5bd8282ee19.jpg"
+          :thumbnail="item.list_image_url"
           @click="onClick(item.id)"
         >
           <text class="uni-body">{{item.brief_content}}</text>
@@ -72,8 +72,9 @@ import { Dataformat } from '../../utils/data'
 // 从pinia中获取对象
 const listnew=useNewStore()
 
-
+// 搜索栏内容
 const searchbar = ref("")
+
 const currentDropdown = ref(null)
 const selectedDomain = ref('新闻领域')
 const selectedTime = ref('发布时间')
@@ -82,6 +83,7 @@ const domainList = ['全部', '教育', '科技', '医疗']
 const timeList = ['全部', '最近一周', '最近一月', '最近一年']
 
 function search() {
+listnew.searchnewlist({'newTitle':searchbar.value})
   console.log("搜索关键词:", searchbar.value)
 }
 

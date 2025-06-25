@@ -13,6 +13,7 @@ export const useNewStore=defineStore('newlist',()=>{
 		  mask: true
 		})
 		try{
+			console.log(listnew)
 			const res=await getNewList({})
 			listnew.value=res.data
 			
@@ -26,10 +27,31 @@ export const useNewStore=defineStore('newlist',()=>{
 		
 		
 	}
+	// 搜索功能
+	const searchnewlist=async(params)=>{
+		
+		uni.showLoading({
+		  title: '加载中...',
+		  mask: true
+		})
+		try{
+			console.log(listnew)
+			const res=await getNewList(params)
+			listnew.value=res.data
+			
+		}catch(error){
+			console.log(error)
+		}finally{
+			
+			uni.hideLoading()
+		}
+		
+	}
 	
 	return{
 		listnew,
-		getlistnew
+		getlistnew,
+		searchnewlist
 		
 	}
 })
