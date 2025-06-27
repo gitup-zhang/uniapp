@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
+const store_Notice = require("../../store/Notice.js");
 if (!Math) {
   (CustomNavbar + showInforVue)();
 }
@@ -9,7 +10,7 @@ const showInforVue = () => "../../components/show-infor/show-infor.js";
 const _sfc_main = {
   __name: "index",
   setup(__props) {
-    let notice = common_vendor.ref(["公告1.。。。。。。。。。", "公告2.。。。。。。。。。。。", "公告3.。。。。。。。。。。。。。"]);
+    const usenotice = store_Notice.useNoticeStore();
     function handleMorenew() {
       common_vendor.index.switchTab({
         url: "../news/news"
@@ -20,6 +21,9 @@ const _sfc_main = {
         url: "../policy/policy"
       });
     }
+    common_vendor.onMounted(() => {
+      usenotice.getnoticestore();
+    });
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_assets._imports_0,
@@ -29,9 +33,10 @@ const _sfc_main = {
         e: common_vendor.p({
           title: "为您推荐"
         }),
-        f: common_vendor.f(common_vendor.unref(notice), (item, k0, i0) => {
+        f: common_vendor.f(common_vendor.unref(usenotice).notice, (item, k0, i0) => {
           return {
-            a: common_vendor.t(item)
+            a: common_vendor.t(item.content),
+            b: item.id
           };
         }),
         g: common_vendor.o(handleMoremsg),

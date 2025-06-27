@@ -1,0 +1,1 @@
+{"version":3,"file":"data.js","sources":["utils/data.js"],"sourcesContent":["import dayjs from 'dayjs'\r\n\r\nexport function Dataformat(timeStr){\r\n\treturn dayjs(timeStr).format('YYYY-MM-DD HH:mm:ss')\r\n}"],"names":["dayjs"],"mappings":";;AAEO,SAAS,WAAW,SAAQ;AAClC,SAAOA,oBAAM,OAAO,EAAE,OAAO,qBAAqB;AACnD;;"}

@@ -1,42 +1,63 @@
-/* 导航栏 */
-.navbar-title.data-v-e4e5fb8d {
+.page {
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 固定顶部区域（搜索 + 筛选） */
+.fixed-top {
+  position: fixed;
+  top: 88rpx; /* 导航栏高度大约88rpx，适配含 statusBar 的情形 */
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background-color: #ffffff;
+  padding-bottom: 20rpx;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 滚动区域 */
+.news-scroll {
+  position: fixed;
+  top: calc(88rpx + 200rpx); /* navBar + search + filter 大约高度 */
+  bottom: var(--window-bottom); /* tabbar 兼容 */
+  left: 0;
+  right: 0;
+  overflow-y: scroll;
+  padding: 5rpx;
+  background-color: #f5f5f5;
+}
+
+/* 导航栏标题 */
+.navbar-title {
   font-size: 20px;
   font-weight: bold;
   color: white;
-  margin-bottom: 10px;
-  text-align: left;
 }
-/* 页面容器 */
-.container.data-v-e4e5fb8d {
-  background-color: #f5f5f5;
-  min-height: 100vh;
-}
-/* 筛选包裹容器：用于相对定位 */
-.filter-wrapper.data-v-e4e5fb8d {
+
+/* 筛选区域 */
+.filter-wrapper {
   position: relative;
   z-index: 1;
 }
-/* 筛选栏 */
-.filter-bar.data-v-e4e5fb8d {
+.filter-bar {
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 20rpx 30rpx;
+/*  padding: 20rpx 30rpx; */
+padding: 10rpx ;
   background-color: #fff;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
-  position: relative;
 }
-/* 筛选项 */
-.filter-item.data-v-e4e5fb8d {
+.filter-item {
   display: flex;
   align-items: center;
   font-size: 30rpx;
   color: #333;
   font-weight: bold;
   margin-right: 40rpx;
+  margin-left: 30rpx;
 }
-/* 下拉箭头 */
-.arrow.data-v-e4e5fb8d {
+.arrow {
   width: 0;
   height: 0;
   border-left: 10rpx solid transparent;
@@ -45,48 +66,53 @@
   margin-left: 10rpx;
   transition: transform 0.2s ease;
 }
-.arrow.open.data-v-e4e5fb8d {
+.arrow.open {
   transform: rotate(180deg);
 }
-/* 下拉列表浮动样式 */
-.dropdown-list.data-v-e4e5fb8d {
+.dropdown-list {
   position: absolute;
   top: 100%;
   left: 0;
   width: 100%;
   background-color: #fff;
-  padding: 10rpx 0;
+  padding: 20rpx 0;
   border-top: 1rpx solid #eee;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
   z-index: 10;
 }
-/* 下拉项 */
-.dropdown-item.data-v-e4e5fb8d {
+.dropdown-item {
   padding: 20rpx 30rpx;
   font-size: 28rpx;
   color: #333;
 }
-/* 选中状态 */
-.dropdown-item.selected.data-v-e4e5fb8d {
+.dropdown-item.selected {
   color: #007aff;
   font-weight: bold;
 }
-/* 点赞转发评论 */
-.card-actions-item.data-v-e4e5fb8d {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
+.dropdown-list {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4rpx;
+  margin-top: 10rpx;
 }
-.card-actions-item-text.data-v-e4e5fb8d {
-	font-size: 12px;
-	color: #666;
-	margin-left: 5px;
+.dropdown-item {
+  padding: 20rpx;
+  font-size: 28rpx;
+  color: #333;
 }
-.card-actions.data-v-e4e5fb8d {
-		display: flex;
-		flex-direction: row;
-		justify-content: space-around;
-		align-items: center;
-		height: 45px;
-		border-top: 1px #eee solid;
+.dropdown-item.selected {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+.filter-item {
+  /* padding: 20rpx;
+  font-size: 30rpx; */
+   padding: 12rpx 20rpx;
+   font-size: 30rpx;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+}
+.arrow.open {
+  transform: rotate(180deg);
 }

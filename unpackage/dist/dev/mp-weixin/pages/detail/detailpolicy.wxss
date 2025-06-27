@@ -4,22 +4,6 @@
   color: white;
   margin-bottom: 10px; /* 与左侧“新闻”一致的垂直视觉位置 */
 }
-
-/* 居中容器，垂直对齐与左侧保持一致 */
-
-/* .navbar-center {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  padding-bottom: 10px;
-  pointer-events: none;
-  margin-top: 30rpx;
-} */
 .navbar-center.data-v-fef9ca7d {
   position: absolute;
   left: 0;
@@ -34,6 +18,7 @@
   transform: translateY(10px); /* 替代 margin-top */
 }
 
+
 /* 标题样式 */
 .example-body.data-v-fef9ca7d {
 
@@ -41,6 +26,7 @@
 
 		padding: 10px;
 }
+
 
 /* 	.mb-10 {
 		margin-bottom: 10px;

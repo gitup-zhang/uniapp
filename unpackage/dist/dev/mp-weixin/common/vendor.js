@@ -5523,6 +5523,10 @@ function vFor(source, renderItem) {
   }
   return ret;
 }
+function setRef(ref2, id, opts = {}) {
+  const { $templateRefs } = getCurrentInstance();
+  $templateRefs.push({ i: id, r: ref2, k: opts.k, f: opts.f });
+}
 const o = (value, key) => vOn(value, key);
 const f = (source, renderItem) => vFor(source, renderItem);
 const s = (value) => stringifyStyle(value);
@@ -5530,6 +5534,7 @@ const e = (target, ...sources) => extend(target, ...sources);
 const n = (value) => normalizeClass(value);
 const t = (val) => toDisplayString(val);
 const p = (props) => renderProps(props);
+const sr = (ref2, id, opts) => setRef(ref2, id, opts);
 function createApp$1(rootComponent, rootProps = null) {
   rootComponent && (rootComponent.mpType = "app");
   return createVueApp(rootComponent, rootProps).use(plugin);
@@ -7351,7 +7356,7 @@ function isConsoleWritable() {
 function initRuntimeSocketService() {
   const hosts = "2.0.0.1,10.29.99.49,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_JUwIjH";
+  const id = "mp-weixin_lB3eKP";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -9367,6 +9372,7 @@ const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
 const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
 exports.Pinia = Pinia;
 exports._export_sfc = _export_sfc;
+exports.computed = computed;
 exports.createPinia = createPinia;
 exports.createSSRApp = createSSRApp;
 exports.dayjs = dayjs;
@@ -9383,6 +9389,8 @@ exports.p = p;
 exports.ref = ref;
 exports.resolveComponent = resolveComponent;
 exports.s = s;
+exports.sr = sr;
 exports.t = t;
 exports.unref = unref;
+exports.wx$1 = wx$1;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/common/vendor.js.map

@@ -1,5 +1,8 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const store_NewList = require("../../store/NewList.js");
+const store_field = require("../../store/field.js");
+const utils_data = require("../../utils/data.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_search_bar2 = common_vendor.resolveComponent("uni-search-bar");
@@ -15,17 +18,20 @@ if (!Math) {
 const _sfc_main = {
   __name: "news",
   setup(__props) {
+    const listnew = store_NewList.useNewStore();
+    const field = store_field.usefieldstore();
     const searchbar = common_vendor.ref("");
     const currentDropdown = common_vendor.ref(null);
-    const selectedDomain = common_vendor.ref("新闻领域");
+    const selectedDomain = common_vendor.ref(null);
     const selectedTime = common_vendor.ref("发布时间");
-    const domainList = ["全部", "教育", "科技", "医疗"];
     const timeList = ["全部", "最近一周", "最近一月", "最近一年"];
     function search() {
-      common_vendor.index.__f__("log", "at pages/news/news.vue:90", "搜索关键词:", searchbar.value);
+      listnew.searchnewlist({ newTitle: searchbar.value });
+      common_vendor.index.__f__("log", "at pages/news/news.vue:115", "搜索关键词:", searchbar.value);
     }
     function cancel() {
       searchbar.value = "";
+      listnew.getlistnew();
     }
     function toggleDropdown(type) {
       currentDropdown.value = currentDropdown.value === type ? null : type;
@@ -33,17 +39,30 @@ const _sfc_main = {
     function selectOption(type, value) {
       if (type === "domain") {
         selectedDomain.value = value;
-      } else if (type === "time") {
+        if (value === null) {
+          common_vendor.index.__f__("log", "at pages/news/news.vue:134", "选中全部领域");
+          listnew.getlistnew();
+        } else {
+          listnew.searchnewlist({ "fieldID": value.field_id });
+          common_vendor.index.__f__("log", "at pages/news/news.vue:140", "选中领域ID:", value.field_id);
+        }
+      }
+      if (type === "time") {
         selectedTime.value = value;
       }
       currentDropdown.value = null;
     }
-    function onClick() {
+    function onClick(id) {
       common_vendor.index.navigateTo({
-        url: "/pages/detail/detailnew"
+        url: `/pages/detail/detailnew?id=${id}`
       });
     }
+    common_vendor.onMounted(() => {
+      listnew.getlistnew();
+      field.getfield();
+    });
     return (_ctx, _cache) => {
+      var _a;
       return common_vendor.e({
         a: common_vendor.p({
           statusBar: "true",
@@ -57,7 +76,7 @@ const _sfc_main = {
           placeholder: "搜索行业新闻",
           modelValue: searchbar.value
         }),
-        f: common_vendor.t(selectedDomain.value),
+        f: common_vendor.t(((_a = selectedDomain.value) == null ? void 0 : _a.field_name) || "全部领域"),
         g: currentDropdown.value === "domain" ? 1 : "",
         h: common_vendor.o(($event) => toggleDropdown("domain")),
         i: common_vendor.t(selectedTime.value),
@@ -65,18 +84,21 @@ const _sfc_main = {
         k: common_vendor.o(($event) => toggleDropdown("time")),
         l: currentDropdown.value === "domain"
       }, currentDropdown.value === "domain" ? {
-        m: common_vendor.f(domainList, (item, k0, i0) => {
+        m: common_vendor.o(($event) => selectOption("domain", null)),
+        n: selectedDomain.value === null ? 1 : "",
+        o: common_vendor.f(common_vendor.unref(field).fieldlist, (item, k0, i0) => {
+          var _a2;
           return {
-            a: common_vendor.t(item),
-            b: item,
-            c: common_vendor.o(($event) => selectOption("domain", item), item),
-            d: selectedDomain.value === item ? 1 : ""
+            a: common_vendor.t(item.field_name),
+            b: item.field_id,
+            c: common_vendor.o(($event) => selectOption("domain", item), item.field_id),
+            d: ((_a2 = selectedDomain.value) == null ? void 0 : _a2.field_id) === item.field_id ? 1 : ""
           };
         })
       } : {}, {
-        n: currentDropdown.value === "time"
+        p: currentDropdown.value === "time"
       }, currentDropdown.value === "time" ? {
-        o: common_vendor.f(timeList, (item, k0, i0) => {
+        q: common_vendor.f(timeList, (item, k0, i0) => {
           return {
             a: common_vendor.t(item),
             b: item,
@@ -85,22 +107,22 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        p: common_vendor.f(10, (item, k0, i0) => {
+        r: common_vendor.f(common_vendor.unref(listnew).listnew, (item, k0, i0) => {
           return {
-            a: "24bc9d41-2-" + i0
+            a: common_vendor.t(item.brief_content),
+            b: item.id,
+            c: common_vendor.o(($event) => onClick(item.id), item.id),
+            d: "26b1a250-2-" + i0,
+            e: common_vendor.p({
+              title: item.new_title,
+              extra: common_vendor.unref(utils_data.Dataformat)(item.release_time),
+              thumbnail: item.list_image_url
+            })
           };
-        }),
-        q: common_vendor.o(onClick),
-        r: common_vendor.p({
-          title: "基础卡片",
-          ["sub-title"]: "副标题",
-          extra: "额外信息",
-          thumbnail: "/static/3044eb7c01d942fc96e5d5bd8282ee19.jpg"
         })
       });
     };
   }
 };
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-24bc9d41"]]);
-wx.createPage(MiniProgramPage);
+wx.createPage(_sfc_main);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/news/news.js.map

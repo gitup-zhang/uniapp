@@ -1,6 +1,8 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const store_PolicyList = require("../../store/PolicyList.js");
+const utils_data = require("../../utils/data.js");
+const store_field = require("../../store/field.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_search_bar2 = common_vendor.resolveComponent("uni-search-bar");
@@ -17,19 +19,22 @@ const _sfc_main = {
   __name: "policy",
   setup(__props) {
     const listpolicy = store_PolicyList.usePolicyStore();
+    const field = store_field.usefieldstore();
     const searchbar = common_vendor.ref("");
     const currentDropdown = common_vendor.ref(null);
-    const selectedDomain = common_vendor.ref("政策领域");
+    const selectedDomain = common_vendor.ref(null);
     const selectedTime = common_vendor.ref("发布时间");
-    const domainList = ["全部", "教育", "科技", "医疗"];
     const timeList = ["全部", "最近一周", "最近一月", "最近一年"];
     common_vendor.onMounted(() => {
       listpolicy.getlistpolicy();
+      field.getfield();
     });
     function search() {
-      common_vendor.index.__f__("log", "at pages/policy/policy.vue:102", "搜索关键词:", searchbar.value);
+      listpolicy.searchpolicy({ "policyTitle": searchbar.value });
+      common_vendor.index.__f__("log", "at pages/policy/policy.vue:119", "搜索关键词:", searchbar.value);
     }
     function cancel() {
+      listpolicy.getlistpolicy();
       searchbar.value = "";
     }
     function toggleDropdown(type) {
@@ -38,7 +43,14 @@ const _sfc_main = {
     function selectOption(type, value) {
       if (type === "domain") {
         selectedDomain.value = value;
-      } else if (type === "time") {
+        if (value === null) {
+          listpolicy.getlistpolicy();
+        } else {
+          listpolicy.searchpolicy({ "fieldID": value.field_id });
+          common_vendor.index.__f__("log", "at pages/policy/policy.vue:142", "选中领域ID:", value.field_id);
+        }
+      }
+      if (type === "time") {
         selectedTime.value = value;
       }
       currentDropdown.value = null;
@@ -48,10 +60,8 @@ const _sfc_main = {
         url: `/pages/detail/detailpolicy?id=${id}`
       });
     }
-    function Dataformat(timeStr) {
-      return common_vendor.dayjs(timeStr).format("YYYY-MM-DD HH:mm:ss");
-    }
     return (_ctx, _cache) => {
+      var _a;
       return common_vendor.e({
         a: common_vendor.p({
           statusBar: "true",
@@ -62,10 +72,10 @@ const _sfc_main = {
         c: common_vendor.o(cancel),
         d: common_vendor.o(($event) => searchbar.value = $event),
         e: common_vendor.p({
-          placeholder: "搜索行业政策",
+          placeholder: "搜索行业新闻",
           modelValue: searchbar.value
         }),
-        f: common_vendor.t(selectedDomain.value),
+        f: common_vendor.t(((_a = selectedDomain.value) == null ? void 0 : _a.field_name) || "全部领域"),
         g: currentDropdown.value === "domain" ? 1 : "",
         h: common_vendor.o(($event) => toggleDropdown("domain")),
         i: common_vendor.t(selectedTime.value),
@@ -73,18 +83,21 @@ const _sfc_main = {
         k: common_vendor.o(($event) => toggleDropdown("time")),
         l: currentDropdown.value === "domain"
       }, currentDropdown.value === "domain" ? {
-        m: common_vendor.f(domainList, (item, k0, i0) => {
+        m: common_vendor.o(($event) => selectOption("domain", null)),
+        n: selectedDomain.value === null ? 1 : "",
+        o: common_vendor.f(common_vendor.unref(field).fieldlist, (item, k0, i0) => {
+          var _a2;
           return {
-            a: common_vendor.t(item),
-            b: item,
-            c: common_vendor.o(($event) => selectOption("domain", item), item),
-            d: selectedDomain.value === item ? 1 : ""
+            a: common_vendor.t(item.field_name),
+            b: item.field_id,
+            c: common_vendor.o(($event) => selectOption("domain", item), item.field_id),
+            d: ((_a2 = selectedDomain.value) == null ? void 0 : _a2.field_id) === item.field_id ? 1 : ""
           };
         })
       } : {}, {
-        n: currentDropdown.value === "time"
+        p: currentDropdown.value === "time"
       }, currentDropdown.value === "time" ? {
-        o: common_vendor.f(timeList, (item, k0, i0) => {
+        q: common_vendor.f(timeList, (item, k0, i0) => {
           return {
             a: common_vendor.t(item),
             b: item,
@@ -93,15 +106,15 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        p: common_vendor.f(common_vendor.unref(listpolicy).listpolicy, (item, k0, i0) => {
+        r: common_vendor.f(common_vendor.unref(listpolicy).listpolicy, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.brief_content),
             b: item.id,
             c: common_vendor.o(($event) => OnClick(item.id), item.id),
-            d: "e4e5fb8d-2-" + i0,
+            d: "52720678-2-" + i0,
             e: common_vendor.p({
               title: item.policy_title,
-              extra: Dataformat(item.release_time)
+              extra: common_vendor.unref(utils_data.Dataformat)(item.release_time)
             })
           };
         })
@@ -109,6 +122,5 @@ const _sfc_main = {
     };
   }
 };
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-e4e5fb8d"]]);
-wx.createPage(MiniProgramPage);
+wx.createPage(_sfc_main);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/policy/policy.js.map
