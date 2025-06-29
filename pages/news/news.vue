@@ -7,7 +7,7 @@
       </template>
     </uni-nav-bar>
 
-    <!-- 搜索栏 + 筛选栏固定区域 -->
+    <!-- 搜索栏 + 筛选栏 -->
     <view class="fixed-top">
       <uni-search-bar 
         @confirm="search" 
@@ -20,7 +20,7 @@
         <view class="filter-bar">
           <!-- 领域筛选 -->
           <view class="filter-item" @click="toggleDropdown('domain')">
-            {{ selectedDomain?.field_name || '全部领域' }}
+            {{ selectedDomain.field_name || '全部领域' }}
             <view class="arrow" :class="{ open: currentDropdown === 'domain' }"></view>
           </view>
 
@@ -31,45 +31,40 @@
           </view>
         </view>
 
-        <!-- 领域下拉菜单 -->
+        <!-- 领域下拉 -->
         <view v-if="currentDropdown === 'domain'" class="dropdown-list">
-          <!-- 全部选项 -->
           <view 
             class="dropdown-item" 
             @click="selectOption('domain', null)" 
-            :class="{ selected: selectedDomain === null }"
-          >
+            :class="{ selected: selectedDomain.field_id === 0 }">
             全部
           </view>
-          <!-- 具体领域项 -->
           <view 
             class="dropdown-item" 
             v-for="item in field.fieldlist" 
             :key="item.field_id"
             @click="selectOption('domain', item)" 
-            :class="{ selected: selectedDomain?.field_id === item.field_id }"
-          >
+            :class="{ selected: selectedDomain.field_id === item.field_id }">
             {{ item.field_name }}
           </view>
         </view>
 
-        <!-- 时间下拉菜单 -->
+        <!-- 时间下拉 -->
         <view v-if="currentDropdown === 'time'" class="dropdown-list">
           <view 
             class="dropdown-item" 
             v-for="item in timeList" 
             :key="item"
             @click="selectOption('time', item)" 
-            :class="{ selected: selectedTime === item }"
-          >
+            :class="{ selected: selectedTime === item }">
             {{ item }}
           </view>
         </view>
       </view>
     </view>
 
-    <!-- 新闻列表区域 -->
-    <scroll-view class="news-scroll" scroll-y="true">
+    <!-- 新闻列表 -->
+    <scroll-view class="news-scroll" scroll-y="true" @scrolltolower="loadMore">
       <view>
         <uni-card
           v-for="item in listnew.listnew"
@@ -77,10 +72,11 @@
           :title="item.new_title"
           :extra="Dataformat(item.release_time)"
           :thumbnail="item.list_image_url"
-          @click="onClick(item.id)"
-        >
+          @click="onClick(item.id)">
           <text class="uni-body">{{ item.brief_content }}</text>
         </uni-card>
+        <view v-if="listnew.loading" class="loading">加载中...</view>
+        <view v-else-if="!listnew.hasMore" class="no-more">没有更多内容</view>
       </view>
     </scroll-view>
   </view>
@@ -92,26 +88,34 @@ import { useNewStore } from '../../store/NewList'
 import { usefieldstore } from '../../store/field.js'
 import { Dataformat } from '../../utils/data'
 
-// 从 Pinia 获取 store
 const listnew = useNewStore()
 const field = usefieldstore()
 
-// 搜索框内容
 const searchbar = ref("")
-
-// 当前打开的下拉框类型（'domain' | 'time'）
 const currentDropdown = ref(null)
 
-// 当前选中的领域（对象或 null）和时间（字符串）
-const selectedDomain = ref(null)
+// 初始化“全部”
+const selectedDomain = ref({ field_id: 0, field_name: '全部' })
 const selectedTime = ref('发布时间')
 
-// 时间列表
 const timeList = ['全部', '最近一周', '最近一月', '最近一年']
+
+// 加载更多
+const loadMore = () => {
+  listnew.getmorelist({
+    policyTitle: searchbar.value,
+    fieldID: selectedDomain.value.field_id,
+    page: listnew.page + 1
+  })
+  console.log("到底了")
+}
 
 // 搜索
 function search() {
-  listnew.searchnewlist({ newTitle: searchbar.value })
+  listnew.searchnewlist({
+    newTitle: searchbar.value,
+    fieldID: selectedDomain.value.field_id
+  })
   console.log("搜索关键词:", searchbar.value)
 }
 
@@ -121,25 +125,20 @@ function cancel() {
   listnew.getlistnew()
 }
 
-// 切换下拉框显示
+// 切换下拉框
 function toggleDropdown(type) {
   currentDropdown.value = currentDropdown.value === type ? null : type
 }
 
-// 选择选项后处理
+// 选择筛选项
 function selectOption(type, value) {
   if (type === 'domain') {
-    selectedDomain.value = value
     if (value === null) {
-      console.log("选中全部领域")
+      selectedDomain.value = { field_id: 0, field_name: '全部' }
       listnew.getlistnew()
-      
     } else {
-	listnew.searchnewlist({ 'fieldID': value.field_id})
-		
-      console.log("选中领域ID:", value.field_id)
-      // 可选：根据字段筛选
-      // listnew.searchnewlist({ fieldId: value.field_id })
+      selectedDomain.value = value
+      listnew.searchnewlist({ fieldID: value.field_id })
     }
   }
 
@@ -150,20 +149,18 @@ function selectOption(type, value) {
   currentDropdown.value = null
 }
 
-// 点击新闻项跳转详情页
+// 跳转新闻详情
 function onClick(id) {
   uni.navigateTo({
     url: `/pages/detail/detailnew?id=${id}`
   })
 }
 
-// 页面挂载时加载新闻和领域列表
 onMounted(() => {
   listnew.getlistnew()
   field.getfield()
 })
 </script>
-
 <style>
 @import url("../../style/new_policy.css");
 
@@ -197,5 +194,11 @@ onMounted(() => {
 
 .arrow.open {
   transform: rotate(180deg);
+}
+.loading,
+.no-more {
+  text-align: center;
+  color: #999;
+  padding: 20rpx;
 }
 </style>

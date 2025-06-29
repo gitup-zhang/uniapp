@@ -7,7 +7,7 @@
       </template>
     </uni-nav-bar>
 
-    <!-- 搜索栏 + 筛选栏固定区域 -->
+    <!-- 搜索栏 + 筛选栏 -->
     <view class="fixed-top">
       <uni-search-bar 
         @confirm="search" 
@@ -20,7 +20,7 @@
         <view class="filter-bar">
           <!-- 领域筛选 -->
           <view class="filter-item" @click="toggleDropdown('domain')">
-            {{ selectedDomain?.field_name || '全部领域' }}
+            {{ selectedDomain.field_name || '全部领域' }}
             <view class="arrow" :class="{ open: currentDropdown === 'domain' }"></view>
           </view>
 
@@ -31,129 +31,121 @@
           </view>
         </view>
 
-        <!-- 领域下拉菜单 -->
+        <!-- 领域下拉 -->
         <view v-if="currentDropdown === 'domain'" class="dropdown-list">
-          <!-- 全部选项 -->
           <view 
             class="dropdown-item" 
             @click="selectOption('domain', null)" 
-            :class="{ selected: selectedDomain === null }"
-          >
+            :class="{ selected: selectedDomain.field_id === 0 }">
             全部
           </view>
-          <!-- 具体领域项 -->
           <view 
             class="dropdown-item" 
             v-for="item in field.fieldlist" 
             :key="item.field_id"
             @click="selectOption('domain', item)" 
-            :class="{ selected: selectedDomain?.field_id === item.field_id }"
-          >
+            :class="{ selected: selectedDomain.field_id === item.field_id }">
             {{ item.field_name }}
           </view>
         </view>
 
-        <!-- 时间下拉菜单 -->
+        <!-- 时间下拉 -->
         <view v-if="currentDropdown === 'time'" class="dropdown-list">
           <view 
             class="dropdown-item" 
             v-for="item in timeList" 
             :key="item"
             @click="selectOption('time', item)" 
-            :class="{ selected: selectedTime === item }"
-          >
+            :class="{ selected: selectedTime === item }">
             {{ item }}
           </view>
         </view>
       </view>
     </view>
 
-    <!-- 新闻列表区域 -->
+    <!-- 新闻列表 -->
     <scroll-view class="news-scroll" scroll-y="true" @scrolltolower="loadMore">
       <view>
         <uni-card 
-                        :title="item.policy_title" 
-                        :extra="Dataformat(item.release_time)" 
-                        v-for="item in listpolicy.listpolicy" 
-                        :key="item.id"
-                  	  @click="OnClick(item.id)"
-                      >
-                        <text>{{item.brief_content}}</text>
-                      </uni-card>
-					  
-					    <view v-if="listpolicy.loading" class="loading">加载中...</view>
-					      <view v-else-if="!listpolicy.hasMore" class="no-more">没有更多内容</view>
+          v-for="item in listpolicy.listpolicy" 
+          :key="item.id"
+          :title="item.policy_title" 
+          :extra="Dataformat(item.release_time)"
+          @click="OnClick(item.id)">
+          <text>{{ item.brief_content }}</text>
+        </uni-card>
+
+        <view v-if="listpolicy.loading" class="loading">加载中...</view>
+        <view v-else-if="!listpolicy.hasMore" class="no-more">没有更多内容</view>
       </view>
     </scroll-view>
-	
   </view>
 </template>
 
 
 <script setup>
-import { ref, computed ,onMounted} from 'vue'
-import {usePolicyStore} from '@/store/PolicyList.js'
+import { ref, onMounted } from 'vue'
+import { usePolicyStore } from '@/store/PolicyList.js'
+import { usefieldstore } from '@/store/field.js'
 import { Dataformat } from '../../utils/data'
-import { usefieldstore } from '../../store/field.js'
-// 从pinia中获得对象
+
 const listpolicy = usePolicyStore()
 const field = usefieldstore()
+
 // 搜索栏
 const searchbar = ref("")
 
-// 当前打开的下拉框类型（'domain' | 'time'）
+// 当前打开的下拉框
 const currentDropdown = ref(null)
 
-// 当前选中的领域（对象或 null）和时间（字符串）
-const selectedDomain = ref(0)
+// 初始值设为“全部”
+const selectedDomain = ref({ field_id: 0, field_name: '全部' })
 const selectedTime = ref('发布时间')
 
 // 时间列表
 const timeList = ['全部', '最近一周', '最近一月', '最近一年']
 
-
-onMounted(()=>{
-	listpolicy.getlistpolicy()
-	field.getfield()
+onMounted(() => {
+  listpolicy.getlistpolicy()
+  field.getfield()
 })
-// 触底加载更多
-const loadMore = () => {
-	
-	listpolicy.getmorelist({'policyTitle':searchbar.value,'fieldID':selectedDomain.value,'page':listpolicy.page+1})
-  console.log("到底了")
-}
 
-// 搜索栏函数
+// 搜索
 function search() {
- listpolicy.searchpolicy({'policyTitle':searchbar.value})
+  listpolicy.searchpolicy({ policyTitle: searchbar.value, fieldID: selectedDomain.value.field_id })
   console.log("搜索关键词:", searchbar.value)
 }
 
+// 取消搜索
 function cancel() {
-listpolicy.getlistpolicy()
   searchbar.value = ""
+  listpolicy.getlistpolicy()
 }
 
+// 加载更多
+function loadMore() {
+  listpolicy.getmorelist({
+    policyTitle: searchbar.value,
+    fieldID: selectedDomain.value.field_id,
+    page: listpolicy.page + 1
+  })
+  console.log("到底了")
+}
 
-
-// 切换下拉框显示
+// 切换下拉框
 function toggleDropdown(type) {
   currentDropdown.value = currentDropdown.value === type ? null : type
 }
 
-// 选择选项后处理
+// 选择筛选项
 function selectOption(type, value) {
   if (type === 'domain') {
-    selectedDomain.value = value
     if (value === null) {
-     listpolicy.getlistpolicy()
-	 selectedDomain.value=0
+      selectedDomain.value = { field_id: 0, field_name: '全部' }
+      listpolicy.getlistpolicy()
     } else {
-	listpolicy.searchpolicy({'fieldID':value.field_id})
-	console.log("选中领域ID:", selectedDomain.value.field_id)
-      console.log("选中领域ID:", value.field_id)
-	  
-      
+      selectedDomain.value = value
+      listpolicy.searchpolicy({ fieldID: value.field_id })
     }
   }
 
@@ -163,13 +155,13 @@ function selectOption(type, value) {
 
   currentDropdown.value = null
 }
-// 获取详细政策
-function OnClick(id){
-	uni.navigateTo({
-		url: `/pages/detail/detailpolicy?id=${id}`
-	});
-}
 
+// 跳转详情
+function OnClick(id) {
+  uni.navigateTo({
+    url: `/pages/detail/detailpolicy?id=${id}`
+  })
+}
 </script>
 
 <style>
