@@ -69,7 +69,7 @@
     </view>
 
     <!-- 新闻列表区域 -->
-    <scroll-view class="news-scroll" scroll-y="true">
+    <scroll-view class="news-scroll" scroll-y="true" @scrolltolower="loadMore">
       <view>
         <uni-card 
                         :title="item.policy_title" 
@@ -80,8 +80,12 @@
                       >
                         <text>{{item.brief_content}}</text>
                       </uni-card>
+					  
+					    <view v-if="listpolicy.loading" class="loading">加载中...</view>
+					      <view v-else-if="!listpolicy.hasMore" class="no-more">没有更多内容</view>
       </view>
     </scroll-view>
+	
   </view>
 </template>
 
@@ -101,7 +105,7 @@ const searchbar = ref("")
 const currentDropdown = ref(null)
 
 // 当前选中的领域（对象或 null）和时间（字符串）
-const selectedDomain = ref(null)
+const selectedDomain = ref(0)
 const selectedTime = ref('发布时间')
 
 // 时间列表
@@ -112,6 +116,12 @@ onMounted(()=>{
 	listpolicy.getlistpolicy()
 	field.getfield()
 })
+// 触底加载更多
+const loadMore = () => {
+	
+	listpolicy.getmorelist({'policyTitle':searchbar.value,'fieldID':selectedDomain.value,'page':listpolicy.page+1})
+  console.log("到底了")
+}
 
 // 搜索栏函数
 function search() {
@@ -120,7 +130,7 @@ function search() {
 }
 
 function cancel() {
-	listpolicy.getlistpolicy()
+listpolicy.getlistpolicy()
   searchbar.value = ""
 }
 
@@ -137,8 +147,10 @@ function selectOption(type, value) {
     selectedDomain.value = value
     if (value === null) {
      listpolicy.getlistpolicy()
+	 selectedDomain.value=0
     } else {
 	listpolicy.searchpolicy({'fieldID':value.field_id})
+	console.log("选中领域ID:", selectedDomain.value.field_id)
       console.log("选中领域ID:", value.field_id)
 	  
       
@@ -192,5 +204,11 @@ function OnClick(id){
 
 .arrow.open {
   transform: rotate(180deg);
+}
+.loading,
+.no-more {
+  text-align: center;
+  color: #999;
+  padding: 20rpx;
 }
 </style>

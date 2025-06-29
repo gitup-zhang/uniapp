@@ -24,7 +24,6 @@ export const useNewDetailStore=defineStore('newdetail',()=>{
 			uni.hideLoading()
 		}
 	}
-	
 	return{
 		detail,
 		getnewdetail
