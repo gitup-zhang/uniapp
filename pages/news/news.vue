@@ -87,12 +87,14 @@ import { ref, onMounted } from 'vue'
 import { useNewStore } from '../../store/NewList'
 import { usefieldstore } from '../../store/field.js'
 import { Dataformat } from '../../utils/data'
-
+import { onShow } from '@dcloudio/uni-app'
 const listnew = useNewStore()
 const field = usefieldstore()
 
 const searchbar = ref("")
 const currentDropdown = ref(null)
+// 是否精选
+const isselected=ref(0)
 
 // 初始化“全部”
 const selectedDomain = ref({ field_id: 0, field_name: '全部' })
@@ -105,7 +107,8 @@ const loadMore = () => {
   listnew.getmorelist({
     policyTitle: searchbar.value,
     fieldID: selectedDomain.value.field_id,
-    page: listnew.page + 1
+    page: listnew.page + 1,
+	is_selection: isselected.value
   })
   console.log("到底了")
 }
@@ -122,7 +125,7 @@ function search() {
 // 取消搜索
 function cancel() {
   searchbar.value = ""
-  listnew.getlistnew()
+  listnew.getlistnew({})
 }
 
 // 切换下拉框
@@ -135,7 +138,7 @@ function selectOption(type, value) {
   if (type === 'domain') {
     if (value === null) {
       selectedDomain.value = { field_id: 0, field_name: '全部' }
-      listnew.getlistnew()
+      listnew.getlistnew({})
     } else {
       selectedDomain.value = value
       listnew.searchnewlist({ fieldID: value.field_id })
@@ -155,11 +158,28 @@ function onClick(id) {
     url: `/pages/detail/detailnew?id=${id}`
   })
 }
+// 在页面显示时判断来源
+onShow(() => {
+  const source = uni.getStorageSync('tabSource') || 'tabbar'
 
-onMounted(() => {
-  listnew.getlistnew()
-  field.getfield()
+  if (source === 'switchTab') {
+    console.log('✅ 来源：通过 uni.switchTab() 跳转');
+	isselected.value=1
+	listnew.getlistnew({is_selection:isselected.value})
+    // 可以执行特定逻辑，比如刷新数据
+  } else {
+    console.log('✅ 来源：用户点击 tabBar 进入');
+	isselected.value=0
+	 listnew.getlistnew({})
+	field.getfield()
+  }
+
+  // 清除标记，避免干扰下一次跳转
+  uni.removeStorageSync('tabSource')
 })
+// onMounted(() => {
+ 
+// })
 </script>
 <style>
 @import url("../../style/new_policy.css");

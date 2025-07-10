@@ -44,10 +44,10 @@
 		 </template>
 		 
 		<template v-slot:body>
-	 <view class="news-item">
+	 <view class="news-item" v-for="item in selected.policys" :key="item.id" @click="onclickpolicy(item.id)">
 	     <image class="news-image" src="/static/3044eb7c01d942fc96e5d5bd8282ee19.jpg" mode="aspectFill"></image>
 	     <view class="news-content">
-	       <view class="news-title">精选</view>
+	       <view class="news-title">{{item.policy_title}}</view>
 	       <view class="news-summary">精选</view>
 	       <view v-if="true" class="hot-tag">最热</view>
 	     </view>
@@ -59,10 +59,10 @@
 		  <view  class="more-text" @click="handleMorenew">更多信息 ></view>
 	  </template>
 	  <template v-slot:body>
-  	 <view class="news-item">
-  	     <image class="news-image" src="/static/3044eb7c01d942fc96e5d5bd8282ee19.jpg" mode="aspectFill"></image>
+  	 <view class="news-item" v-for="item in selected.news" :key="item.id" @click="onclicknew(item.id)">
+  	     <image class="news-image" :src="item.list_image_url" mode="aspectFill"></image>
   	     <view class="news-content">
-  	       <view class="news-title">精选</view>
+  	       <view class="news-title">{{item.new_title}}</view>
   	       <view class="news-summary">精选</view>
   	       <view v-if="true" class="hot-tag">最热</view>
   	     </view>
@@ -79,29 +79,48 @@ import {ref,onMounted} from 'vue'
 import CustomNavbar from '@/components/CustomNavbar/CustomNavbar.vue'
 import showInforVue from '../../components/show-infor/show-infor.vue';
 import {useNoticeStore} from '@/store/Notice.js'
+import {useSelectedstore} from '@/store/Home.js'
 
 // 获得公告对象
 const usenotice=useNoticeStore()
+// 获得精选对象
+const selected=useSelectedstore()
 
 
 // 获取更多新闻和政策
 function handleMorenew(){
+	uni.setStorageSync('tabSource', 'switchTab');
 	uni.switchTab({
 		url: '../news/news'
 	});
 
 }
 function handleMoremsg(){
+	uni.setStorageSync('tabSource', 'switchTab');
 	uni.switchTab({
 		url: '../policy/policy'
 	});
 	
+}
+// 获取精选的政策和新闻信息
+function onclicknew(id){
+	console.log(id)
+	uni.navigateTo({
+		url: `/pages/detail/detailnew?id=${id}`
+	})
+}
+function onclickpolicy(id){
+	console.log(id)
+	uni.navigateTo({
+	  url: `/pages/detail/detailpolicy?id=${id}`
+	})
 }
 
 
 // 初始化
 onMounted(()=>{
 	usenotice.getnoticestore()
+	selected.getselected()
 })
     
 

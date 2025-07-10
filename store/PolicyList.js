@@ -13,7 +13,8 @@ export const usePolicyStore = defineStore('policylist', () => {
     const loading = ref(false)
     const hasMore = ref(true)
 
-  const getlistpolicy = async () => {
+
+  const getlistpolicy = async (params) => {
     uni.showLoading({
       title: '加载中...',
       mask: true
@@ -22,7 +23,7 @@ export const usePolicyStore = defineStore('policylist', () => {
     try {
 		message.value=""
 	
-      const res = await getPolicyList({})  // 正确使用 await
+      const res = await getPolicyList(params)  // 正确使用 await
       console.log('示例数据：', res.data)
 	  page.value=res.page
 	  if(res.page*res.page_size<res.total){

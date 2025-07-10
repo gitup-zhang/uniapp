@@ -88,7 +88,7 @@ import { ref, onMounted } from 'vue'
 import { usePolicyStore } from '@/store/PolicyList.js'
 import { usefieldstore } from '@/store/field.js'
 import { Dataformat } from '../../utils/data'
-
+import { onShow } from '@dcloudio/uni-app'
 const listpolicy = usePolicyStore()
 const field = usefieldstore()
 
@@ -98,6 +98,9 @@ const searchbar = ref("")
 // 当前打开的下拉框
 const currentDropdown = ref(null)
 
+// 是否精选
+const isselected=ref(0)
+
 // 初始值设为“全部”
 const selectedDomain = ref({ field_id: 0, field_name: '全部' })
 const selectedTime = ref('发布时间')
@@ -105,10 +108,7 @@ const selectedTime = ref('发布时间')
 // 时间列表
 const timeList = ['全部', '最近一周', '最近一月', '最近一年']
 
-onMounted(() => {
-  listpolicy.getlistpolicy()
-  field.getfield()
-})
+
 
 // 搜索
 function search() {
@@ -119,7 +119,7 @@ function search() {
 // 取消搜索
 function cancel() {
   searchbar.value = ""
-  listpolicy.getlistpolicy()
+  listpolicy.getlistpolicy({})
 }
 
 // 加载更多
@@ -127,7 +127,8 @@ function loadMore() {
   listpolicy.getmorelist({
     policyTitle: searchbar.value,
     fieldID: selectedDomain.value.field_id,
-    page: listpolicy.page + 1
+    page: listpolicy.page + 1,
+	is_selection: isselected.value
   })
   console.log("到底了")
 }
@@ -142,7 +143,7 @@ function selectOption(type, value) {
   if (type === 'domain') {
     if (value === null) {
       selectedDomain.value = { field_id: 0, field_name: '全部' }
-      listpolicy.getlistpolicy()
+      listpolicy.getlistpolicy({})
     } else {
       selectedDomain.value = value
       listpolicy.searchpolicy({ fieldID: value.field_id })
@@ -162,6 +163,30 @@ function OnClick(id) {
     url: `/pages/detail/detailpolicy?id=${id}`
   })
 }
+// 在页面显示时判断来源
+onShow(() => {
+  const source = uni.getStorageSync('tabSource') || 'tabbar'
+
+  if (source === 'switchTab') {
+    console.log('✅ 来源：通过 uni.switchTab() 跳转');
+	isselected.value=1
+	listpolicy.getlistpolicy({is_selection:isselected.value})
+    // 可以执行特定逻辑，比如刷新数据
+  } else {
+    console.log('✅ 来源：用户点击 tabBar 进入');
+	isselected.value=0
+	 listpolicy.getlistpolicy({})
+	 field.getfield()
+  }
+
+  // 清除标记，避免干扰下一次跳转
+  uni.removeStorageSync('tabSource')
+})
+
+// onMounted(() => {
+//   listpolicy.getlistpolicy({})
+//   field.getfield()
+// })
 </script>
 
 <style>
