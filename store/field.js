@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getPolicyField } from '@/new-apis/policy.js'
+import { getPolicyField } from '../new-apis/policy.js'
 
 
 export const usefieldstore=defineStore('field',()=>{

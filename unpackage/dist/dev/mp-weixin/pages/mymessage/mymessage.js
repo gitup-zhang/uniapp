@@ -4,11 +4,13 @@ const common_assets = require("../../common/assets.js");
 const store_Info = require("../../store/Info.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  _easycom_uni_icons2();
+  const _easycom_uni_popup_dialog2 = common_vendor.resolveComponent("uni-popup-dialog");
+  (_easycom_uni_icons2 + _easycom_uni_popup_dialog2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_popup_dialog = () => "../../uni_modules/uni-popup/components/uni-popup-dialog/uni-popup-dialog.js";
 if (!Math) {
-  (_easycom_uni_icons + uniPopup)();
+  (_easycom_uni_icons + uniPopup + _easycom_uni_popup_dialog)();
 }
 const uniPopup = () => "../../node-modules/@dcloudio/uni-ui/lib/uni-popup/uni-popup.js";
 const _sfc_main = {
@@ -31,14 +33,21 @@ const _sfc_main = {
       "background-color": "transparent"
       // 外层透明，让圆角显示
     }));
+    const alertDialog = common_vendor.ref(null);
     common_vendor.onMounted(() => {
     });
-    function admin() {
+    const admin = async () => {
       if (userInfo.signal) {
-        common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:111", "已登录");
+        common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:122", "已登录");
       } else {
-        userInfo.getinfo();
+        userInfo.loginWithWeChat();
+        alertDialog.value.open();
       }
+    };
+    function dialogConfirm() {
+      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:137", "用户点击了同意");
+      alertDialog.value.close();
+      userInfo.getUserProfile();
     }
     function openset() {
       popupRef.value.open();
@@ -97,6 +106,21 @@ const _sfc_main = {
         r: common_vendor.p({
           type: "bottom",
           ["custom-style"]: popupStyle.value
+        }),
+        s: common_vendor.o(dialogConfirm),
+        t: common_vendor.o(_ctx.dialogClose),
+        v: common_vendor.p({
+          type: "info",
+          cancelText: "关闭",
+          confirmText: "同意",
+          title: "通知",
+          content: "是否确认登录"
+        }),
+        w: common_vendor.sr(alertDialog, "2e735db0-3", {
+          "k": "alertDialog"
+        }),
+        x: common_vendor.p({
+          type: "dialog"
         })
       });
     };

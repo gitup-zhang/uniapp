@@ -70,6 +70,15 @@
       </view>
     </uni-popup>
   </view>
+  
+<view>
+			<!-- 提示窗示例 -->
+			<uni-popup ref="alertDialog" type="dialog">
+				<uni-popup-dialog type="info" cancelText="关闭" confirmText="同意" title="通知" content="是否确认登录" @confirm="dialogConfirm"
+					@close="dialogClose"></uni-popup-dialog>
+			</uni-popup>
+</view>
+  
 </template>
 
 <script setup>
@@ -99,20 +108,39 @@ const popupStyle = computed(() => ({
   'margin': '0 auto',
   'background-color': 'transparent' // 外层透明，让圆角显示
 }))
+
+// 确认登录弹窗
+const alertDialog = ref(null)  
 // 页面挂载钩子
 onMounted(()=>{
 	// userInfo.getinfo()
 	
 	
 })
-// 登录功能
-function admin(){
+const admin=async()=>{
 	if(userInfo.signal){
 		console.log("已登录")
 	}else{
-		userInfo.getinfo()
+		// const loginRes = await uni.login();
+		
+		// console.log(loginRes)
+		
+		// userInfo.getinfo()
+		userInfo.loginWithWeChat()
+		// 打开确定登录的弹窗
+		alertDialog.value.open()
+		
 	}
 }
+// 确认登录弹窗的确定和取消函数
+function dialogConfirm() {
+  console.log('用户点击了同意')
+  alertDialog.value.close()
+  // 这里可继续处理登录逻辑
+  userInfo.getUserProfile()
+}
+
+
 
 // 打开弹窗
 function openset() {

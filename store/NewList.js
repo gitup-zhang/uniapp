@@ -10,14 +10,14 @@ export const useNewStore=defineStore('newlist',()=>{
 	const loading = ref(false)
 	const hasMore = ref(true)
 	
-	const getlistnew=async()=>{
+	const getlistnew=async(parmas)=>{
 		uni.showLoading({
 		  title: '加载中...',
 		  mask: true
 		})
 		try{
 			console.log(listnew)
-			const res=await getNewList({})
+			const res=await getNewList(parmas)
 			page.value=res.page
 			if(res.page*res.page_size<res.total){
 					  hasMore.value=true

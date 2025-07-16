@@ -1,7 +1,7 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
 let BASE_URL = "";
-BASE_URL = "http://47.113.194.28:8080/api";
+BASE_URL = "http://localhost:8080/api";
 function buildQuery(params) {
   return Object.entries(params).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join("&");
 }

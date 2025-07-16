@@ -22,29 +22,41 @@ const _sfc_main = {
     const field = store_field.usefieldstore();
     const searchbar = common_vendor.ref("");
     const currentDropdown = common_vendor.ref(null);
-    const selectedDomain = common_vendor.ref(null);
+    const isselected = common_vendor.ref(0);
+    const selectedDomain = common_vendor.ref({ field_id: 0, field_name: "全部" });
     const selectedTime = common_vendor.ref("发布时间");
     const timeList = ["全部", "最近一周", "最近一月", "最近一年"];
+    const loadMore = () => {
+      listnew.getmorelist({
+        policyTitle: searchbar.value,
+        fieldID: selectedDomain.value.field_id,
+        page: listnew.page + 1,
+        is_selection: isselected.value
+      });
+      common_vendor.index.__f__("log", "at pages/news/news.vue:113", "到底了");
+    };
     function search() {
-      listnew.searchnewlist({ newTitle: searchbar.value });
-      common_vendor.index.__f__("log", "at pages/news/news.vue:115", "搜索关键词:", searchbar.value);
+      listnew.searchnewlist({
+        newTitle: searchbar.value,
+        fieldID: selectedDomain.value.field_id
+      });
+      common_vendor.index.__f__("log", "at pages/news/news.vue:122", "搜索关键词:", searchbar.value);
     }
     function cancel() {
       searchbar.value = "";
-      listnew.getlistnew();
+      listnew.getlistnew({});
     }
     function toggleDropdown(type) {
       currentDropdown.value = currentDropdown.value === type ? null : type;
     }
     function selectOption(type, value) {
       if (type === "domain") {
-        selectedDomain.value = value;
         if (value === null) {
-          common_vendor.index.__f__("log", "at pages/news/news.vue:134", "选中全部领域");
-          listnew.getlistnew();
+          selectedDomain.value = { field_id: 0, field_name: "全部" };
+          listnew.getlistnew({});
         } else {
-          listnew.searchnewlist({ "fieldID": value.field_id });
-          common_vendor.index.__f__("log", "at pages/news/news.vue:140", "选中领域ID:", value.field_id);
+          selectedDomain.value = value;
+          listnew.searchnewlist({ fieldID: value.field_id });
         }
       }
       if (type === "time") {
@@ -57,12 +69,21 @@ const _sfc_main = {
         url: `/pages/detail/detailnew?id=${id}`
       });
     }
-    common_vendor.onMounted(() => {
-      listnew.getlistnew();
-      field.getfield();
+    common_vendor.onShow(() => {
+      const source = common_vendor.index.getStorageSync("tabSource") || "tabbar";
+      if (source === "switchTab") {
+        common_vendor.index.__f__("log", "at pages/news/news.vue:166", "来源：通过 uni.switchTab() 跳转");
+        isselected.value = 1;
+        listnew.getlistnew({ is_selection: isselected.value });
+      } else {
+        common_vendor.index.__f__("log", "at pages/news/news.vue:171", "来源：用户点击 tabBar 进入");
+        isselected.value = 0;
+        listnew.getlistnew({});
+        field.getfield();
+      }
+      common_vendor.index.removeStorageSync("tabSource");
     });
     return (_ctx, _cache) => {
-      var _a;
       return common_vendor.e({
         a: common_vendor.p({
           statusBar: "true",
@@ -76,7 +97,7 @@ const _sfc_main = {
           placeholder: "搜索行业新闻",
           modelValue: searchbar.value
         }),
-        f: common_vendor.t(((_a = selectedDomain.value) == null ? void 0 : _a.field_name) || "全部领域"),
+        f: common_vendor.t(selectedDomain.value.field_name || "全部领域"),
         g: currentDropdown.value === "domain" ? 1 : "",
         h: common_vendor.o(($event) => toggleDropdown("domain")),
         i: common_vendor.t(selectedTime.value),
@@ -85,14 +106,13 @@ const _sfc_main = {
         l: currentDropdown.value === "domain"
       }, currentDropdown.value === "domain" ? {
         m: common_vendor.o(($event) => selectOption("domain", null)),
-        n: selectedDomain.value === null ? 1 : "",
+        n: selectedDomain.value.field_id === 0 ? 1 : "",
         o: common_vendor.f(common_vendor.unref(field).fieldlist, (item, k0, i0) => {
-          var _a2;
           return {
             a: common_vendor.t(item.field_name),
             b: item.field_id,
             c: common_vendor.o(($event) => selectOption("domain", item), item.field_id),
-            d: ((_a2 = selectedDomain.value) == null ? void 0 : _a2.field_id) === item.field_id ? 1 : ""
+            d: selectedDomain.value.field_id === item.field_id ? 1 : ""
           };
         })
       } : {}, {
@@ -119,7 +139,11 @@ const _sfc_main = {
               thumbnail: item.list_image_url
             })
           };
-        })
+        }),
+        s: common_vendor.unref(listnew).loading
+      }, common_vendor.unref(listnew).loading ? {} : !common_vendor.unref(listnew).hasMore ? {} : {}, {
+        t: !common_vendor.unref(listnew).hasMore,
+        v: common_vendor.o(loadMore)
       });
     };
   }

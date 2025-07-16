@@ -7,7 +7,7 @@
 /* 固定顶部区域（搜索 + 筛选） */
 .fixed-top {
   position: fixed;
-  top: 88rpx; /* 导航栏高度大约88rpx，适配含 statusBar 的情形 */
+  top: 178rpx; /* 导航栏高度大约88rpx，适配含 statusBar 的情形 */
   left: 0;
   right: 0;
   z-index: 10;
@@ -19,7 +19,7 @@
 /* 滚动区域 */
 .news-scroll {
   position: fixed;
-  top: calc(88rpx + 200rpx); /* navBar + search + filter 大约高度 */
+  top: calc(178rpx + 200rpx); /* navBar + search + filter 大约高度 */
   bottom: var(--window-bottom); /* tabbar 兼容 */
   left: 0;
   right: 0;
@@ -115,4 +115,10 @@ padding: 10rpx ;
 }
 .arrow.open {
   transform: rotate(180deg);
+}
+.loading,
+.no-more {
+  text-align: center;
+  color: #999;
+  padding: 20rpx;
 }

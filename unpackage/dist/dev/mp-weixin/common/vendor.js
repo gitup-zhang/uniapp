@@ -7354,9 +7354,9 @@ function isConsoleWritable() {
   return isWritable;
 }
 function initRuntimeSocketService() {
-  const hosts = "2.0.0.1,10.29.99.49,127.0.0.1";
+  const hosts = "2.0.0.1,192.168.3.12,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_lB3eKP";
+  const id = "mp-weixin_C2nwdJ";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -9369,6 +9369,7 @@ const dayjs = /* @__PURE__ */ getDefaultExportFromCjs(dayjs_minExports);
 const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
   !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
 };
+const onShow = /* @__PURE__ */ createHook(ON_SHOW);
 const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
 exports.Pinia = Pinia;
 exports._export_sfc = _export_sfc;
@@ -9385,6 +9386,7 @@ exports.n = n;
 exports.o = o;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;
+exports.onShow = onShow;
 exports.p = p;
 exports.ref = ref;
 exports.resolveComponent = resolveComponent;

@@ -168,12 +168,12 @@ onShow(() => {
   const source = uni.getStorageSync('tabSource') || 'tabbar'
 
   if (source === 'switchTab') {
-    console.log('✅ 来源：通过 uni.switchTab() 跳转');
+    console.log('来源：通过 uni.switchTab() 跳转');
 	isselected.value=1
 	listpolicy.getlistpolicy({is_selection:isselected.value})
     // 可以执行特定逻辑，比如刷新数据
   } else {
-    console.log('✅ 来源：用户点击 tabBar 进入');
+    console.log('来源：用户点击 tabBar 进入');
 	isselected.value=0
 	 listpolicy.getlistpolicy({})
 	 field.getfield()

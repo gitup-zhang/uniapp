@@ -5,7 +5,7 @@
   },
   "setting": {
     "urlCheck": false,
-    "es6": true,
+    "es6": false,
     "postcss": false,
     "minified": false,
     "newFeature": true,
@@ -13,7 +13,7 @@
   },
   "compileType": "miniprogram",
   "libVersion": "",
-  "appid": "wx790b056cd6485160",
+  "appid": "wx80be6283694e28a2",
   "projectname": "uniapp-news",
   "condition": {
     "search": {
