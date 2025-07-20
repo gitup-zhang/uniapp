@@ -3,6 +3,7 @@ const common_vendor = require("../common/vendor.js");
 const newApis_info = require("../new-apis/info.js");
 const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
   let info = common_vendor.ref({});
+  const token = common_vendor.ref("");
   const signal = common_vendor.ref(false);
   const getinfo = async () => {
     signal.value = true;
@@ -18,33 +19,42 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
   };
   const loginWithWeChat = async () => {
     try {
-      const loginRes = await common_vendor.index.login();
+      const loginRes = await common_vendor.index.login({ provider: "weixin" });
       if (loginRes.errMsg === "login:ok") {
         const codes = loginRes.code;
-        common_vendor.index.__f__("log", "at store/Info.js:31", codes);
+        common_vendor.index.__f__("log", "at store/Info.js:33", codes);
         const res = await newApis_info.getinfologin({ code: codes });
-        common_vendor.index.__f__("log", "at store/Info.js:34", res);
+        token.value = res.token;
+        common_vendor.index.__f__("log", "at store/Info.js:37", token.value);
         if (res.code === 200) {
-          common_vendor.index.__f__("log", "at store/Info.js:36", "1111111111111111111111111111");
-          common_vendor.index.__f__("log", "at store/Info.js:37", "登录成功");
+          common_vendor.index.__f__("log", "at store/Info.js:39", "1111111111111111111111111111");
+          common_vendor.index.__f__("log", "at store/Info.js:40", "登录成功");
         }
       }
     } catch (err) {
-      common_vendor.index.__f__("error", "at store/Info.js:54", "登录失败", err);
+      common_vendor.index.__f__("error", "at store/Info.js:56", "登录失败", err);
     }
   };
   function deleteinfo() {
     signal.value = false;
     info.value = {};
   }
-  const getUserProfile = async (token) => {
+  const getUserProfile = async () => {
     common_vendor.index.getUserProfile({
       desc: "用于完善用户资料",
-      success: (userRes) => {
-        common_vendor.index.__f__("log", "at store/Info.js:66", userRes);
+      success: async (userRes) => {
+        common_vendor.index.__f__("log", "at store/Info.js:69", userRes);
+        const { encryptedData, iv } = userRes;
+        common_vendor.index.__f__("log", "at store/Info.js:71", encryptedData);
+        try {
+          const res = await newApis_info.getinfoprofile({ encryptedData, iv, token: token.value });
+          common_vendor.index.__f__("log", "at store/Info.js:76", res);
+        } catch (error) {
+          common_vendor.index.__f__("error", "at store/Info.js:78", "请求出错:", error);
+        }
       },
       fail: (err) => {
-        common_vendor.index.__f__("error", "at store/Info.js:90", "用户拒绝授权:", err);
+        common_vendor.index.__f__("error", "at store/Info.js:82", "用户拒绝授权:", err);
       }
     });
   };

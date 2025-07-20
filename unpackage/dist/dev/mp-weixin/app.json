@@ -5,7 +5,8 @@
     "pages/news/news",
     "pages/mymessage/mymessage",
     "pages/detail/detailnew",
-    "pages/detail/detailpolicy"
+    "pages/detail/detailpolicy",
+    "pages/mes/mes"
   ],
   "window": {
     "navigationBarTextStyle": "white",
@@ -36,6 +37,12 @@
         "iconPath": "/static/icon/news.png",
         "selectedIconPath": "/static/icon/new-selecte.png",
         "text": "新闻"
+      },
+      {
+        "pagePath": "pages/mes/mes",
+        "iconPath": "/static/icon/mes.png",
+        "selectedIconPath": "/static/icon/mes-select.png",
+        "text": "消息"
       },
       {
         "pagePath": "pages/mymessage/mymessage",

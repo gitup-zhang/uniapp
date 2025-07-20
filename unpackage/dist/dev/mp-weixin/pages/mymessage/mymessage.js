@@ -36,16 +36,16 @@ const _sfc_main = {
     const alertDialog = common_vendor.ref(null);
     common_vendor.onMounted(() => {
     });
-    const admin = async () => {
-      if (userInfo.signal) {
-        common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:122", "已登录");
-      } else {
-        userInfo.loginWithWeChat();
-        alertDialog.value.open();
+    const getPhoneNumber = async (e) => {
+      userInfo.loginWithWeChat();
+      if (e.detail.errMsg !== "getPhoneNumber:ok") {
+        common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:126", e);
+        common_vendor.index.showToast({ title: "用户拒绝授权", icon: "none" });
+        return;
       }
     };
     function dialogConfirm() {
-      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:137", "用户点击了同意");
+      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:150", "用户点击了同意");
       alertDialog.value.close();
       userInfo.getUserProfile();
     }
@@ -86,7 +86,7 @@ const _sfc_main = {
         d: common_vendor.o(openset),
         e: common_vendor.unref(userInfo).info.Image ? common_vendor.unref(userInfo).info.Image : "/static/icon/empty.png",
         f: common_vendor.t(common_vendor.unref(userInfo).info.username || "点击登录"),
-        g: common_vendor.o(admin),
+        g: common_vendor.o(getPhoneNumber),
         h: common_vendor.t(common_vendor.unref(userInfo).info.slogan || "请登录后设置个人签名"),
         i: common_assets._imports_0$1,
         j: common_vendor.t(common_vendor.unref(userInfo).info.daysOnline),

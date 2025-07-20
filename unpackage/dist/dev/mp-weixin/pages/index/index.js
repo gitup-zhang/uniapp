@@ -26,13 +26,13 @@ const _sfc_main = {
       });
     }
     function onclicknew(id) {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:107", id);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:132", id);
       common_vendor.index.navigateTo({
         url: `/pages/detail/detailnew?id=${id}`
       });
     }
     function onclickpolicy(id) {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:113", id);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:138", id);
       common_vendor.index.navigateTo({
         url: `/pages/detail/detailpolicy?id=${id}`
       });
@@ -47,30 +47,19 @@ const _sfc_main = {
         b: common_vendor.o(handleMoremsg),
         c: common_assets._imports_1,
         d: common_vendor.o(handleMorenew),
-        e: common_vendor.p({
+        e: common_assets._imports_2,
+        f: common_vendor.o(handleMorenew),
+        g: common_vendor.p({
           title: "为您推荐"
         }),
-        f: common_vendor.f(common_vendor.unref(usenotice).notice, (item, k0, i0) => {
+        h: common_vendor.f(common_vendor.unref(usenotice).notice, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.content),
             b: item.id
           };
         }),
-        g: common_vendor.o(handleMoremsg),
-        h: common_vendor.f(common_vendor.unref(selected).policys, (item, k0, i0) => {
-          return common_vendor.e({
-            a: common_vendor.t(item.policy_title)
-          }, {}, {
-            b: item.id,
-            c: common_vendor.o(($event) => onclickpolicy(item.id), item.id)
-          });
-        }),
-        i: common_assets._imports_2,
-        j: common_vendor.p({
-          title: "精选政策"
-        }),
-        k: common_vendor.o(handleMorenew),
-        l: common_vendor.f(common_vendor.unref(selected).news, (item, k0, i0) => {
+        i: common_vendor.o((...args) => _ctx.handleMoreactivity && _ctx.handleMoreactivity(...args)),
+        j: common_vendor.f(common_vendor.unref(selected).news, (item, k0, i0) => {
           return common_vendor.e({
             a: item.list_image_url,
             b: common_vendor.t(item.new_title)
@@ -79,7 +68,33 @@ const _sfc_main = {
             d: common_vendor.o(($event) => onclicknew(item.id), item.id)
           });
         }),
-        m: common_vendor.p({
+        k: common_vendor.p({
+          title: "热门活动"
+        }),
+        l: common_vendor.o(handleMoremsg),
+        m: common_vendor.f(common_vendor.unref(selected).policys, (item, k0, i0) => {
+          return common_vendor.e({
+            a: common_vendor.t(item.policy_title)
+          }, {}, {
+            b: item.id,
+            c: common_vendor.o(($event) => onclickpolicy(item.id), item.id)
+          });
+        }),
+        n: common_assets._imports_3,
+        o: common_vendor.p({
+          title: "精选政策"
+        }),
+        p: common_vendor.o(handleMorenew),
+        q: common_vendor.f(common_vendor.unref(selected).news, (item, k0, i0) => {
+          return common_vendor.e({
+            a: item.list_image_url,
+            b: common_vendor.t(item.new_title)
+          }, {}, {
+            c: item.id,
+            d: common_vendor.o(($event) => onclicknew(item.id), item.id)
+          });
+        }),
+        r: common_vendor.p({
           title: "精选新闻"
         })
       };

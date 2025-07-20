@@ -30,8 +30,8 @@ const props = defineProps({
 <style scoped>
 .card-container {
 
-	padding: 0rpx 30rpx; /* 左右保留30rpx，去掉上下padding */
- margin-bottom: 40rpx;/* 控制组件间距，视视觉需要可调为10rpx等 */
+	padding: 10rpx 30rpx ;/* 左右保留30rpx，去掉上下padding */
+ margin-bottom: 10rpx;/* 控制组件间距，视视觉需要可调为10rpx等 */
   background-color: #f5f5f5;
 
 

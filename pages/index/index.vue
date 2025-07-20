@@ -18,6 +18,13 @@
 		    </view>
 		    <text class="label">行业新闻</text>
 		  </view>
+		  
+		  <view class="recommend-item" @click="handleMorenew">
+		    <view class="icon-wrapper activity-icon">
+		      <image src="/static/icon/convention_index.png" class="icon-image" mode="aspectFit" />
+		    </view>
+		    <text class="label">大会报名</text>
+		  </view>
 		</view>
 		</template>
 	</showInforVue>
@@ -37,6 +44,23 @@
 	       </view>
 	     </view>
 	   </view>
+	   
+	   <!-- 热门活动 -->
+	   <showInforVue  title="热门活动" >
+	   	  <template v-slot:more>
+	   		  <view  class="more-text" @click="handleMoreactivity">更多信息 ></view>
+	   	  </template>
+	   	  <template v-slot:body>
+	   	 <view class="news-item" v-for="item in selected.news" :key="item.id" @click="onclicknew(item.id)">
+	   	     <image class="news-image" :src="item.list_image_url" mode="aspectFill"></image>
+	   	     <view class="news-content">
+	   	       <view class="news-title">{{item.new_title}}</view>
+	   	       <view class="news-summary">精选</view>
+	   	       <view v-if="true" class="hot-tag">最热</view>
+	   	     </view>
+	   	   </view>
+	   	   </template>
+	   </showInforVue>
 	<!-- 政策和新闻 -->
 	 <showInforVue  title="精选政策" >
 		 <template v-slot:more>
@@ -69,6 +93,7 @@
   	   </view>
 	   </template>
   </showInforVue>
+  
   </view>
  
 </template>

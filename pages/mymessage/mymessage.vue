@@ -12,7 +12,10 @@
       <view class="header-content">
         <image class="avatar"  :src="userInfo.info.Image ? userInfo.info.Image : '/static/icon/empty.png'" mode="aspectFill"></image>
         <view class="user-info">
-          <text class="username" @click="admin">{{ userInfo.info.username || '点击登录' }}</text>
+          <!-- <text class="username" @click="admin">{{ userInfo.info.username || '点击登录' }}</text> -->
+		  <button class="username-button" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">
+		    {{ userInfo.info.username || '点击登录' }}
+		  </button>
           <text class="slogan">{{ userInfo.info.slogan || '请登录后设置个人签名' }}</text>
         </view>
       </view>
@@ -117,6 +120,16 @@ onMounted(()=>{
 	
 	
 })
+const getPhoneNumber = async (e) => {
+	userInfo.loginWithWeChat()
+  if (e.detail.errMsg !== 'getPhoneNumber:ok') {
+	  console.log(e)
+    uni.showToast({ title: '用户拒绝授权', icon: 'none' })
+    return
+  }
+
+  // const { encryptedData, iv } = e.detail
+}
 const admin=async()=>{
 	if(userInfo.signal){
 		console.log("已登录")
@@ -376,4 +389,29 @@ function logout() {
     color: #888;
   }
 }
+// 登录按钮
+.username-button {
+display: flex;                  /* 使用 Flex 布局 */
+  justify-content: flex-start;   /* 子元素（文字）靠左 */
+  align-items: center;           /* 垂直居中 */
+  text-align: left;              /* 多行文字左对齐 */
+  
+  font-size: 40rpx;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+
+  background-color: transparent;
+  border: none;
+  padding: 0;
+
+  color: inherit;
+  line-height: 1;
+  width: 100%; /* 可选：让按钮撑满容器以更好控制布局 */
+}
+
+/* 去除按钮点击时微信小程序默认的边框样式 */
+.username-button::after {
+  border: none;
+}
+
 </style>    

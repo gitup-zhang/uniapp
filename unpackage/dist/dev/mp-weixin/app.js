@@ -8,6 +8,7 @@ if (!Math) {
   "./pages/mymessage/mymessage.js";
   "./pages/detail/detailnew.js";
   "./pages/detail/detailpolicy.js";
+  "./pages/mes/mes.js";
 }
 const _sfc_main = {
   onLaunch: function() {

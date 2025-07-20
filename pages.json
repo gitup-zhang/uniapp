@@ -47,6 +47,14 @@
 				"navigationBarTitleText" : "",
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path" : "pages/mes/mes",
+			"style" : 
+			{
+				"navigationBarTitleText" : "",
+				"navigationStyle": "custom"
+			}
 		}
 	],
 	"easycom": {
@@ -85,6 +93,11 @@
 			"iconPath": "/static/icon/news.png",
 			"selectedIconPath": "/static/icon/new-selecte.png",
 			"text": "新闻"
+		},{
+			"pagePath": "pages/mes/mes",
+			"iconPath": "/static/icon/mes.png",
+			"selectedIconPath": "/static/icon/mes-select.png",
+			"text": "消息"
 		},{
 			"pagePath": "pages/mymessage/mymessage",
 			"iconPath": "/static/icon/my.png",

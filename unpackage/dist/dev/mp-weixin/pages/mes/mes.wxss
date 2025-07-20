@@ -1,0 +1,92 @@
+
+.container.data-v-bb2249ad {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f5f6fa;
+}
+
+/* 自定义导航栏 */
+.custom-navbar.data-v-bb2249ad {
+  background-color: #903749;
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+}
+.status-bar.data-v-bb2249ad {
+  width: 100%;
+}
+.nav-content.data-v-bb2249ad {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+}
+.nav-title.data-v-bb2249ad {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* 消息列表 */
+.message-list.data-v-bb2249ad {
+  padding: 0 16px;
+  padding-bottom: 20px;
+  flex: 1;
+}
+.message-item.data-v-bb2249ad {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  border: 1px solid #eee;
+  transition: transform 0.2s ease;
+}
+.message-item.data-v-bb2249ad:hover {
+  transform: translateY(-2px);
+}
+.avatar.data-v-bb2249ad {
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  margin-right: 12px;
+}
+.msg-content.data-v-bb2249ad {
+  flex: 1;
+}
+.msg-title.data-v-bb2249ad {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+.msg-brief.data-v-bb2249ad {
+  color: #666;
+  font-size: 14px;
+}
+.msg-time.data-v-bb2249ad {
+  color: #999;
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+/* 空状态 */
+.empty.data-v-bb2249ad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 100px;
+}
+.empty-img.data-v-bb2249ad {
+  width: 120px;
+  height: 120px;
+  opacity: 0.5;
+}
+.empty-text.data-v-bb2249ad {
+  color: #aaa;
+  margin-top: 16px;
+}

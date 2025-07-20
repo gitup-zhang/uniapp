@@ -1,1 +1,1 @@
-<view class="navbar data-v-ff1d8d81" style="{{'padding-top:' + b + ';' + ('height:' + c)}}"><image class="navbar-bg data-v-ff1d8d81" src="{{a}}" mode="aspectFill"/><view class="navbar-title data-v-ff1d8d81">政府政策与行业新闻助手</view></view>
+<view class="data-v-ff1d8d81"><view class="navbar data-v-ff1d8d81" style="{{'padding-top:' + b + ';' + ('height:' + c)}}"><image class="navbar-bg data-v-ff1d8d81" src="{{a}}" mode="aspectFill"/><view class="navbar-title data-v-ff1d8d81">政府政策与行业新闻助手</view></view><view class="data-v-ff1d8d81" style="{{'height:' + d}}"></view></view>

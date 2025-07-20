@@ -58,6 +58,9 @@
 .news-icon {
   background: linear-gradient(135deg, #1fa2ff, #12d8fa);
 }
+.activity-icon{
+	background: linear-gradient(135deg, #90EE90, #228B22);
+}
 .icon-image {
   width: 64rpx;
   height: 64rpx;
@@ -122,7 +125,7 @@
 /* 公告布局 */
 .notice-card-container {
   padding: 0rpx 30rpx; /* 与其他卡片一致的外部边距 */
-  margin-bottom: 40rpx;
+  margin-bottom: 10rpx;
   background-color: #f5f5f5;
 }
 .notice-card {

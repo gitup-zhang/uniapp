@@ -1,10 +1,15 @@
 <template>
-  <view class="navbar" :style="{ paddingTop: statusBarHeight + 'px', height: navbarHeight + 'px' }">
-    <!-- 背景图片层 -->
-    <image class="navbar-bg" src="/static/Background 4.png" mode="aspectFill" />
+  <view>
+    <!-- 固定导航栏 -->
+    <view class="navbar" :style="{ paddingTop: statusBarHeight + 'px', height: navbarHeight + 'px' }">
+      <!-- 背景图片层 -->
+      <image class="navbar-bg" src="/static/Background 4.png" mode="aspectFill" />
+      <!-- 标题层 -->
+      <view class="navbar-title">政府政策与行业新闻助手</view>
+    </view>
 
-    <!-- 标题层 -->
-    <view class="navbar-title">政府政策与行业新闻助手</view>
+    <!-- 占位空白，避免内容被导航栏遮挡 -->
+    <view :style="{ height: navbarHeight + 'px' }"></view>
   </view>
 </template>
 
@@ -23,7 +28,9 @@ onMounted(() => {
 
 <style scoped>
 .navbar {
-  position: relative;
+  position: fixed; /* 固定顶部 */
+  top: 0;
+  left: 0;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -31,8 +38,8 @@ onMounted(() => {
   box-sizing: border-box;
   z-index: 1000;
   overflow: hidden;
-  margin-bottom: 30rpx;
 }
+
 .navbar-bg {
   position: absolute;
   top: 0;
@@ -41,6 +48,7 @@ onMounted(() => {
   height: 100%;
   z-index: -1;
 }
+
 .navbar-title {
   font-size: 20px;
   font-weight: bold;

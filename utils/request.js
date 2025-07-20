@@ -55,13 +55,13 @@
 let BASE_URL = '';
 
 // #ifdef H5
-// BASE_URL = import.meta.env.DEV ? '/api' : 'http://47.113.194.28:8080/api';
-BASE_URL = import.meta.env.DEV ? '/api' : 'http://localhost:8080/api';
+BASE_URL = import.meta.env.DEV ? '/api' : 'http://47.113.194.28:8080/api';
+// BASE_URL = import.meta.env.DEV ? '/api' : 'http://localhost:8080/api';
 // #endif
 
 // #ifndef H5
-// BASE_URL = 'http://47.113.194.28:8080/api';
-BASE_URL = 'http://localhost:8080/api';
+BASE_URL = 'http://47.113.194.28:8080/api';
+// BASE_URL = 'http://localhost:8080/api';
 // #endif
 
 // 辅助函数：将对象参数转为 URL 查询字符串

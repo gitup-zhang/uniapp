@@ -6,6 +6,8 @@ import { getinfologin,getinfoprofile } from '@/new-apis/info.js'
 export const useInfoStore=defineStore('peopleinfo',()=>{
 	// 个人信息
 	let info=ref({})
+	
+	const token =ref("")
 	// 标志位，判断是否登录
 	const signal=ref(false)
 	const getinfo=async()=>{
@@ -24,18 +26,18 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	const loginWithWeChat = async () => {
 	  try {
 	    // 1. 登录获取临时登录凭证 code
-	    const loginRes = await uni.login();
+	    const loginRes = await uni.login({provider: 'weixin'});
 	
 	    if (loginRes.errMsg === "login:ok") {
 	      const codes = loginRes.code;
 			console.log(codes)
 	      // 2. 发送 code 到你自己的后端
 	      const res = await getinfologin({code:codes})
-		  console.log(res)
+		  token.value=res.token
+		  console.log(token.value)
 			if(res.code===200){
 				console.log("1111111111111111111111111111")
 				console.log("登录成功")
-				// getUserProfile(123)
 			}
 			
 			
@@ -59,38 +61,28 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 		info.value={}
 	}
 	
-	const  getUserProfile =async(token)=>{
+	const getUserProfile = async () => {
 	  uni.getUserProfile({
 	    desc: '用于完善用户资料',
-	    success: (userRes) => {
-			console.log(userRes)
+	    
+	    success: async (userRes) => {
+	      console.log(userRes);
 	      const { encryptedData, iv } = userRes;
+		  console.log(encryptedData)
 	
-	      // 发送 encryptedData 和 iv 给后台，由后台用 session_key 解密
-	      // uni.request({
-	      //   url: 'http://你的服务器地址/api/user/decrypt',
-	      //   method: 'POST',
-	      //   data: {
-	      //     encryptedData,
-	      //     iv,
-	      //     // token // 后台用 token 找到 session_key
-	      //   },
-		  // const res= await getinfoprofile({encryptedDatas:encryptedData,ivs:iv})
-	      //   success: (decryptRes) => {
-	      //     if (decryptRes.data.code === 200) {
-	      //       console.log('用户信息：', decryptRes.data.data);
-	      //       // 这里拿到用户昵称、头像等信息，可以保存到页面或者数据库
-	      //     } else {
-	      //       console.error('解密失败:', decryptRes.data.message);
-	      //     }
-	      //   }
-	      // });
+	      try {
+	        
+	        const res = await getinfoprofile({ encryptedData: encryptedData, iv: iv ,token:token.value});
+	        console.log(res); // 处理你的请求结果
+	      } catch (error) {
+	        console.error('请求出错:', error);
+	      }
 	    },
 	    fail: (err) => {
 	      console.error('用户拒绝授权:', err);
-	    }
+	    },
 	  });
-	}
+	};
 
 	
 	

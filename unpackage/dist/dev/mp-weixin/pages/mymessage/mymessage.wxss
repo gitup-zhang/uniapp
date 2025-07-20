@@ -195,3 +195,28 @@
   font-size: 34rpx;
   color: #888;
 }
+.username-button {
+  display: flex;
+  /* 使用 Flex 布局 */
+  justify-content: flex-start;
+  /* 子元素（文字）靠左 */
+  align-items: center;
+  /* 垂直居中 */
+  text-align: left;
+  /* 多行文字左对齐 */
+  font-size: 40rpx;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  line-height: 1;
+  width: 100%;
+  /* 可选：让按钮撑满容器以更好控制布局 */
+}
+
+/* 去除按钮点击时微信小程序默认的边框样式 */
+.username-button::after {
+  border: none;
+}

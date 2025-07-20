@@ -3,7 +3,7 @@
     <!-- 顶部固定导航栏 -->
     <uni-nav-bar statusBar="true" backgroundColor="#903749" fixed="true">
       <template v-slot:left>
-        <view class="navbar-title">新闻</view>
+        <view class="navbar-title">政策</view>
       </template>
     </uni-nav-bar>
 
