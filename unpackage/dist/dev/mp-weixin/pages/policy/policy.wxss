@@ -19,7 +19,7 @@
 /* 滚动区域 */
 .news-scroll {
   position: fixed;
-  top: calc(178rpx + 200rpx); /* navBar + search + filter 大约高度 */
+  top: calc(178rpx + 260rpx); /* navBar + search + filter 大约高度 */
   bottom: var(--window-bottom); /* tabbar 兼容 */
   left: 0;
   right: 0;
@@ -122,3 +122,4 @@ padding: 10rpx ;
   color: #999;
   padding: 20rpx;
 }
+

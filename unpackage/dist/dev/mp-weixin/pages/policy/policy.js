@@ -13,13 +13,15 @@ const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni
 const _easycom_uni_search_bar = () => "../../uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar.js";
 const _easycom_uni_card = () => "../../uni_modules/uni-card/components/uni-card/uni-card.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_search_bar + _easycom_uni_card)();
+  (_easycom_uni_nav_bar + _easycom_uni_search_bar + Tabswitch + _easycom_uni_card)();
 }
+const Tabswitch = () => "../../components/Tabswitch/Tabswitch.js";
 const _sfc_main = {
   __name: "policy",
   setup(__props) {
     const listpolicy = store_PolicyList.usePolicyStore();
     const field = store_field.usefieldstore();
+    const activeTab = common_vendor.ref("policy");
     const searchbar = common_vendor.ref("");
     const currentDropdown = common_vendor.ref(null);
     const isselected = common_vendor.ref(0);
@@ -28,7 +30,7 @@ const _sfc_main = {
     const timeList = ["全部", "最近一周", "最近一月", "最近一年"];
     function search() {
       listpolicy.searchpolicy({ policyTitle: searchbar.value, fieldID: selectedDomain.value.field_id });
-      common_vendor.index.__f__("log", "at pages/policy/policy.vue:116", "搜索关键词:", searchbar.value);
+      common_vendor.index.__f__("log", "at pages/policy/policy.vue:133", "搜索关键词:", searchbar.value);
     }
     function cancel() {
       searchbar.value = "";
@@ -41,7 +43,7 @@ const _sfc_main = {
         page: listpolicy.page + 1,
         is_selection: isselected.value
       });
-      common_vendor.index.__f__("log", "at pages/policy/policy.vue:133", "到底了");
+      common_vendor.index.__f__("log", "at pages/policy/policy.vue:150", "到底了");
     }
     function toggleDropdown(type) {
       currentDropdown.value = currentDropdown.value === type ? null : type;
@@ -69,11 +71,11 @@ const _sfc_main = {
     common_vendor.onShow(() => {
       const source = common_vendor.index.getStorageSync("tabSource") || "tabbar";
       if (source === "switchTab") {
-        common_vendor.index.__f__("log", "at pages/policy/policy.vue:171", "来源：通过 uni.switchTab() 跳转");
+        common_vendor.index.__f__("log", "at pages/policy/policy.vue:188", "来源：通过 uni.switchTab() 跳转");
         isselected.value = 1;
         listpolicy.getlistpolicy({ is_selection: isselected.value });
       } else {
-        common_vendor.index.__f__("log", "at pages/policy/policy.vue:176", "来源：用户点击 tabBar 进入");
+        common_vendor.index.__f__("log", "at pages/policy/policy.vue:193", "来源：用户点击 tabBar 进入");
         isselected.value = 0;
         listpolicy.getlistpolicy({});
         field.getfield();
@@ -91,20 +93,26 @@ const _sfc_main = {
         c: common_vendor.o(cancel),
         d: common_vendor.o(($event) => searchbar.value = $event),
         e: common_vendor.p({
-          placeholder: "搜索行业新闻",
+          placeholder: "搜索政策或新闻",
           modelValue: searchbar.value
         }),
-        f: common_vendor.t(selectedDomain.value.field_name || "全部领域"),
-        g: currentDropdown.value === "domain" ? 1 : "",
-        h: common_vendor.o(($event) => toggleDropdown("domain")),
-        i: common_vendor.t(selectedTime.value),
-        j: currentDropdown.value === "time" ? 1 : "",
-        k: common_vendor.o(($event) => toggleDropdown("time")),
-        l: currentDropdown.value === "domain"
+        f: common_vendor.o(($event) => activeTab.value = $event),
+        g: common_vendor.p({
+          modelValue: activeTab.value
+        }),
+        h: activeTab.value === "policy"
+      }, activeTab.value === "policy" ? {} : {}, {
+        i: common_vendor.t(selectedDomain.value.field_name || "全部领域"),
+        j: currentDropdown.value === "domain" ? 1 : "",
+        k: common_vendor.o(($event) => toggleDropdown("domain")),
+        l: common_vendor.t(selectedTime.value),
+        m: currentDropdown.value === "time" ? 1 : "",
+        n: common_vendor.o(($event) => toggleDropdown("time")),
+        o: currentDropdown.value === "domain"
       }, currentDropdown.value === "domain" ? {
-        m: common_vendor.o(($event) => selectOption("domain", null)),
-        n: selectedDomain.value.field_id === 0 ? 1 : "",
-        o: common_vendor.f(common_vendor.unref(field).fieldlist, (item, k0, i0) => {
+        p: common_vendor.o(($event) => selectOption("domain", null)),
+        q: selectedDomain.value.field_id === 0 ? 1 : "",
+        r: common_vendor.f(common_vendor.unref(field).fieldlist, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.field_name),
             b: item.field_id,
@@ -113,9 +121,9 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        p: currentDropdown.value === "time"
+        s: currentDropdown.value === "time"
       }, currentDropdown.value === "time" ? {
-        q: common_vendor.f(timeList, (item, k0, i0) => {
+        t: common_vendor.f(timeList, (item, k0, i0) => {
           return {
             a: common_vendor.t(item),
             b: item,
@@ -124,22 +132,22 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        r: common_vendor.f(common_vendor.unref(listpolicy).listpolicy, (item, k0, i0) => {
+        v: common_vendor.f(common_vendor.unref(listpolicy).listpolicy, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.brief_content),
             b: item.id,
             c: common_vendor.o(($event) => OnClick(item.id), item.id),
-            d: "52720678-2-" + i0,
+            d: "52720678-3-" + i0,
             e: common_vendor.p({
               title: item.policy_title,
               extra: common_vendor.unref(utils_data.Dataformat)(item.release_time)
             })
           };
         }),
-        s: common_vendor.unref(listpolicy).loading
+        w: common_vendor.unref(listpolicy).loading
       }, common_vendor.unref(listpolicy).loading ? {} : !common_vendor.unref(listpolicy).hasMore ? {} : {}, {
-        t: !common_vendor.unref(listpolicy).hasMore,
-        v: common_vendor.o(loadMore)
+        x: !common_vendor.unref(listpolicy).hasMore,
+        y: common_vendor.o(loadMore)
       });
     };
   }

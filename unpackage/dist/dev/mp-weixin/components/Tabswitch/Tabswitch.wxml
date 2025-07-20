@@ -1,0 +1,1 @@
+<view class="tab-bar data-v-2539f56a"><view id="tab-policy" class="{{['tab-item', 'data-v-2539f56a', a && 'active']}}" bindtap="{{b}}"> 政府政策 </view><view id="tab-news" class="{{['tab-item', 'data-v-2539f56a', c && 'active']}}" bindtap="{{d}}"> 行业新闻 </view><view class="tab-indicator data-v-2539f56a" style="{{e}}"></view></view>

@@ -11,10 +11,23 @@
     <view class="fixed-top">
       <uni-search-bar 
         @confirm="search" 
-        placeholder="搜索行业新闻" 
+        placeholder="搜索政策或新闻" 
         v-model="searchbar" 
         @cancel="cancel">
       </uni-search-bar>
+	  
+	  <!-- tab切换 -->
+	    <view>
+	      <Tabswitch v-model="activeTab" />
+	  
+	      <view v-if="activeTab === 'policy'">
+	        <!-- 政府政策内容 -->
+	      </view>
+	      <view v-else>
+	        <!-- 行业新闻内容 -->
+	      </view>
+	    </view>
+	  
 
       <view class="filter-wrapper">
         <view class="filter-bar">
@@ -89,8 +102,12 @@ import { usePolicyStore } from '@/store/PolicyList.js'
 import { usefieldstore } from '@/store/field.js'
 import { Dataformat } from '../../utils/data'
 import { onShow } from '@dcloudio/uni-app'
+import Tabswitch from '@/components/Tabswitch/Tabswitch.vue'
+
 const listpolicy = usePolicyStore()
 const field = usefieldstore()
+
+const activeTab = ref('policy')
 
 // 搜索栏
 const searchbar = ref("")
@@ -228,4 +245,5 @@ onShow(() => {
   color: #999;
   padding: 20rpx;
 }
+
 </style>
