@@ -6,7 +6,8 @@
     "pages/mymessage/mymessage",
     "pages/detail/detailnew",
     "pages/detail/detailpolicy",
-    "pages/mes/mes"
+    "pages/mes/mes",
+    "pages/detail/articledetail"
   ],
   "window": {
     "navigationBarTextStyle": "white",

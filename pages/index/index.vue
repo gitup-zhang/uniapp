@@ -51,10 +51,10 @@
 	   		  <view  class="more-text" @click="handleMoreactivity">更多信息 ></view>
 	   	  </template>
 	   	  <template v-slot:body>
-	   	 <view class="news-item" v-for="item in selected.news" :key="item.id" @click="onclicknew(item.id)">
+	   	 <view class="news-item" v-for="item in selected.news" :key="item.article_id" @click="onclicknew(item.article_id)">
 	   	     <image class="news-image" :src="item.list_image_url" mode="aspectFill"></image>
 	   	     <view class="news-content">
-	   	       <view class="news-title">{{item.new_title}}</view>
+	   	       <view class="news-title">{{item.article_title}}</view>
 	   	       <view class="news-summary">精选</view>
 	   	       <view v-if="true" class="hot-tag">最热</view>
 	   	     </view>
@@ -68,10 +68,10 @@
 		 </template>
 		 
 		<template v-slot:body>
-	 <view class="news-item" v-for="item in selected.policys" :key="item.id" @click="onclickpolicy(item.id)">
+	 <view class="news-item" v-for="item in selected.policys" :key="item.article_id" @click="onclickpolicy(item.article_id)">
 	     <image class="news-image" src="/static/3044eb7c01d942fc96e5d5bd8282ee19.jpg" mode="aspectFill"></image>
 	     <view class="news-content">
-	       <view class="news-title">{{item.policy_title}}</view>
+	       <view class="news-title">{{item.article_title}}</view>
 	       <view class="news-summary">精选</view>
 	       <view v-if="true" class="hot-tag">最热</view>
 	     </view>
@@ -83,10 +83,10 @@
 		  <view  class="more-text" @click="handleMorenew">更多信息 ></view>
 	  </template>
 	  <template v-slot:body>
-  	 <view class="news-item" v-for="item in selected.news" :key="item.id" @click="onclicknew(item.id)">
+  	 <view class="news-item" v-for="item in selected.news" :key="article_id" @click="onclicknew(article_id)">
   	     <image class="news-image" :src="item.list_image_url" mode="aspectFill"></image>
   	     <view class="news-content">
-  	       <view class="news-title">{{item.new_title}}</view>
+  	       <view class="news-title">{{item.article_title}}</view>
   	       <view class="news-summary">精选</view>
   	       <view v-if="true" class="hot-tag">最热</view>
   	     </view>

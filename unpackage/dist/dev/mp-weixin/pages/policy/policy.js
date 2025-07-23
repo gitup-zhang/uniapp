@@ -1,6 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
-const store_PolicyList = require("../../store/PolicyList.js");
+const store_Articles = require("../../store/Articles.js");
 const store_field = require("../../store/field.js");
 const utils_data = require("../../utils/data.js");
 if (!Array) {
@@ -19,7 +19,7 @@ const Tabswitch = () => "../../components/Tabswitch/Tabswitch.js";
 const _sfc_main = {
   __name: "policy",
   setup(__props) {
-    const listpolicy = store_PolicyList.usePolicyStore();
+    const listarticles = store_Articles.useArticlesStore();
     const field = store_field.usefieldstore();
     const activeTab = common_vendor.ref("policy");
     const searchbar = common_vendor.ref("");
@@ -28,22 +28,40 @@ const _sfc_main = {
     const selectedDomain = common_vendor.ref({ field_id: 0, field_name: "全部" });
     const selectedTime = common_vendor.ref("发布时间");
     const timeList = ["全部", "最近一周", "最近一月", "最近一年"];
+    const Params = {
+      field_id: 0,
+      page: 0,
+      is_selection: 0,
+      article_title: "",
+      release_time: "",
+      article_type: activeTab.value.toUpperCase()
+    };
+    common_vendor.watch(activeTab, (newVal, oldVal) => {
+      common_vendor.index.__f__("log", "at pages/policy/policy.vue:164", "Tab 变化:", oldVal, "=>", newVal);
+      if (newVal === "news") {
+        listarticles.resetpage(1);
+        Params.article_type = "NEWS";
+      } else if (newVal === "policy") {
+        listarticles.resetpage(1);
+        Params.article_type = "POLICY";
+      }
+    });
     function search() {
-      listpolicy.searchpolicy({ policyTitle: searchbar.value, fieldID: selectedDomain.value.field_id });
-      common_vendor.index.__f__("log", "at pages/policy/policy.vue:133", "搜索关键词:", searchbar.value);
+      Params.article_title = searchbar.value;
+      Params.page = 1;
+      listarticles.getlistpolicy(Params);
+      common_vendor.index.__f__("log", "at pages/policy/policy.vue:179", "搜索关键词:", searchbar.value);
     }
     function cancel() {
       searchbar.value = "";
-      listpolicy.getlistpolicy({});
+      Params.page = 1;
+      Params.article_title = searchbar.value;
+      listarticles.getlistpolicy(Params);
     }
     function loadMore() {
-      listpolicy.getmorelist({
-        policyTitle: searchbar.value,
-        fieldID: selectedDomain.value.field_id,
-        page: listpolicy.page + 1,
-        is_selection: isselected.value
-      });
-      common_vendor.index.__f__("log", "at pages/policy/policy.vue:150", "到底了");
+      Params.page = listarticles.page + 1;
+      listarticles.getarticlemore(Params);
+      common_vendor.index.__f__("log", "at pages/policy/policy.vue:194", "到底了");
     }
     function toggleDropdown(type) {
       currentDropdown.value = currentDropdown.value === type ? null : type;
@@ -52,10 +70,14 @@ const _sfc_main = {
       if (type === "domain") {
         if (value === null) {
           selectedDomain.value = { field_id: 0, field_name: "全部" };
-          listpolicy.getlistpolicy({});
+          Params.page = 1;
+          Params.field_id = selectedDomain.value.field_id;
+          listarticles.getlistpolicy(Params);
         } else {
           selectedDomain.value = value;
-          listpolicy.searchpolicy({ fieldID: value.field_id });
+          Params.page = 1;
+          Params.field_id = selectedDomain.value.field_id;
+          listarticles.getlistpolicy(Params);
         }
       }
       if (type === "time") {
@@ -64,21 +86,30 @@ const _sfc_main = {
       currentDropdown.value = null;
     }
     function OnClick(id) {
+      common_vendor.index.__f__("log", "at pages/policy/policy.vue:227", "测试的Id:" + id);
       common_vendor.index.navigateTo({
-        url: `/pages/detail/detailpolicy?id=${id}`
+        url: `/pages/detail/articledetail?id=${id}`
       });
     }
     common_vendor.onShow(() => {
       const source = common_vendor.index.getStorageSync("tabSource") || "tabbar";
+      field.getfield();
       if (source === "switchTab") {
-        common_vendor.index.__f__("log", "at pages/policy/policy.vue:188", "来源：通过 uni.switchTab() 跳转");
-        isselected.value = 1;
-        listpolicy.getlistpolicy({ is_selection: isselected.value });
+        common_vendor.index.__f__("log", "at pages/policy/policy.vue:237", "来源：通过 uni.switchTab() 跳转");
+        Params.is_selection = 1;
+        Params.page = 1;
+        listarticles.getlistpolicy(Params);
+        Params.article_type = "NEWS";
+        listarticles.getlistpolicy(Params);
+        Params.article_type = activeTab.value.toUpperCase();
       } else {
-        common_vendor.index.__f__("log", "at pages/policy/policy.vue:193", "来源：用户点击 tabBar 进入");
+        common_vendor.index.__f__("log", "at pages/policy/policy.vue:245", "来源：用户点击 tabBar 进入");
         isselected.value = 0;
-        listpolicy.getlistpolicy({});
-        field.getfield();
+        Params.page = 1;
+        listarticles.getlistpolicy(Params);
+        Params.article_type = "NEWS";
+        listarticles.getlistpolicy(Params);
+        Params.article_type = activeTab.value.toUpperCase();
       }
       common_vendor.index.removeStorageSync("tabSource");
     });
@@ -132,23 +163,43 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        v: common_vendor.f(common_vendor.unref(listpolicy).listpolicy, (item, k0, i0) => {
+        v: activeTab.value === "policy"
+      }, activeTab.value === "policy" ? common_vendor.e({
+        w: common_vendor.f(common_vendor.unref(listarticles).listpolicy, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.brief_content),
-            b: item.id,
-            c: common_vendor.o(($event) => OnClick(item.id), item.id),
+            b: item.article_id,
+            c: common_vendor.o(($event) => OnClick(item.article_id), item.article_id),
             d: "52720678-3-" + i0,
             e: common_vendor.p({
-              title: item.policy_title,
+              title: item.article_title,
               extra: common_vendor.unref(utils_data.Dataformat)(item.release_time)
             })
           };
         }),
-        w: common_vendor.unref(listpolicy).loading
-      }, common_vendor.unref(listpolicy).loading ? {} : !common_vendor.unref(listpolicy).hasMore ? {} : {}, {
-        x: !common_vendor.unref(listpolicy).hasMore,
-        y: common_vendor.o(loadMore)
-      });
+        x: common_vendor.unref(listarticles).loading
+      }, common_vendor.unref(listarticles).loading ? {} : !common_vendor.unref(listarticles).hasMore ? {} : {}, {
+        y: !common_vendor.unref(listarticles).hasMore,
+        z: common_vendor.o(loadMore)
+      }) : common_vendor.e({
+        A: common_vendor.f(common_vendor.unref(listarticles).listnew, (item, k0, i0) => {
+          return {
+            a: common_vendor.t(item.brief_content),
+            b: item.article_id,
+            c: common_vendor.o(($event) => OnClick(item.article_id), item.article_id),
+            d: "52720678-4-" + i0,
+            e: common_vendor.p({
+              title: item.article_title,
+              extra: common_vendor.unref(utils_data.Dataformat)(item.release_time),
+              thumbnail: item.list_image_url
+            })
+          };
+        }),
+        B: common_vendor.unref(listarticles).loading
+      }, common_vendor.unref(listarticles).loading ? {} : !common_vendor.unref(listarticles).hasMore ? {} : {}, {
+        C: !common_vendor.unref(listarticles).hasMore,
+        D: common_vendor.o(loadMore)
+      }));
     };
   }
 };

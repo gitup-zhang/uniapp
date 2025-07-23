@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getPolicyField } from '../new-apis/policy.js'
+import { getArticleField } from '../new-apis/articles.js'
 
 
 export const usefieldstore=defineStore('field',()=>{
@@ -15,7 +15,7 @@ export const usefieldstore=defineStore('field',()=>{
 		    mask: true
 		  })
 		  try{
-			  const res=await getPolicyField()
+			  const res=await getArticleField()
 			  // fieldlist.value=['全部', ...res.data.map(item => item.field_name).sort()];
 			  fieldlist.value=res.data
 			  console.log(fieldlist.value)

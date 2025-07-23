@@ -9,6 +9,7 @@ if (!Math) {
   "./pages/detail/detailnew.js";
   "./pages/detail/detailpolicy.js";
   "./pages/mes/mes.js";
+  "./pages/detail/articledetail.js";
 }
 const _sfc_main = {
   onLaunch: function() {

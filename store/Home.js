@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getNewList} from '@/new-apis/new.js'
-import { getPolicyList } from '@/new-apis/policy.js'
+import {getArticleList} from '@/new-apis/articles.js'
 
 export const useSelectedstore=defineStore('selected',()=>{
 	// 精选政策
@@ -16,10 +15,10 @@ export const useSelectedstore=defineStore('selected',()=>{
 			    mask: true
 			  })
 			  try{
-				  const res_new=await getNewList({is_selection:1,page_size:1})
+				  const res_new=await getArticleList({is_selection:1,page_size:1,article_type:"NEWS"})
 				  
 				  news.value=res_new.data
-				  const res_policy=await getPolicyList({is_selection:1,page_size:1})
+				  const res_policy=await getArticleList({is_selection:1,page_size:1,article_type:"POLICY"})
 				  policys.value=res_policy.data
 				  
 			  }catch(error){

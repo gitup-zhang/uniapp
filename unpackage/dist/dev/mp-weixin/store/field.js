@@ -1,6 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-const newApis_policy = require("../new-apis/policy.js");
+const newApis_articles = require("../new-apis/articles.js");
 const usefieldstore = common_vendor.defineStore("field", () => {
   const fieldlist = common_vendor.ref([]);
   const getfield = async () => {
@@ -9,7 +9,7 @@ const usefieldstore = common_vendor.defineStore("field", () => {
       mask: true
     });
     try {
-      const res = await newApis_policy.getPolicyField();
+      const res = await newApis_articles.getArticleField();
       fieldlist.value = res.data;
       common_vendor.index.__f__("log", "at store/field.js:21", fieldlist.value);
     } catch (error) {

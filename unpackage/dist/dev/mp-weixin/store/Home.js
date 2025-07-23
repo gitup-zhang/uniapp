@@ -1,7 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-const newApis_new = require("../new-apis/new.js");
-const newApis_policy = require("../new-apis/policy.js");
+const newApis_articles = require("../new-apis/articles.js");
 const useSelectedstore = common_vendor.defineStore("selected", () => {
   const policys = common_vendor.ref([]);
   const news = common_vendor.ref([]);
@@ -11,12 +10,12 @@ const useSelectedstore = common_vendor.defineStore("selected", () => {
       mask: true
     });
     try {
-      const res_new = await newApis_new.getNewList({ is_selection: 1, page_size: 1 });
+      const res_new = await newApis_articles.getArticleList({ is_selection: 1, page_size: 1, article_type: "NEWS" });
       news.value = res_new.data;
-      const res_policy = await newApis_policy.getPolicyList({ is_selection: 1, page_size: 1 });
+      const res_policy = await newApis_articles.getArticleList({ is_selection: 1, page_size: 1, article_type: "POLICY" });
       policys.value = res_policy.data;
     } catch (error) {
-      common_vendor.index.__f__("log", "at store/Home.js:26", error);
+      common_vendor.index.__f__("log", "at store/Home.js:25", error);
     } finally {
       common_vendor.index.hideLoading();
     }
