@@ -33,24 +33,25 @@ const _sfc_main = {
     }
     return (_ctx, _cache) => {
       return {
-        a: common_vendor.o(onBack),
-        b: common_vendor.p({
+        a: common_vendor.t(common_vendor.unref(articledetail).detail.article_type),
+        b: common_vendor.o(onBack),
+        c: common_vendor.p({
           statusBar: "true",
           backgroundColor: "#903749",
           fixed: "true",
           border: false,
           leftIcon: "left"
         }),
-        c: common_vendor.p({
+        d: common_vendor.p({
           type: "h1",
           title: common_vendor.unref(articledetail).detail.article_title
         }),
-        d: common_vendor.p({
+        e: common_vendor.p({
           title: "文章详情",
           type: "line",
           titleFontSize: "16px"
         }),
-        e: common_vendor.p({
+        f: common_vendor.p({
           content: content.value,
           ["container-style"]: style
         })

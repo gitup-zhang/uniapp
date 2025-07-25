@@ -1,224 +1,80 @@
 <template> 
   <view class="page">
     <!-- 顶部固定导航栏 -->
-    <uni-nav-bar statusBar="true" backgroundColor="#903749" fixed="true">
+    <uni-nav-bar statusBar="true" backgroundColor="#903749" fixed="true" leftWidth="150px">
       <template v-slot:left>
-        <view class="navbar-title">新闻</view>
+        <view class="navbar-title">活动报名</view>
       </template>
     </uni-nav-bar>
-
-    <!-- 搜索栏 + 筛选栏 -->
-    <view class="fixed-top">
-      <uni-search-bar 
-        @confirm="search" 
-        placeholder="搜索行业新闻" 
-        v-model="searchbar" 
-        @cancel="cancel">
-      </uni-search-bar>
-
-      <view class="filter-wrapper">
-        <view class="filter-bar">
-          <!-- 领域筛选 -->
-          <view class="filter-item" @click="toggleDropdown('domain')">
-            {{ selectedDomain.field_name || '全部领域' }}
-            <view class="arrow" :class="{ open: currentDropdown === 'domain' }"></view>
-          </view>
-
-          <!-- 时间筛选 -->
-          <view class="filter-item" @click="toggleDropdown('time')">
-            {{ selectedTime }}
-            <view class="arrow" :class="{ open: currentDropdown === 'time' }"></view>
-          </view>
-        </view>
-
-        <!-- 领域下拉 -->
-        <view v-if="currentDropdown === 'domain'" class="dropdown-list">
-          <view 
-            class="dropdown-item" 
-            @click="selectOption('domain', null)" 
-            :class="{ selected: selectedDomain.field_id === 0 }">
-            全部
-          </view>
-          <view 
-            class="dropdown-item" 
-            v-for="item in field.fieldlist" 
-            :key="item.field_id"
-            @click="selectOption('domain', item)" 
-            :class="{ selected: selectedDomain.field_id === item.field_id }">
-            {{ item.field_name }}
-          </view>
-        </view>
-
-        <!-- 时间下拉 -->
-        <view v-if="currentDropdown === 'time'" class="dropdown-list">
-          <view 
-            class="dropdown-item" 
-            v-for="item in timeList" 
-            :key="item"
-            @click="selectOption('time', item)" 
-            :class="{ selected: selectedTime === item }">
-            {{ item }}
-          </view>
-        </view>
-      </view>
+	
+    <view class="section-header">
+      <uni-section title="热门活动报名中" titleFontSize="20px" type="line" />
+       <text class="more-link" @click="goMorehotactivity">更多活动</text>
     </view>
+	
+	<!-- 热门活动 -->
+			<uni-grid :column="2" :highlight="false" :show-border="false" @change="change" :square="false">
+				<uni-grid-item v-for="(item, index) in 2" :index="index" :key="index">
+<!-- 					<view class="grid-item-box" style="background-color: #fff;" > -->
+						  <ActivityCard
+						    imgSrc="https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg"
+						    title="深圳市插画协会、英国插画师协会联合展览"
+						    date="3月17日 - 3月30日"
+						    location="深圳"
+							:isJoined="true"
+						  />
+<!-- 					</view> -->
+				</uni-grid-item>
+			</uni-grid>
+	<!-- 历史活动 -->
+	<view class="section-header">
+	  <uni-section title="历史活动回顾" titleFontSize="20px" type="line" />
+	   <text class="more-link" @click="goMorehistoryactivity">查看更多</text>
+	</view >
+	  <HorizontalActivityCard  v-for="(item,index) in 3" 
+	    imgSrc="https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg"
+	    title="中国大模型人才大会"
+	    date="3月15日 - 4月10日"
+	    location="深圳华侨城创意文化园北区 C2 展厅"
+	    status="已结束"
+	  />
 
-    <!-- 新闻列表 -->
-    <scroll-view class="news-scroll" scroll-y="true" @scrolltolower="loadMore">
-      <view>
-        <uni-card
-          v-for="item in listnew.listnew"
-          :key="item.id"
-          :title="item.new_title"
-          :extra="Dataformat(item.release_time)"
-          :thumbnail="item.list_image_url"
-          @click="onClick(item.id)">
-          <text class="uni-body">{{ item.brief_content }}</text>
-        </uni-card>
-        <view v-if="listnew.loading" class="loading">加载中...</view>
-        <view v-else-if="!listnew.hasMore" class="no-more">没有更多内容</view>
-      </view>
-    </scroll-view>
   </view>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useNewStore } from '../../store/NewList'
-import { usefieldstore } from '../../store/field.js'
-import { Dataformat } from '../../utils/data'
-import { onShow } from '@dcloudio/uni-app'
-const listnew = useNewStore()
-const field = usefieldstore()
-
-const searchbar = ref("")
-const currentDropdown = ref(null)
-// 是否精选
-const isselected=ref(0)
-
-// 初始化“全部”
-const selectedDomain = ref({ field_id: 0, field_name: '全部' })
-const selectedTime = ref('发布时间')
-
-const timeList = ['全部', '最近一周', '最近一月', '最近一年']
-
-// 加载更多
-const loadMore = () => {
-  listnew.getmorelist({
-    policyTitle: searchbar.value,
-    fieldID: selectedDomain.value.field_id,
-    page: listnew.page + 1,
-	is_selection: isselected.value
-  })
-  console.log("到底了")
+import ActivityCard from '@/components/ActivityCard/ActivityCard.vue'
+import HorizontalActivityCard from '@/components/HorizontalActivityCard/HorizontalActivityCard.vue'
+// 热门活动点击
+function change(e){
+	const clickedIndex = e.detail.index
+	console.log('点击了第', clickedIndex+1, '个宫格')
+	uni.navigateTo({
+	  url: `/pages/detail/activitydetail`
+	})
 }
-
-// 搜索
-function search() {
-  listnew.searchnewlist({
-    newTitle: searchbar.value,
-    fieldID: selectedDomain.value.field_id
-  })
-  console.log("搜索关键词:", searchbar.value)
-}
-
-// 取消搜索
-function cancel() {
-  searchbar.value = ""
-  listnew.getlistnew({})
-}
-
-// 切换下拉框
-function toggleDropdown(type) {
-  currentDropdown.value = currentDropdown.value === type ? null : type
-}
-
-// 选择筛选项
-function selectOption(type, value) {
-  if (type === 'domain') {
-    if (value === null) {
-      selectedDomain.value = { field_id: 0, field_name: '全部' }
-      listnew.getlistnew({})
-    } else {
-      selectedDomain.value = value
-      listnew.searchnewlist({ fieldID: value.field_id })
-    }
-  }
-
-  if (type === 'time') {
-    selectedTime.value = value
-  }
-
-  currentDropdown.value = null
-}
-
-// 跳转新闻详情
-function onClick(id) {
-  uni.navigateTo({
-    url: `/pages/detail/detailnew?id=${id}`
-  })
-}
-// 在页面显示时判断来源
-onShow(() => {
-  const source = uni.getStorageSync('tabSource') || 'tabbar'
-
-  if (source === 'switchTab') {
-    console.log('来源：通过 uni.switchTab() 跳转');
-	isselected.value=1
-	listnew.getlistnew({is_selection:isselected.value})
-    // 可以执行特定逻辑，比如刷新数据
-  } else {
-    console.log('来源：用户点击 tabBar 进入');
-	isselected.value=0
-	 listnew.getlistnew({})
-	field.getfield()
-  }
-
-  // 清除标记，避免干扰下一次跳转
-  uni.removeStorageSync('tabSource')
-})
-// onMounted(() => {
- 
-// })
 </script>
 <style>
-@import url("../../style/new_policy.css");
-
-.dropdown-list {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4rpx;
-  margin-top: 10rpx;
+.page {
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
 }
-
-.dropdown-item {
-  padding: 20rpx;
-  font-size: 28rpx;
-  color: #333;
-}
-
-.dropdown-item.selected {
-  background-color: #f0f0f0;
+.navbar-title {
+  font-size: 20px;
   font-weight: bold;
+  color: white;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10rpx 20rpx;
 }
 
-.filter-item {
-  /* padding: 20rpx;
-  font-size: 30rpx; */
-   padding: 12rpx 20rpx;
-   font-size: 30rpx;
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
-}
-
-.arrow.open {
-  transform: rotate(180deg);
-}
-.loading,
-.no-more {
-  text-align: center;
-  color: #999;
-  padding: 20rpx;
+.more-link {
+  color: #ccc;
+  font-size: 30rpx;
+  margin-left: 20rpx;
 }
 </style>

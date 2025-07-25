@@ -4,10 +4,10 @@
     "pages/policy/policy",
     "pages/news/news",
     "pages/mymessage/mymessage",
-    "pages/detail/detailnew",
-    "pages/detail/detailpolicy",
     "pages/mes/mes",
-    "pages/detail/articledetail"
+    "pages/detail/articledetail",
+    "pages/detail/activitydetail",
+    "pages/detail/applydetail"
   ],
   "window": {
     "navigationBarTextStyle": "white",
@@ -31,13 +31,13 @@
         "pagePath": "pages/policy/policy",
         "iconPath": "/static/icon/policy.png",
         "selectedIconPath": "/static/icon/policy-selecte.png",
-        "text": "政策"
+        "text": "咨询"
       },
       {
         "pagePath": "pages/news/news",
         "iconPath": "/static/icon/news.png",
         "selectedIconPath": "/static/icon/new-selecte.png",
-        "text": "新闻"
+        "text": "活动"
       },
       {
         "pagePath": "pages/mes/mes",

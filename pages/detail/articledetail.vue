@@ -10,7 +10,7 @@
     <!-- 居中标题插槽 -->
     <template v-slot:default>
       <view class="navbar-center">
-        <text class="navbar-title">文章</text>
+        <text class="navbar-title">{{articledetail.detail.article_type }}</text>
       </view>
     </template>
   </uni-nav-bar>

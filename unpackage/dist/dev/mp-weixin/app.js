@@ -6,10 +6,10 @@ if (!Math) {
   "./pages/policy/policy.js";
   "./pages/news/news.js";
   "./pages/mymessage/mymessage.js";
-  "./pages/detail/detailnew.js";
-  "./pages/detail/detailpolicy.js";
   "./pages/mes/mes.js";
   "./pages/detail/articledetail.js";
+  "./pages/detail/activitydetail.js";
+  "./pages/detail/applydetail.js";
 }
 const _sfc_main = {
   onLaunch: function() {

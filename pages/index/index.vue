@@ -5,21 +5,21 @@
 	<showInforVue  title="为您推荐" >
 		<template v-slot:body>
 		<view class="recommend-list">
-		  <view class="recommend-item" @click="handleMoremsg">
+		  <view class="recommend-item" @click="handleMorearticle">
 		    <view class="icon-wrapper policy-icon">
 		      <image src="/static/icon/policy_index.png" class="icon-image" mode="aspectFit" />
 		    </view>
 		    <text class="label">政府政策</text>
 		  </view>
 		
-		  <view class="recommend-item" @click="handleMorenew">
+		  <view class="recommend-item" @click="handleMorearticle">
 		    <view class="icon-wrapper news-icon">
 		      <image src="/static/icon/new_index.png" class="icon-image" mode="aspectFit" />
 		    </view>
 		    <text class="label">行业新闻</text>
 		  </view>
 		  
-		  <view class="recommend-item" @click="handleMorenew">
+		  <view class="recommend-item" @click="handleMoreactivity">
 		    <view class="icon-wrapper activity-icon">
 		      <image src="/static/icon/convention_index.png" class="icon-image" mode="aspectFit" />
 		    </view>
@@ -51,8 +51,8 @@
 	   		  <view  class="more-text" @click="handleMoreactivity">更多信息 ></view>
 	   	  </template>
 	   	  <template v-slot:body>
-	   	 <view class="news-item" v-for="item in selected.news" :key="item.article_id" @click="onclicknew(item.article_id)">
-	   	     <image class="news-image" :src="item.list_image_url" mode="aspectFill"></image>
+	   	 <view class="news-item" v-for="item in selected.news" :key="item.article_id" @click="onclickactivity(item.article_id)">
+	   	     <image class="news-image" :src="item.cover_image_url" mode="aspectFill"></image>
 	   	     <view class="news-content">
 	   	       <view class="news-title">{{item.article_title}}</view>
 	   	       <view class="news-summary">精选</view>
@@ -64,11 +64,11 @@
 	<!-- 政策和新闻 -->
 	 <showInforVue  title="精选政策" >
 		 <template v-slot:more>
-			 <view  class="more-text" @click="handleMoremsg">更多信息 ></view>
+			 <view  class="more-text" @click="handleMorearticle">更多信息 ></view>
 		 </template>
 		 
 		<template v-slot:body>
-	 <view class="news-item" v-for="item in selected.policys" :key="item.article_id" @click="onclickpolicy(item.article_id)">
+	 <view class="news-item" v-for="item in selected.policys" :key="item.article_id" @click="onclickactivity(item.article_id)">
 	     <image class="news-image" src="/static/3044eb7c01d942fc96e5d5bd8282ee19.jpg" mode="aspectFill"></image>
 	     <view class="news-content">
 	       <view class="news-title">{{item.article_title}}</view>
@@ -80,11 +80,11 @@
   </showInforVue>
   <showInforVue  title="精选新闻" >
 	  <template v-slot:more>
-		  <view  class="more-text" @click="handleMorenew">更多信息 ></view>
+		  <view  class="more-text" @click="handleMorearticle">更多信息 ></view>
 	  </template>
 	  <template v-slot:body>
-  	 <view class="news-item" v-for="item in selected.news" :key="article_id" @click="onclicknew(article_id)">
-  	     <image class="news-image" :src="item.list_image_url" mode="aspectFill"></image>
+  	 <view class="news-item" v-for="item in selected.news" :key="article_id" @click="onclickactivity(item.article_id)">
+  	     <image class="news-image" :src="item.cover_image_url" mode="aspectFill"></image>
   	     <view class="news-content">
   	       <view class="news-title">{{item.article_title}}</view>
   	       <view class="news-summary">精选</view>
@@ -113,31 +113,29 @@ const selected=useSelectedstore()
 
 
 // 获取更多新闻和政策
-function handleMorenew(){
-	uni.setStorageSync('tabSource', 'switchTab');
-	uni.switchTab({
-		url: '../news/news'
-	});
-
-}
-function handleMoremsg(){
+function handleMorearticle(){
 	uni.setStorageSync('tabSource', 'switchTab');
 	uni.switchTab({
 		url: '../policy/policy'
 	});
+
+}
+// 获取更多活动
+function handleMoreactivity(){
+	uni.switchTab({
+		url: '../news/news'
+	});
+	
 	
 }
+
+
 // 获取精选的政策和新闻信息
-function onclicknew(id){
+
+function onclickactivity(id){
 	console.log(id)
 	uni.navigateTo({
-		url: `/pages/detail/detailnew?id=${id}`
-	})
-}
-function onclickpolicy(id){
-	console.log(id)
-	uni.navigateTo({
-	  url: `/pages/detail/detailpolicy?id=${id}`
+	  url: `/pages/detail/articledetail?id=${id}`
 	})
 }
 

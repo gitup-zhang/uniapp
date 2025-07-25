@@ -98,15 +98,21 @@
 	<view v-else>
 	  <scroll-view class="news-scroll" scroll-y="true" @scrolltolower="loadMore">
 	    <view>
-	      <uni-card
+	      <!-- <uni-card
 	        v-for="item in listarticles.listnew"
 	        :key="item.article_id"
 	        :title="item.article_title"
 	        :extra="Dataformat(item.release_time)"
-	        :thumbnail="item.list_image_url"
+	        :thumbnail="item.cover_image_url"
 	        @click="OnClick(item.article_id)">
 	        <text class="uni-body">{{ item.brief_content }}</text>
-	      </uni-card>
+	      </uni-card> -->
+		  <ArticleCard 
+		        v-for="item in newsList" 
+		               :key="item.id"
+		               :newsData="item"
+		               @click="handleNewsClick"   
+			/>
 	      <view v-if="listarticles.loading" class="loading">加载中...</view>
 	      <view v-else-if="!listarticles.hasMore" class="no-more">没有更多内容</view>
 	    </view>
@@ -127,6 +133,59 @@ import { usefieldstore } from '@/store/field.js'
 import { Dataformat } from '../../utils/data'
 import { onShow } from '@dcloudio/uni-app'
 import Tabswitch from '@/components/Tabswitch/Tabswitch.vue'
+import ArticleCard from '@/components/ArticleCard/ArticleCard.vue'
+
+const newsList = ref([
+  {
+    id: '1',
+    title: 'AI技术突破：ChatGPT-5即将发布，性能提升显著',
+    summary: '据最新消息，OpenAI即将发布ChatGPT-5，新版本在推理能力、多模态处理和代码生成方面都有显著提升，预计将改变人工智能应用格局。',
+    image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400',
+    source: '科技日报',
+    publishTime: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2小时前
+    category: '科技',
+    views: 12500,
+    likes: 389,
+    comments: 67
+  },
+  {
+    id: '2',
+    title: '新能源汽车市场持续火热，特斯拉Q4销量创历史新高',
+    summary: '特斯拉公布2024年第四季度财报，全球交付量达到48.4万辆，同比增长20%，Model Y成为全球最畅销电动车型。',
+    image: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=400',
+    source: '财经时报',
+    publishTime: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5小时前
+    category: '财经',
+    views: 8900,
+    likes: 156,
+    comments: 34
+  },
+  {
+    id: '3',
+    title: '元宇宙概念重新升温，Meta推出全新VR设备',
+    summary: 'Meta公司发布了新一代VR头显设备，采用更轻便的设计和更高的分辨率，预计将推动虚拟现实技术普及。',
+    image: 'https://images.unsplash.com/photo-1592478411213-6153e4ebc696?w=400',
+    source: '虚拟世界',
+    publishTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1天前
+    category: '数码',
+    views: 6700,
+    likes: 234,
+    comments: 89
+  },
+  {
+    id: '4',
+    title: '量子计算领域再获突破，IBM发布1000量子比特处理器',
+    summary: 'IBM宣布成功开发出1000量子比特的量子处理器"Condor"，这一突破将为量子计算的商业化应用奠定重要基础。',
+    image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400',
+    source: '量子科学',
+    publishTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3天前
+    category: '科学',
+    views: 4500,
+    likes: 178,
+    comments: 45
+  }
+])
+
 
 const listarticles = useArticlesStore()
 const field = usefieldstore()

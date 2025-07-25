@@ -12,7 +12,7 @@
 			"path" : "pages/policy/policy",
 			"style" : 
 			{
-				"navigationBarTitleText" : "政策",
+				"navigationBarTitleText" : "咨询",
 				"navigationStyle": "custom" // 开启自定义导航栏
 			}
 		},
@@ -20,7 +20,7 @@
 			"path" : "pages/news/news",
 			"style" : 
 			{
-				"navigationBarTitleText" : "新闻",
+				"navigationBarTitleText" : "活动",
 				"navigationStyle": "custom" // 开启自定义导航栏
 			}
 		},
@@ -32,22 +32,7 @@
 				"navigationStyle": "custom" // 开启自定义导航栏
 			}
 		},
-		{
-			"path" : "pages/detail/detailnew",
-			"style" : 
-			{
-				"navigationBarTitleText" : "",
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path" : "pages/detail/detailpolicy",
-			"style" : 
-			{
-				"navigationBarTitleText" : "",
-				"navigationStyle": "custom"
-			}
-		},
+	
 		{
 			"path" : "pages/mes/mes",
 			"style" : 
@@ -58,6 +43,22 @@
 		},
 		{
 			"path" : "pages/detail/articledetail",
+			"style" : 
+			{
+				"navigationBarTitleText" : "",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path" : "pages/detail/activitydetail",
+			"style" : 
+			{
+				"navigationBarTitleText" : "",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path" : "pages/detail/applydetail",
 			"style" : 
 			{
 				"navigationBarTitleText" : "",
@@ -96,12 +97,12 @@
 			"pagePath": "pages/policy/policy",
 			"iconPath": "/static/icon/policy.png",
 			"selectedIconPath": "/static/icon/policy-selecte.png",
-			"text": "政策"
+			"text": "咨询"
 		},{
 			"pagePath": "pages/news/news",
 			"iconPath": "/static/icon/news.png",
 			"selectedIconPath": "/static/icon/new-selecte.png",
-			"text": "新闻"
+			"text": "活动"
 		},{
 			"pagePath": "pages/mes/mes",
 			"iconPath": "/static/icon/mes.png",

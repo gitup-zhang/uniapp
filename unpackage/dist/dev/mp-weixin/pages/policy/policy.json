@@ -1,10 +1,11 @@
 {
-  "navigationBarTitleText": "政策",
+  "navigationBarTitleText": "咨询",
   "navigationStyle": "custom",
   "usingComponents": {
     "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar",
     "uni-search-bar": "../../uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar",
     "uni-card": "../../uni_modules/uni-card/components/uni-card/uni-card",
-    "tabswitch": "../../components/Tabswitch/Tabswitch"
+    "tabswitch": "../../components/Tabswitch/Tabswitch",
+    "article-card": "../../components/ArticleCard/ArticleCard"
   }
 }
