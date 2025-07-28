@@ -1,5 +1,5 @@
 <template>
-  <view class="horizontal-card">
+  <view class="horizontal-card" @click="handleClick">
     <!-- 左侧图片 -->
     <image class="left-img" :src="imgSrc" mode="aspectFill" />
 
@@ -23,6 +23,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { defineProps, defineEmits } from 'vue';
 defineProps({
   imgSrc: {
     type: String,
@@ -41,6 +42,15 @@ defineProps({
     required: true
   }
 })
+// 定义事件
+const emit = defineEmits();
+
+// 处理点击事件
+function handleClick() {
+	console.log('卡片点击事件触发');
+  // 触发父组件的事件，传递必要的参数
+  emit('click');
+}
 </script>
 
 <style scoped>

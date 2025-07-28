@@ -3,7 +3,7 @@
     <!-- 顶部固定导航栏 -->
     <uni-nav-bar statusBar="true" backgroundColor="#903749" fixed="true">
       <template v-slot:left>
-        <view class="navbar-title">政策</view>
+        <view class="navbar-title">咨询</view>
       </template>
     </uni-nav-bar>
 
@@ -33,24 +33,36 @@
         <view class="filter-bar">
           <!-- 领域筛选 -->
           <view class="filter-item" @click="toggleDropdown('domain')">
-            {{ selectedDomain.field_name || '全部领域' }}
-            <view class="arrow" :class="{ open: currentDropdown === 'domain' }"></view>
+            <view class="filter-content">
+              <text class="filter-icon">🏷️</text>
+              <text class="filter-text">{{ selectedDomain.field_name || '全部领域' }}</text>
+              <view class="arrow" :class="{ open: currentDropdown === 'domain' }"></view>
+            </view>
           </view>
 
           <!-- 时间筛选 -->
           <view class="filter-item" @click="toggleDropdown('time')">
-            {{ selectedTime }}
-            <view class="arrow" :class="{ open: currentDropdown === 'time' }"></view>
+            <view class="filter-content">
+              <text class="filter-icon">📅</text>
+              <text class="filter-text">{{ selectedTime }}</text>
+              <view class="arrow" :class="{ open: currentDropdown === 'time' }"></view>
+            </view>
           </view>
         </view>
 
+        <!-- 下拉遮罩 -->
+        <view v-if="currentDropdown" class="dropdown-overlay" @click="currentDropdown = null"></view>
+
         <!-- 领域下拉 -->
         <view v-if="currentDropdown === 'domain'" class="dropdown-list">
+          <view class="dropdown-header">选择领域</view>
           <view 
             class="dropdown-item" 
             @click="selectOption('domain', null)" 
             :class="{ selected: selectedDomain.field_id === 0 }">
-            全部
+            <text class="item-icon">🌐</text>
+            <text class="item-text">全部</text>
+            <text v-if="selectedDomain.field_id === 0" class="check-icon">✓</text>
           </view>
           <view 
             class="dropdown-item" 
@@ -58,19 +70,24 @@
             :key="item.field_id"
             @click="selectOption('domain', item)" 
             :class="{ selected: selectedDomain.field_id === item.field_id }">
-            {{ item.field_name }}
+            <text class="item-icon">📁</text>
+            <text class="item-text">{{ item.field_name }}</text>
+            <text v-if="selectedDomain.field_id === item.field_id" class="check-icon">✓</text>
           </view>
         </view>
 
         <!-- 时间下拉 -->
         <view v-if="currentDropdown === 'time'" class="dropdown-list">
+          <view class="dropdown-header">选择时间</view>
           <view 
             class="dropdown-item" 
             v-for="item in timeList" 
             :key="item"
             @click="selectOption('time', item)" 
             :class="{ selected: selectedTime === item }">
-            {{ item }}
+            <text class="item-icon">⏰</text>
+            <text class="item-text">{{ item }}</text>
+            <text v-if="selectedTime === item" class="check-icon">✓</text>
           </view>
         </view>
       </view>
@@ -80,14 +97,21 @@
 	 <view v-if="activeTab === 'policy'">
     <scroll-view class="news-scroll" scroll-y="true" @scrolltolower="loadMore">
       <view>
-        <uni-card 
+        <!-- <uni-card 
           v-for="item in listarticles.listpolicy" 
           :key="item.article_id"
           :title="item.article_title" 
           :extra="Dataformat(item.release_time)"
           @click="OnClick(item.article_id)">
           <text>{{ item.brief_content }}</text>
-        </uni-card>
+        </uni-card> -->
+		<ArticlePolicyVue 
+		        v-for="item in listarticles.listpolicy" 
+		        :key="item.article_id"
+		        :policyData="item"
+		        @click="handlePolicyClick"
+
+		 />
 
         <view v-if="listarticles.loading" class="loading">加载中...</view>
         <view v-else-if="!listarticles.hasMore" class="no-more">没有更多内容</view>
@@ -108,8 +132,8 @@
 	        <text class="uni-body">{{ item.brief_content }}</text>
 	      </uni-card> -->
 		  <ArticleCard 
-		        v-for="item in newsList" 
-		               :key="item.id"
+		        v-for="item in listarticles.listnew" 
+		               :key="item.article_id"
 		               :newsData="item"
 		               @click="handleNewsClick"   
 			/>
@@ -124,67 +148,19 @@
   </view>
 </template>
 
-
 <script setup>
 import { ref, onMounted,watch } from 'vue'
 import {useArticlesStore} from '@/store/Articles.js'
-
 import { usefieldstore } from '@/store/field.js'
-import { Dataformat } from '../../utils/data'
+import { Dataformat,formatDate,getLastWeekDate,getLastMonthDate,getLastYearDate } from '../../utils/data'
 import { onShow } from '@dcloudio/uni-app'
 import Tabswitch from '@/components/Tabswitch/Tabswitch.vue'
 import ArticleCard from '@/components/ArticleCard/ArticleCard.vue'
+import ArticlePolicyVue from '../../components/ArticleCard/ArticlePolicy.vue'
 
-const newsList = ref([
-  {
-    id: '1',
-    title: 'AI技术突破：ChatGPT-5即将发布，性能提升显著',
-    summary: '据最新消息，OpenAI即将发布ChatGPT-5，新版本在推理能力、多模态处理和代码生成方面都有显著提升，预计将改变人工智能应用格局。',
-    image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400',
-    source: '科技日报',
-    publishTime: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2小时前
-    category: '科技',
-    views: 12500,
-    likes: 389,
-    comments: 67
-  },
-  {
-    id: '2',
-    title: '新能源汽车市场持续火热，特斯拉Q4销量创历史新高',
-    summary: '特斯拉公布2024年第四季度财报，全球交付量达到48.4万辆，同比增长20%，Model Y成为全球最畅销电动车型。',
-    image: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=400',
-    source: '财经时报',
-    publishTime: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5小时前
-    category: '财经',
-    views: 8900,
-    likes: 156,
-    comments: 34
-  },
-  {
-    id: '3',
-    title: '元宇宙概念重新升温，Meta推出全新VR设备',
-    summary: 'Meta公司发布了新一代VR头显设备，采用更轻便的设计和更高的分辨率，预计将推动虚拟现实技术普及。',
-    image: 'https://images.unsplash.com/photo-1592478411213-6153e4ebc696?w=400',
-    source: '虚拟世界',
-    publishTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1天前
-    category: '数码',
-    views: 6700,
-    likes: 234,
-    comments: 89
-  },
-  {
-    id: '4',
-    title: '量子计算领域再获突破，IBM发布1000量子比特处理器',
-    summary: 'IBM宣布成功开发出1000量子比特的量子处理器"Condor"，这一突破将为量子计算的商业化应用奠定重要基础。',
-    image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400',
-    source: '量子科学',
-    publishTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3天前
-    category: '科学',
-    views: 4500,
-    likes: 178,
-    comments: 45
-  }
-])
+
+
+
 
 
 const listarticles = useArticlesStore()
@@ -201,7 +177,7 @@ const currentDropdown = ref(null)
 // 是否精选
 const isselected=ref(0)
 
-// 初始值设为“全部”
+// 初始值设为"全部"
 const selectedDomain = ref({ field_id: 0, field_name: '全部' })
 const selectedTime = ref('发布时间')
 
@@ -275,11 +251,61 @@ function selectOption(type, value) {
   }
 
   if (type === 'time') {
+	  console.log(value)
     selectedTime.value = value
+	if (value === '最近一周') {
+	      // 计算并更新为最近一周
+	      Params.release_time = getLastWeekDate();
+	    } else if (value === '最近一月') {
+	      // 计算并更新为最近一月
+	      Params.release_time = getLastMonthDate();
+	    } else if (value === '最近一年') {
+	      // 计算并更新为最近一年
+	      Params.release_time = getLastYearDate();
+	    } else {
+	      // 清空时间筛选
+	      Params.release_time = '';
+	    }
+	
+	    Params.page = 1;
+	    listarticles.getlistpolicy(Params);
   }
 
   currentDropdown.value = null
 }
+
+// 处理政策点击
+const handlePolicyClick = (policyItem) => {
+  console.log('点击了政策:', policyItem)
+  uni.navigateTo({
+    url: `/pages/detail/articledetail?id=${policyItem.article_id}`
+  })
+}
+
+// 处理新闻点击
+const handleNewsClick = (newsItem) => {
+  console.log('点击了新闻:', newsItem.article_id)
+  uni.navigateTo({
+    url: `/pages/detail/articledetail?id=${newsItem.article_id}`
+  })
+}
+
+// 处理预览
+const handlePreview = (policyItem) => {
+  console.log('预览政策:', policyItem)
+  uni.navigateTo({
+    url: `/pages/policy-preview/policy-preview?id=${policyItem.id}`
+  })
+}
+
+// // 处理下载
+// const handleDownload = (policyItem) => {
+//   console.log('下载政策:', policyItem)
+//   uni.showToast({
+//     title: '开始下载',
+//     icon: 'success'
+//   })
+// }
 
 // 跳转详情
 function OnClick(id) {
@@ -317,38 +343,172 @@ onShow(() => {
 </script>
 
 <style>
-@import url("../../style/new_policy.css");
-.dropdown-list {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4rpx;
-  margin-top: 10rpx;
+.page {
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
 }
 
-.dropdown-item {
-  padding: 20rpx;
-  font-size: 28rpx;
-  color: #333;
+/* 固定顶部区域（搜索 + 筛选） */
+.fixed-top {
+  position: fixed;
+  top: 178rpx;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background-color: #ffffff;
+  padding-bottom: 20rpx;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 
-.dropdown-item.selected {
-  background-color: #f0f0f0;
+/* 滚动区域 */
+.news-scroll {
+  position: fixed;
+  top: calc(178rpx + 260rpx);
+  bottom: var(--window-bottom);
+  left: 0;
+  right: 0;
+  overflow-y: scroll;
+  padding: 5rpx;
+  background-color: #f5f5f5;
+}
+
+/* 导航栏标题 */
+.navbar-title {
+  font-size: 20px;
   font-weight: bold;
+  color: white;
+}
+
+/* 筛选区域 */
+.filter-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+.filter-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  background-color: #fff;
+  gap: 20rpx;
 }
 
 .filter-item {
-  /* padding: 20rpx;
-  font-size: 30rpx; */
-   padding: 12rpx 20rpx;
-   font-size: 30rpx;
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
+  flex: 1;
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+  border-radius: 16rpx;
+  border: 2rpx solid #e8e8ff;
+  transition: all 0.3s ease;
+}
+
+.filter-item.active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg, #f0f2ff 0%, #e8e8ff 100%);
+}
+
+.filter-content {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  gap: 12rpx;
+}
+
+.filter-content .filter-icon {
+  font-size: 28rpx;
+}
+
+.filter-content .filter-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.arrow {
+  width: 0;
+  height: 0;
+  border-left: 8rpx solid transparent;
+  border-right: 8rpx solid transparent;
+  border-top: 10rpx solid #666;
+  transition: transform 0.3s ease;
 }
 
 .arrow.open {
   transform: rotate(180deg);
 }
+
+/* 下拉遮罩 */
+.dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 98;
+}
+
+/* 下拉列表 */
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 20rpx;
+  right: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+  z-index: 99;
+  max-height: 600rpx;
+  overflow-y: auto;
+}
+
+.dropdown-list .dropdown-header {
+  padding: 20rpx 24rpx 12rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #666;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.dropdown-list .dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  gap: 16rpx;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-list .dropdown-item:active {
+  background: #f5f5f5;
+}
+
+.dropdown-list .dropdown-item.selected {
+  background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+}
+
+.dropdown-list .dropdown-item.selected .item-text {
+  color: #667eea;
+  font-weight: 600;
+}
+
+.dropdown-list .dropdown-item .item-icon {
+  font-size: 24rpx;
+}
+
+.dropdown-list .dropdown-item .item-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.dropdown-list .dropdown-item .check-icon {
+  font-size: 28rpx;
+  color: #667eea;
+  font-weight: 700;
+}
+
 .loading,
 .no-more {
   text-align: center;

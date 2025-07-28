@@ -10,6 +10,9 @@ if (!Math) {
   "./pages/detail/articledetail.js";
   "./pages/detail/activitydetail.js";
   "./pages/detail/applydetail.js";
+  "./components/ArticleCard/ArticlePolicy.js";
+  "./pages/detail/activitymore.js";
+  "./pages/detail/activityhistorymore.js";
 }
 const _sfc_main = {
   onLaunch: function() {

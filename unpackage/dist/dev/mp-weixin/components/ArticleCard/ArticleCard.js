@@ -6,16 +6,16 @@ const _sfc_main = {
     newsData: {
       type: Object,
       default: () => ({
-        id: "",
-        title: "新闻标题",
-        summary: "新闻内容摘要，这里展示新闻的主要内容概述...",
-        image: "/static/images/default-news.jpg",
+        article_id: "",
+        article_title: "新闻标题",
+        brief_content: "新闻内容摘要，这里展示新闻的主要内容概述...",
+        cover_image_url: "/static/images/default-news.jpg",
         source: "新闻来源",
-        publishTime: /* @__PURE__ */ new Date(),
-        category: "科技",
-        views: 1234,
-        likes: 89,
-        comments: 23
+        release_time: /* @__PURE__ */ new Date(),
+        field_name: "科技"
+        // views: 1234,
+        // likes: 89,
+        // comments: 23
       })
     }
   },
@@ -48,41 +48,19 @@ const _sfc_main = {
         return publishTime.toLocaleDateString();
       }
     };
-    const formatNumber = (num) => {
-      if (!num)
-        return "0";
-      if (num >= 1e4) {
-        return `${(num / 1e4).toFixed(1)}万`;
-      } else if (num >= 1e3) {
-        return `${(num / 1e3).toFixed(1)}k`;
-      }
-      return num.toString();
-    };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: __props.newsData.image,
+        a: __props.newsData.cover_image_url,
         b: common_vendor.o(handleImageError),
-        c: __props.newsData.category
-      }, __props.newsData.category ? {
-        d: common_vendor.t(__props.newsData.category)
+        c: __props.newsData.field_name
+      }, __props.newsData.field_name ? {
+        d: common_vendor.t(__props.newsData.field_name)
       } : {}, {
         e: common_vendor.t(__props.newsData.source || "新闻来源"),
-        f: common_vendor.t(formatTime(__props.newsData.publishTime)),
-        g: common_vendor.t(__props.newsData.title),
-        h: common_vendor.t(__props.newsData.summary),
-        i: __props.newsData.views
-      }, __props.newsData.views ? {
-        j: common_vendor.t(formatNumber(__props.newsData.views))
-      } : {}, {
-        k: __props.newsData.likes
-      }, __props.newsData.likes ? {
-        l: common_vendor.t(formatNumber(__props.newsData.likes))
-      } : {}, {
-        m: __props.newsData.comments
-      }, __props.newsData.comments ? {
-        n: common_vendor.t(formatNumber(__props.newsData.comments))
-      } : {}, {
-        o: common_vendor.o(handleClick)
+        f: common_vendor.t(formatTime(__props.newsData.release_time)),
+        g: common_vendor.t(__props.newsData.article_title),
+        h: common_vendor.t(__props.newsData.brief_content),
+        i: common_vendor.o(handleClick)
       });
     };
   }

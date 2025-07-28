@@ -7,7 +7,10 @@
     "pages/mes/mes",
     "pages/detail/articledetail",
     "pages/detail/activitydetail",
-    "pages/detail/applydetail"
+    "pages/detail/applydetail",
+    "components/ArticleCard/ArticlePolicy",
+    "pages/detail/activitymore",
+    "pages/detail/activityhistorymore"
   ],
   "window": {
     "navigationBarTextStyle": "white",
@@ -53,6 +56,10 @@
       }
     ]
   },
-  "permission": {},
+  "permission": {
+    "scope.userInfo": {
+      "desc": "用于完善用户资料"
+    }
+  },
   "usingComponents": {}
 }

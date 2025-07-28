@@ -13,6 +13,7 @@ const _sfc_main = {
   setup(__props) {
     const usenotice = store_Notice.useNoticeStore();
     const selected = store_Home.useSelectedstore();
+    const currentTab = common_vendor.ref(0);
     function handleMorearticle() {
       common_vendor.index.setStorageSync("tabSource", "switchTab");
       common_vendor.index.switchTab({
@@ -25,10 +26,23 @@ const _sfc_main = {
       });
     }
     function onclickactivity(id) {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:136", id);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:151", id);
       common_vendor.index.navigateTo({
         url: `/pages/detail/articledetail?id=${id}`
       });
+    }
+    function switchTab(index) {
+      currentTab.value = index;
+    }
+    function onSwiperChange(e) {
+      currentTab.value = e.detail.current;
+    }
+    function handleMoreClick() {
+      if (currentTab.value === 0) {
+        handleMoreactivity();
+      } else {
+        handleMorearticle();
+      }
     }
     common_vendor.onMounted(() => {
       usenotice.getnoticestore();
@@ -51,45 +65,42 @@ const _sfc_main = {
             b: item.id
           };
         }),
-        i: common_vendor.o(handleMoreactivity),
-        j: common_vendor.f(common_vendor.unref(selected).news, (item, k0, i0) => {
-          return common_vendor.e({
-            a: item.cover_image_url,
-            b: common_vendor.t(item.article_title)
-          }, {}, {
-            c: item.article_id,
-            d: common_vendor.o(($event) => onclickactivity(item.article_id), item.article_id)
-          });
+        i: currentTab.value === 0 ? 1 : "",
+        j: common_vendor.o(($event) => switchTab(0)),
+        k: currentTab.value === 1 ? 1 : "",
+        l: common_vendor.o(($event) => switchTab(1)),
+        m: currentTab.value === 2 ? 1 : "",
+        n: common_vendor.o(($event) => switchTab(2)),
+        o: common_vendor.o(handleMoreClick),
+        p: common_vendor.f(common_vendor.unref(selected).news, (item, index, i0) => {
+          return {
+            a: common_vendor.t(index + 1),
+            b: index < 3 ? 1 : "",
+            c: common_vendor.t(item.article_title),
+            d: item.article_id,
+            e: common_vendor.o(($event) => onclickactivity(item.article_id), item.article_id)
+          };
         }),
-        k: common_vendor.p({
-          title: "热门活动"
+        q: common_vendor.f(common_vendor.unref(selected).policys, (item, index, i0) => {
+          return {
+            a: common_vendor.t(index + 1),
+            b: index < 3 ? 1 : "",
+            c: common_vendor.t(item.article_title),
+            d: item.article_id,
+            e: common_vendor.o(($event) => onclickactivity(item.article_id), item.article_id)
+          };
         }),
-        l: common_vendor.o(handleMorearticle),
-        m: common_vendor.f(common_vendor.unref(selected).policys, (item, k0, i0) => {
-          return common_vendor.e({
-            a: common_vendor.t(item.article_title)
-          }, {}, {
-            b: item.article_id,
-            c: common_vendor.o(($event) => onclickactivity(item.article_id), item.article_id)
-          });
+        r: common_vendor.f(common_vendor.unref(selected).news, (item, index, i0) => {
+          return {
+            a: common_vendor.t(index + 1),
+            b: index < 3 ? 1 : "",
+            c: common_vendor.t(item.article_title),
+            d: item.article_id,
+            e: common_vendor.o(($event) => onclickactivity(item.article_id), item.article_id)
+          };
         }),
-        n: common_assets._imports_3,
-        o: common_vendor.p({
-          title: "精选政策"
-        }),
-        p: common_vendor.o(handleMorearticle),
-        q: common_vendor.f(common_vendor.unref(selected).news, (item, k0, i0) => {
-          return common_vendor.e({
-            a: item.cover_image_url,
-            b: common_vendor.t(item.article_title)
-          }, {}, {
-            c: common_vendor.o(($event) => onclickactivity(item.article_id), _ctx.article_id)
-          });
-        }),
-        r: _ctx.article_id,
-        s: common_vendor.p({
-          title: "精选新闻"
-        })
+        s: currentTab.value,
+        t: common_vendor.o(onSwiperChange)
       };
     };
   }

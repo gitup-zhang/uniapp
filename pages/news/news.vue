@@ -3,7 +3,7 @@
     <!-- 顶部固定导航栏 -->
     <uni-nav-bar statusBar="true" backgroundColor="#903749" fixed="true" leftWidth="150px">
       <template v-slot:left>
-        <view class="navbar-title">活动报名</view>
+        <view class="navbar-title">热门活动</view>
       </template>
     </uni-nav-bar>
 	
@@ -37,6 +37,7 @@
 	    date="3月15日 - 4月10日"
 	    location="深圳华侨城创意文化园北区 C2 展厅"
 	    status="已结束"
+		@click="handleCardClick"
 	  />
 
   </view>
@@ -51,6 +52,28 @@ function change(e){
 	console.log('点击了第', clickedIndex+1, '个宫格')
 	uni.navigateTo({
 	  url: `/pages/detail/activitydetail`
+	})
+}
+// 历史活动点击
+
+function handleCardClick(eventData) {
+  console.log("点击了卡片:", eventData);
+	uni.navigateTo({
+	url: `/pages/detail/activitydetail` // 举例，传递 title 作为参数
+  });
+}
+
+// 更多热门活动
+function goMorehotactivity(){
+	console.log("11111111")
+	uni.navigateTo({
+	  url: `/pages/detail/activitymore`
+	})
+}
+// 更多历史活动
+function goMorehistoryactivity(){
+	uni.navigateTo({
+	  url: `/pages/detail/activityhistorymore`
 	})
 }
 </script>

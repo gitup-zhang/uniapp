@@ -15,10 +15,10 @@ export const useSelectedstore=defineStore('selected',()=>{
 			    mask: true
 			  })
 			  try{
-				  const res_new=await getArticleList({is_selection:1,page_size:1,article_type:"NEWS"})
+				  const res_new=await getArticleList({is_selection:1,page_size:8,article_type:"NEWS"})
 				  
 				  news.value=res_new.data
-				  const res_policy=await getArticleList({is_selection:1,page_size:1,article_type:"POLICY"})
+				  const res_policy=await getArticleList({is_selection:1,page_size:8,article_type:"POLICY"})
 				  policys.value=res_policy.data
 				  
 			  }catch(error){

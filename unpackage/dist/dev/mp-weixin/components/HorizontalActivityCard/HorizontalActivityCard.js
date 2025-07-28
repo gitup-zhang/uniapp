@@ -28,7 +28,12 @@ const _sfc_main = {
       required: true
     }
   },
-  setup(__props) {
+  setup(__props, { emit: __emit }) {
+    const emit = __emit;
+    function handleClick() {
+      common_vendor.index.__f__("log", "at components/HorizontalActivityCard/HorizontalActivityCard.vue:50", "卡片点击事件触发");
+      emit("click");
+    }
     return (_ctx, _cache) => {
       return {
         a: __props.imgSrc,
@@ -45,7 +50,8 @@ const _sfc_main = {
           size: "16",
           color: "#999"
         }),
-        g: common_vendor.t(__props.location)
+        g: common_vendor.t(__props.location),
+        h: common_vendor.o(handleClick)
       };
     };
   }

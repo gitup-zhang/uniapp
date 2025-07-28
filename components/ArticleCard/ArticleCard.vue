@@ -2,29 +2,29 @@
   <view class="news-card" @tap="handleClick">
     <view class="news-image-container">
       <image 
-        :src="newsData.image" 
+        :src="newsData.cover_image_url" 
         mode="aspectFill"
         :lazy-load="true"
         class="news-image"
         @error="handleImageError"
       />
       <view class="image-overlay"></view>
-      <view class="category-tag" v-if="newsData.category">
-        {{ newsData.category }}
+      <view class="category-tag" v-if="newsData.field_name">
+        {{ newsData.field_name }}
       </view>
     </view>
     
     <view class="news-content">
       <view class="news-meta">
         <text class="news-source">{{ newsData.source || '新闻来源' }}</text>
-        <text class="news-time">{{ formatTime(newsData.publishTime) }}</text>
+        <text class="news-time">{{ formatTime(newsData.release_time) }}</text>
       </view>
       
-      <view class="news-title">{{ newsData.title }}</view>
+      <view class="news-title">{{ newsData.article_title }}</view>
       
-      <view class="news-summary">{{ newsData.summary }}</view>
+      <view class="news-summary">{{ newsData.brief_content }}</view>
       
-      <view class="news-footer">
+      <!-- <view class="news-footer">
         <view class="news-stats">
           <view class="stat-item" v-if="newsData.views">
             <text class="icon">👁</text>
@@ -43,7 +43,7 @@
           <text>阅读全文</text>
           <text class="arrow">→</text>
         </view>
-      </view>
+      </view> -->
     </view>
   </view>
 </template>
@@ -56,16 +56,16 @@ const props = defineProps({
   newsData: {
     type: Object,
     default: () => ({
-      id: '',
-      title: '新闻标题',
-      summary: '新闻内容摘要，这里展示新闻的主要内容概述...',
-      image: '/static/images/default-news.jpg',
+      article_id: '',
+      article_title: '新闻标题',
+      brief_content: '新闻内容摘要，这里展示新闻的主要内容概述...',
+      cover_image_url: '/static/images/default-news.jpg',
       source: '新闻来源',
-      publishTime: new Date(),
-      category: '科技',
-      views: 1234,
-      likes: 89,
-      comments: 23
+      release_time: new Date(),
+      field_name: '科技',
+      // views: 1234,
+      // likes: 89,
+      // comments: 23
     })
   }
 })
@@ -120,7 +120,8 @@ const formatNumber = (num) => {
 .news-card {
   background: #fff;
   border-radius: 16rpx;
-  margin-bottom: 24rpx;
+  margin-bottom: 1rpx;
+  margin-top: 24rpx;
   overflow: hidden;
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;

@@ -46,48 +46,42 @@
                     <text class="bottom-label">关注领域</text>
                   </view>
                 </view>
+				</view>
+			<ActivityTicket 
+	  :activityData="myActivityData" 
+	  @check-activity="onCheck"
+	  @join-group="onJoin"
+	  @status-action="onStatus"
+	/>	
+				
       </view>
     </view>
+	
 
-    <!-- 优化后的弹窗组件 -->
-    <uni-popup ref="popupRef" type="bottom" :custom-style="popupStyle">
-      <view class="setting-popup">
-        <!-- 标题栏 -->
-        <view class="popup-header">
-          <text class="popup-title">设置</text>
-        </view>
-        
-        <!-- 分割线 -->
-        <view class="popup-divider"></view>
-        
-        <!-- 功能项 -->
-        <view class="popup-item" @click="logout">
-          <uni-icons type="logout" size="24" color="#ff4d4f" />
-          <text class="item-text">退出登录</text>
-        </view>
-        
-        <!-- 取消按钮 -->
-        <view class="popup-cancel" @click="closePopup">
-          <text>取消</text>
-        </view>
-      </view>
-    </uni-popup>
-  </view>
-  
-<view>
-			<!-- 提示窗示例 -->
-			<uni-popup ref="alertDialog" type="dialog">
-				<uni-popup-dialog type="info" cancelText="关闭" confirmText="同意" title="通知" content="是否确认登录" @confirm="dialogConfirm"
-					@close="dialogClose"></uni-popup-dialog>
-			</uni-popup>
-</view>
-  
+
 </template>
 
 <script setup>
 import { ref, computed ,onMounted} from 'vue'
 import uniPopup from '@dcloudio/uni-ui/lib/uni-popup/uni-popup.vue'
 import {useInfoStore} from '@/store/Info.js'
+import ActivityTicketVue from '../../components/ActivityTicket/ActivityTicket.vue'
+
+
+const myActivityData = ref({
+  title: 'AI前沿研讨会',
+  location: '北京中关村科技园',
+  date: '8月10日-8月12日',
+  checkText: '查看须知',
+  joinText: '加入群聊',
+  statusText: '点击签到'
+})
+
+const onCheck = (data) => { console.log('check', data) }
+const onJoin = (data) => { console.log('join', data) }
+const onStatus = (data) => { console.log('status', data) }
+
+
 
 // 初始化pinia对象
 const userInfo=useInfoStore()

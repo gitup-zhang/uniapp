@@ -1,3 +1,4 @@
+
 .page {
   height: 100vh;
   overflow: hidden;
@@ -7,7 +8,7 @@
 /* 固定顶部区域（搜索 + 筛选） */
 .fixed-top {
   position: fixed;
-  top: 178rpx; /* 导航栏高度大约88rpx，适配含 statusBar 的情形 */
+  top: 178rpx;
   left: 0;
   right: 0;
   z-index: 10;
@@ -19,8 +20,8 @@
 /* 滚动区域 */
 .news-scroll {
   position: fixed;
-  top: calc(178rpx + 260rpx); /* navBar + search + filter 大约高度 */
-  bottom: var(--window-bottom); /* tabbar 兼容 */
+  top: calc(178rpx + 260rpx);
+  bottom: var(--window-bottom);
   left: 0;
   right: 0;
   overflow-y: scroll;
@@ -44,77 +45,108 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-/*  padding: 20rpx 30rpx; */
-padding: 10rpx ;
+  padding: 16rpx 20rpx;
   background-color: #fff;
+  gap: 20rpx;
 }
 .filter-item {
+  flex: 1;
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+  border-radius: 16rpx;
+  border: 2rpx solid #e8e8ff;
+  transition: all 0.3s ease;
+}
+.filter-item.active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg, #f0f2ff 0%, #e8e8ff 100%);
+}
+.filter-content {
   display: flex;
   align-items: center;
-  font-size: 30rpx;
+  padding: 16rpx 20rpx;
+  gap: 12rpx;
+}
+.filter-content .filter-icon {
+  font-size: 28rpx;
+}
+.filter-content .filter-text {
+  flex: 1;
+  font-size: 28rpx;
   color: #333;
-  font-weight: bold;
-  margin-right: 40rpx;
-  margin-left: 30rpx;
+  font-weight: 500;
 }
 .arrow {
   width: 0;
   height: 0;
-  border-left: 10rpx solid transparent;
-  border-right: 10rpx solid transparent;
-  border-top: 12rpx solid #999;
-  margin-left: 10rpx;
-  transition: transform 0.2s ease;
+  border-left: 8rpx solid transparent;
+  border-right: 8rpx solid transparent;
+  border-top: 10rpx solid #666;
+  transition: transform 0.3s ease;
 }
 .arrow.open {
   transform: rotate(180deg);
 }
+
+/* 下拉遮罩 */
+.dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 98;
+}
+
+/* 下拉列表 */
 .dropdown-list {
   position: absolute;
   top: 100%;
-  left: 0;
-  width: 100%;
-  background-color: #fff;
-  padding: 20rpx 0;
-  border-top: 1rpx solid #eee;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  left: 20rpx;
+  right: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 12rpx 40rpx rgba(0, 0, 0, 0.15);
+  z-index: 99;
+  max-height: 600rpx;
+  overflow-y: auto;
 }
-.dropdown-item {
-  padding: 20rpx 30rpx;
+.dropdown-list .dropdown-header {
+  padding: 20rpx 24rpx 12rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #666;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.dropdown-list .dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  gap: 16rpx;
+  transition: background-color 0.2s ease;
+}
+.dropdown-list .dropdown-item:active {
+  background: #f5f5f5;
+}
+.dropdown-list .dropdown-item.selected {
+  background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+}
+.dropdown-list .dropdown-item.selected .item-text {
+  color: #667eea;
+  font-weight: 600;
+}
+.dropdown-list .dropdown-item .item-icon {
+  font-size: 24rpx;
+}
+.dropdown-list .dropdown-item .item-text {
+  flex: 1;
   font-size: 28rpx;
   color: #333;
 }
-.dropdown-item.selected {
-  color: #007aff;
-  font-weight: bold;
-}
-.dropdown-list {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4rpx;
-  margin-top: 10rpx;
-}
-.dropdown-item {
-  padding: 20rpx;
+.dropdown-list .dropdown-item .check-icon {
   font-size: 28rpx;
-  color: #333;
-}
-.dropdown-item.selected {
-  background-color: #f0f0f0;
-  font-weight: bold;
-}
-.filter-item {
-  /* padding: 20rpx;
-  font-size: 30rpx; */
-   padding: 12rpx 20rpx;
-   font-size: 30rpx;
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
-}
-.arrow.open {
-  transform: rotate(180deg);
+  color: #667eea;
+  font-weight: 700;
 }
 .loading,
 .no-more {

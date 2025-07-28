@@ -5523,10 +5523,6 @@ function vFor(source, renderItem) {
   }
   return ret;
 }
-function setRef(ref2, id, opts = {}) {
-  const { $templateRefs } = getCurrentInstance();
-  $templateRefs.push({ i: id, r: ref2, k: opts.k, f: opts.f });
-}
 const o = (value, key) => vOn(value, key);
 const f = (source, renderItem) => vFor(source, renderItem);
 const s = (value) => stringifyStyle(value);
@@ -5534,7 +5530,6 @@ const e = (target, ...sources) => extend(target, ...sources);
 const n = (value) => normalizeClass(value);
 const t = (val) => toDisplayString(val);
 const p = (props) => renderProps(props);
-const sr = (ref2, id, opts) => setRef(ref2, id, opts);
 function createApp$1(rootComponent, rootProps = null) {
   rootComponent && (rootComponent.mpType = "app");
   return createVueApp(rootComponent, rootProps).use(plugin);
@@ -7356,7 +7351,7 @@ function isConsoleWritable() {
 function initRuntimeSocketService() {
   const hosts = "2.0.0.1,192.168.3.12,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_etOtiC";
+  const id = "mp-weixin_PJW8D2";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -9071,9 +9066,6 @@ const Pinia = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   storeToRefs
 }, Symbol.toStringTag, { value: "Module" }));
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
-function getDefaultExportFromCjs(x) {
-  return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
-}
 var dayjs_min = { exports: {} };
 (function(module2, exports2) {
   !function(t2, e2) {
@@ -9364,8 +9356,6 @@ var dayjs_min = { exports: {} };
     }, O.en = D[g], O.Ls = D, O.p = {}, O;
   });
 })(dayjs_min);
-var dayjs_minExports = dayjs_min.exports;
-const dayjs = /* @__PURE__ */ getDefaultExportFromCjs(dayjs_minExports);
 const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
   !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
 };
@@ -9376,7 +9366,6 @@ exports._export_sfc = _export_sfc;
 exports.computed = computed;
 exports.createPinia = createPinia;
 exports.createSSRApp = createSSRApp;
-exports.dayjs = dayjs;
 exports.defineStore = defineStore;
 exports.e = e;
 exports.f = f;
@@ -9393,7 +9382,6 @@ exports.reactive = reactive;
 exports.ref = ref;
 exports.resolveComponent = resolveComponent;
 exports.s = s;
-exports.sr = sr;
 exports.t = t;
 exports.unref = unref;
 exports.watch = watch;

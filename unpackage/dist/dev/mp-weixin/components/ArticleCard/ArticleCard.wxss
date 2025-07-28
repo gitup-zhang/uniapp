@@ -26,7 +26,8 @@
 .news-card.data-v-67a517e8 {
   background: #fff;
   border-radius: 16rpx;
-  margin-bottom: 24rpx;
+  margin-bottom: 1rpx;
+  margin-top: 24rpx;
   overflow: hidden;
   box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;

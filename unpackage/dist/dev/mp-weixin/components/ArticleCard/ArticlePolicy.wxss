@@ -1,0 +1,207 @@
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+/* 颜色变量 */
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+.policy-card.data-v-5f8dda5f {
+  background: #fff;
+  border-radius: 12rpx;
+  margin-bottom: 1rpx;
+  margin-top: 24rpx;
+  overflow: hidden;
+  border: 2rpx solid #e8e8e8;
+  transition: all 0.3s ease;
+}
+.policy-card.data-v-5f8dda5f:active {
+  transform: translateY(1rpx);
+  border-color: #d0d0d0;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+.policy-header.data-v-5f8dda5f {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+  border-bottom: 1rpx solid #e8e8e8;
+}
+.policy-level.data-v-5f8dda5f {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+.policy-level.level-national.data-v-5f8dda5f {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  color: #fff;
+}
+.policy-level.level-provincial.data-v-5f8dda5f {
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+  color: #fff;
+}
+.policy-level.level-city.data-v-5f8dda5f {
+  background: linear-gradient(135deg, #45b7d1 0%, #96c93d 100%);
+  color: #fff;
+}
+.policy-level.level-district.data-v-5f8dda5f {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: #fff;
+}
+.policy-status.data-v-5f8dda5f {
+  padding: 6rpx 12rpx;
+  border-radius: 12rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+.policy-status.status-active.data-v-5f8dda5f {
+  background: #e8f5e8;
+  color: #2d8f2d;
+}
+.policy-status.status-pending.data-v-5f8dda5f {
+  background: #fff3cd;
+  color: #856404;
+}
+.policy-status.status-abolished.data-v-5f8dda5f {
+  background: #f8d7da;
+  color: #721c24;
+}
+.policy-status.status-revised.data-v-5f8dda5f {
+  background: #cce5ff;
+  color: #0066cc;
+}
+.policy-content.data-v-5f8dda5f {
+  padding: 24rpx;
+}
+.policy-title.data-v-5f8dda5f {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.4;
+  margin-bottom: 20rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.policy-info.data-v-5f8dda5f {
+  margin-bottom: 20rpx;
+}
+.policy-info .info-row.data-v-5f8dda5f {
+  display: flex;
+  margin-bottom: 8rpx;
+  font-size: 26rpx;
+}
+.policy-info .info-row .info-label.data-v-5f8dda5f {
+  color: #666;
+  min-width: 140rpx;
+  flex-shrink: 0;
+}
+.policy-info .info-row .info-value.data-v-5f8dda5f {
+  color: #333;
+  flex: 1;
+}
+.policy-summary.data-v-5f8dda5f {
+  font-size: 28rpx;
+  color: #555;
+  line-height: 1.5;
+  margin-bottom: 20rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.policy-tags.data-v-5f8dda5f {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+.policy-tags .tag-item.data-v-5f8dda5f {
+  background: #f0f0f0;
+  color: #666;
+  padding: 6rpx 12rpx;
+  border-radius: 16rpx;
+  font-size: 22rpx;
+}
+.policy-footer.data-v-5f8dda5f {
+  padding: 20rpx 24rpx;
+  background: #fafafa;
+  border-top: 1rpx solid #e8e8e8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.policy-meta.data-v-5f8dda5f {
+  display: flex;
+  gap: 24rpx;
+}
+.policy-meta .meta-item.data-v-5f8dda5f {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+.policy-meta .meta-item .icon.data-v-5f8dda5f {
+  font-size: 22rpx;
+}
+.policy-meta .meta-item .meta-text.data-v-5f8dda5f {
+  font-size: 22rpx;
+  color: #999;
+}
+.action-buttons.data-v-5f8dda5f {
+  display: flex;
+  gap: 16rpx;
+}
+.action-buttons .action-btn.data-v-5f8dda5f {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  transition: all 0.3s ease;
+}
+.action-buttons .action-btn.preview-btn.data-v-5f8dda5f {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+.action-buttons .action-btn.preview-btn.data-v-5f8dda5f:active {
+  background: #bbdefb;
+}
+.action-buttons .action-btn.download-btn.data-v-5f8dda5f {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+.action-buttons .action-btn.download-btn.data-v-5f8dda5f:active {
+  background: #c8e6c9;
+}
+.action-buttons .action-btn .btn-icon.data-v-5f8dda5f {
+  font-size: 20rpx;
+}
+.action-buttons .action-btn .btn-text.data-v-5f8dda5f {
+  font-weight: 500;
+}

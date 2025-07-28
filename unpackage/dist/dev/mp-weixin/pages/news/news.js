@@ -21,9 +21,27 @@ const _sfc_main = {
   setup(__props) {
     function change(e) {
       const clickedIndex = e.detail.index;
-      common_vendor.index.__f__("log", "at pages/news/news.vue:51", "点击了第", clickedIndex + 1, "个宫格");
+      common_vendor.index.__f__("log", "at pages/news/news.vue:52", "点击了第", clickedIndex + 1, "个宫格");
       common_vendor.index.navigateTo({
         url: `/pages/detail/activitydetail`
+      });
+    }
+    function handleCardClick(eventData) {
+      common_vendor.index.__f__("log", "at pages/news/news.vue:60", "点击了卡片:", eventData);
+      common_vendor.index.navigateTo({
+        url: `/pages/detail/activitydetail`
+        // 举例，传递 title 作为参数
+      });
+    }
+    function goMorehotactivity() {
+      common_vendor.index.__f__("log", "at pages/news/news.vue:68", "11111111");
+      common_vendor.index.navigateTo({
+        url: `/pages/detail/activitymore`
+      });
+    }
+    function goMorehistoryactivity() {
+      common_vendor.index.navigateTo({
+        url: `/pages/detail/activityhistorymore`
       });
     }
     return (_ctx, _cache) => {
@@ -39,7 +57,7 @@ const _sfc_main = {
           titleFontSize: "20px",
           type: "line"
         }),
-        c: common_vendor.o((...args) => _ctx.goMorehotactivity && _ctx.goMorehotactivity(...args)),
+        c: common_vendor.o(goMorehotactivity),
         d: common_vendor.f(2, (item, index, i0) => {
           return {
             a: "26b1a250-4-" + i0 + "," + ("26b1a250-3-" + i0),
@@ -69,13 +87,14 @@ const _sfc_main = {
           titleFontSize: "20px",
           type: "line"
         }),
-        i: common_vendor.o((...args) => _ctx.goMorehistoryactivity && _ctx.goMorehistoryactivity(...args)),
+        i: common_vendor.o(goMorehistoryactivity),
         j: common_vendor.f(3, (item, index, i0) => {
           return {
             a: "26b1a250-6-" + i0
           };
         }),
-        k: common_vendor.p({
+        k: common_vendor.o(handleCardClick),
+        l: common_vendor.p({
           imgSrc: "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
           title: "中国大模型人才大会",
           date: "3月15日 - 4月10日",

@@ -10,9 +10,9 @@ const useSelectedstore = common_vendor.defineStore("selected", () => {
       mask: true
     });
     try {
-      const res_new = await newApis_articles.getArticleList({ is_selection: 1, page_size: 1, article_type: "NEWS" });
+      const res_new = await newApis_articles.getArticleList({ is_selection: 1, page_size: 8, article_type: "NEWS" });
       news.value = res_new.data;
-      const res_policy = await newApis_articles.getArticleList({ is_selection: 1, page_size: 1, article_type: "POLICY" });
+      const res_policy = await newApis_articles.getArticleList({ is_selection: 1, page_size: 8, article_type: "POLICY" });
       policys.value = res_policy.data;
     } catch (error) {
       common_vendor.index.__f__("log", "at store/Home.js:25", error);
