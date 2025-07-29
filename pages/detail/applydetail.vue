@@ -1,7 +1,7 @@
 <template>
 	<uni-nav-bar
 	  statusBar="true"
-	  backgroundColor="#903749"
+	  backgroundColor="#ff4757"
 	  fixed="true"
 	  :border="false"
 	  leftIcon="left"
@@ -71,15 +71,65 @@
           />
         </view>
 
-        <!-- 学校 -->
+        <!-- 邮箱 -->
         <view class="form-item">
-          <view class="label">学校</view>
+          <view class="label">邮箱</view>
           <input 
             class="input" 
-            v-model="formData.school" 
-            placeholder="请输入学校名称"
+            v-model="formData.email" 
+            placeholder="请输入邮箱地址"
+            placeholder-class="placeholder"
+            type="email"
+          />
+        </view>
+
+        <!-- 单位 -->
+        <view class="form-item">
+          <view class="label">单位</view>
+          <input 
+            class="input" 
+            v-model="formData.unit" 
+            placeholder="请输入单位名称"
             placeholder-class="placeholder"
           />
+        </view>
+		<!-- 部门 -->
+		<view class="form-item">
+		  <view class="label">部门</view>
+		  <input 
+		    class="input" 
+		    v-model="formData.sectoral" 
+		    placeholder="请输入部门名称"
+		    placeholder-class="placeholder"
+		  />
+		</view>
+		<!-- 职位 -->
+		<view class="form-item">
+		  <view class="label">职位</view>
+		  <input 
+		    class="input" 
+		    v-model="formData.office" 
+		    placeholder="请输入职位名称"
+		    placeholder-class="placeholder"
+		  />
+		</view>
+
+        <!-- 职业 -->
+        <view class="form-item">
+          <view class="label">职业</view>
+          <picker 
+            mode="selector" 
+            :range="careerOptions" 
+            :value="formData.careerIndex"
+            @change="onCareerChange"
+          >
+            <view class="picker-input">
+              <text class="picker-text" :class="{ 'placeholder': formData.careerIndex === -1 }">
+                {{ formData.careerIndex === -1 ? '请选择职业' : careerOptions[formData.careerIndex] }}
+              </text>
+              <text class="picker-arrow">></text>
+            </view>
+          </picker>
         </view>
 
         <!-- 出生日期 -->
@@ -123,12 +173,36 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 
+// 职业选项
+const careerOptions = [
+  '学生',
+  '教师/教育工作者',
+  '工程师',
+  '产品经理',
+  '设计师',
+  '销售',
+  '市场营销',
+  '人力资源',
+  '财务会计',
+  '医生/医护人员',
+  '律师',
+  '咨询顾问',
+  '创业者',
+  '自由职业者',
+  '公务员',
+  '其他'
+]
+
 // 表单数据
 const formData = reactive({
   name: '尹慧',
   phone: '18520658976',
   verifyCode: '',
-  school: '广州华南商贸学院',
+  email: '',
+  unit: '广州华南商贸学院',
+  sectoral: '教导处',
+  office:'院士',
+  careerIndex: -1, // 职业选择索引，-1表示未选择
   birthDate: '1997-11-14',
   idCard: ''
 })
@@ -184,6 +258,12 @@ const sendVerifyCode = () => {
 const onDateChange = (e) => {
   formData.birthDate = e.detail.value
 }
+
+// 职业选择
+const onCareerChange = (e) => {
+  formData.careerIndex = e.detail.value
+}
+
 // 返回函数
 function onBack() {
   uni.navigateBack();
@@ -211,8 +291,25 @@ const validateForm = () => {
     return false
   }
 
-  if (!formData.school.trim()) {
-    uni.showToast({ title: '请输入学校名称', icon: 'none' })
+  if (!formData.email) {
+    uni.showToast({ title: '请输入邮箱地址', icon: 'none' })
+    return false
+  }
+
+  // 邮箱格式验证
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(formData.email)) {
+    uni.showToast({ title: '请输入正确的邮箱格式', icon: 'none' })
+    return false
+  }
+
+  if (!formData.unit.trim()) {
+    uni.showToast({ title: '请输入单位名称', icon: 'none' })
+    return false
+  }
+
+  if (formData.careerIndex === -1) {
+    uni.showToast({ title: '请选择职业', icon: 'none' })
     return false
   }
 
@@ -411,7 +508,7 @@ const handleSubmit = () => {
     }
     
     .picker-arrow {
-      font-size: 24rpx;
+      font-size: 34rpx;
       color: #999999;
       transform: rotate(90deg);
     }

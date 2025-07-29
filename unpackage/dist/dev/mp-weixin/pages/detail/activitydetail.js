@@ -41,7 +41,7 @@ const _sfc_main = {
         a: common_vendor.o(onBack),
         b: common_vendor.p({
           statusBar: "true",
-          backgroundColor: "#903749",
+          backgroundColor: "#ff4757",
           fixed: "true",
           border: false,
           leftIcon: "left"

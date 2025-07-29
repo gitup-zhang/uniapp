@@ -48,7 +48,7 @@ const _sfc_main = {
       return {
         a: common_vendor.p({
           statusBar: "true",
-          backgroundColor: "#903749",
+          backgroundColor: "#ff4757",
           fixed: "true",
           leftWidth: "150px"
         }),

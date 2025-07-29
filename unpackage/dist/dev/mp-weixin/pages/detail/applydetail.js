@@ -11,11 +11,34 @@ if (!Math) {
 const _sfc_main = {
   __name: "applydetail",
   setup(__props) {
+    const careerOptions = [
+      "学生",
+      "教师/教育工作者",
+      "工程师",
+      "产品经理",
+      "设计师",
+      "销售",
+      "市场营销",
+      "人力资源",
+      "财务会计",
+      "医生/医护人员",
+      "律师",
+      "咨询顾问",
+      "创业者",
+      "自由职业者",
+      "公务员",
+      "其他"
+    ];
     const formData = common_vendor.reactive({
       name: "尹慧",
       phone: "18520658976",
       verifyCode: "",
-      school: "广州华南商贸学院",
+      email: "",
+      unit: "广州华南商贸学院",
+      sectoral: "教导处",
+      office: "院士",
+      careerIndex: -1,
+      // 职业选择索引，-1表示未选择
       birthDate: "1997-11-14",
       idCard: ""
     });
@@ -58,6 +81,9 @@ const _sfc_main = {
     const onDateChange = (e) => {
       formData.birthDate = e.detail.value;
     };
+    const onCareerChange = (e) => {
+      formData.careerIndex = e.detail.value;
+    };
     function onBack() {
       common_vendor.index.navigateBack();
     }
@@ -78,8 +104,21 @@ const _sfc_main = {
         common_vendor.index.showToast({ title: "请输入验证码", icon: "none" });
         return false;
       }
-      if (!formData.school.trim()) {
-        common_vendor.index.showToast({ title: "请输入学校名称", icon: "none" });
+      if (!formData.email) {
+        common_vendor.index.showToast({ title: "请输入邮箱地址", icon: "none" });
+        return false;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        common_vendor.index.showToast({ title: "请输入正确的邮箱格式", icon: "none" });
+        return false;
+      }
+      if (!formData.unit.trim()) {
+        common_vendor.index.showToast({ title: "请输入单位名称", icon: "none" });
+        return false;
+      }
+      if (formData.careerIndex === -1) {
+        common_vendor.index.showToast({ title: "请选择职业", icon: "none" });
         return false;
       }
       if (!formData.birthDate) {
@@ -116,7 +155,7 @@ const _sfc_main = {
         a: common_vendor.o(onBack),
         b: common_vendor.p({
           statusBar: "true",
-          backgroundColor: "#903749",
+          backgroundColor: "#ff4757",
           fixed: "true",
           border: false,
           leftIcon: "left"
@@ -130,16 +169,27 @@ const _sfc_main = {
         i: isCountingDown.value,
         j: formData.verifyCode,
         k: common_vendor.o(($event) => formData.verifyCode = $event.detail.value),
-        l: formData.school,
-        m: common_vendor.o(($event) => formData.school = $event.detail.value),
-        n: common_vendor.t(formData.birthDate || "请选择出生日期"),
-        o: !formData.birthDate ? 1 : "",
-        p: formData.birthDate,
-        q: common_vendor.o(onDateChange),
-        r: maxDate.value,
-        s: formData.idCard,
-        t: common_vendor.o(($event) => formData.idCard = $event.detail.value),
-        v: common_vendor.o(handleSubmit)
+        l: formData.email,
+        m: common_vendor.o(($event) => formData.email = $event.detail.value),
+        n: formData.unit,
+        o: common_vendor.o(($event) => formData.unit = $event.detail.value),
+        p: formData.sectoral,
+        q: common_vendor.o(($event) => formData.sectoral = $event.detail.value),
+        r: formData.office,
+        s: common_vendor.o(($event) => formData.office = $event.detail.value),
+        t: common_vendor.t(formData.careerIndex === -1 ? "请选择职业" : careerOptions[formData.careerIndex]),
+        v: formData.careerIndex === -1 ? 1 : "",
+        w: careerOptions,
+        x: formData.careerIndex,
+        y: common_vendor.o(onCareerChange),
+        z: common_vendor.t(formData.birthDate || "请选择出生日期"),
+        A: !formData.birthDate ? 1 : "",
+        B: formData.birthDate,
+        C: common_vendor.o(onDateChange),
+        D: maxDate.value,
+        E: formData.idCard,
+        F: common_vendor.o(($event) => formData.idCard = $event.detail.value),
+        G: common_vendor.o(handleSubmit)
       };
     };
   }

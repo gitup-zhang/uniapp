@@ -13,6 +13,8 @@ if (!Math) {
   "./components/ArticleCard/ArticlePolicy.js";
   "./pages/detail/activitymore.js";
   "./pages/detail/activityhistorymore.js";
+  "./pages/detail/profile.js";
+  "./pages/detail/activityjoined.js";
 }
 const _sfc_main = {
   onLaunch: function() {

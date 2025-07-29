@@ -10,7 +10,9 @@
     "pages/detail/applydetail",
     "components/ArticleCard/ArticlePolicy",
     "pages/detail/activitymore",
-    "pages/detail/activityhistorymore"
+    "pages/detail/activityhistorymore",
+    "pages/detail/profile",
+    "pages/detail/activityjoined"
   ],
   "window": {
     "navigationBarTextStyle": "white",
@@ -34,7 +36,7 @@
         "pagePath": "pages/policy/policy",
         "iconPath": "/static/icon/policy.png",
         "selectedIconPath": "/static/icon/policy-selecte.png",
-        "text": "咨询"
+        "text": "资讯"
       },
       {
         "pagePath": "pages/news/news",

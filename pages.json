@@ -87,6 +87,22 @@
 				"navigationBarTitleText" : "",
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path" : "pages/detail/profile",
+			"style" : 
+			{
+				"navigationBarTitleText" : "",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path" : "pages/detail/activityjoined",
+			"style" : 
+			{
+				"navigationBarTitleText" : "",
+				"navigationStyle": "custom"
+			}
 		}
 		
 	],
@@ -120,7 +136,7 @@
 			"pagePath": "pages/policy/policy",
 			"iconPath": "/static/icon/policy.png",
 			"selectedIconPath": "/static/icon/policy-selecte.png",
-			"text": "咨询"
+			"text": "资讯"
 		},{
 			"pagePath": "pages/news/news",
 			"iconPath": "/static/icon/news.png",

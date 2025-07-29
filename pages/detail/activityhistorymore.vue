@@ -1,7 +1,7 @@
 <template>
 	<uni-nav-bar
 	  statusBar="true"
-	  backgroundColor="#903749"
+	  backgroundColor="#ff4757"
 	  fixed="true"
 	  :border="false"
 	  leftIcon="left"

@@ -1,0 +1,1 @@
+<uni-nav-bar wx:if="{{b}}" u-s="{{['d']}}" bindclickLeft="{{a}}" u-i="3edb85df-0" bind:__l="__l" u-p="{{b}}"><view class="navbar-center"><text class="navbar-title">参加的活动</text></view></uni-nav-bar>

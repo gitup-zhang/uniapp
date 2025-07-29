@@ -4,7 +4,7 @@ const newApis_info = require("../new-apis/info.js");
 const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
   let info = common_vendor.ref({});
   const token = common_vendor.ref("");
-  const signal = common_vendor.ref(false);
+  const signal = common_vendor.ref(true);
   const getinfo = async () => {
     signal.value = true;
     info.value = {

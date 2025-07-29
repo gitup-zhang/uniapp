@@ -184,7 +184,7 @@
   color: #cccccc;
 }
 .form-item .picker-input .picker-arrow.data-v-123ce677 {
-  font-size: 24rpx;
+  font-size: 34rpx;
   color: #999999;
   transform: rotate(90deg);
 }
