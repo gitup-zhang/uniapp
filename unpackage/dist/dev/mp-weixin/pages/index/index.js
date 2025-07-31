@@ -44,6 +44,11 @@ const _sfc_main = {
         handleMorearticle();
       }
     }
+    function noticeclick(id) {
+      common_vendor.index.navigateTo({
+        url: `/pages/detail/noticedetail?id=${id}`
+      });
+    }
     common_vendor.onMounted(() => {
       usenotice.getnoticestore();
       selected.getselected();
@@ -62,7 +67,8 @@ const _sfc_main = {
         h: common_vendor.f(common_vendor.unref(usenotice).notice, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.content),
-            b: item.id
+            b: common_vendor.o(($event) => noticeclick(item.id), item.id),
+            c: item.id
           };
         }),
         i: currentTab.value === 0 ? 1 : "",

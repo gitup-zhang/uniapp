@@ -15,6 +15,7 @@ if (!Math) {
   "./pages/detail/activityhistorymore.js";
   "./pages/detail/profile.js";
   "./pages/detail/activityjoined.js";
+  "./pages/detail/noticedetail.js";
 }
 const _sfc_main = {
   onLaunch: function() {

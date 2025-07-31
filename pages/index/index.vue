@@ -37,12 +37,12 @@
 	        <text class="icon-text">📢</text>
 	      </view>
 	      <text class="notice-title">系统公告</text>
-	      <view class="notice-badge">NEW</view>
+	      <view class="notice-badge">重要</view>
 	    </view>
 	    <view class="notice-content">
 	      <swiper class="notice-swiper" autoplay="true" vertical="true" interval="4000" circular="true">
 	        <swiper-item v-for="item in usenotice.notice" :key="item.id">
-	          <text class="notice-text">{{item.content}}</text>
+	          <text class="notice-text" @click="noticeclick(item.id)">{{item.content}}</text>
 	        </swiper-item>
 	      </swiper>
 	    </view>
@@ -171,6 +171,11 @@ function handleMoreClick() {
   } else {
     handleMorearticle() // 政策和新闻
   }
+}
+function noticeclick(id){
+	uni.navigateTo({
+		 url: `/pages/detail/noticedetail?id=${id}`
+	})
 }
 
 

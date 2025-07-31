@@ -12,7 +12,8 @@
     "pages/detail/activitymore",
     "pages/detail/activityhistorymore",
     "pages/detail/profile",
-    "pages/detail/activityjoined"
+    "pages/detail/activityjoined",
+    "pages/detail/noticedetail"
   ],
   "window": {
     "navigationBarTextStyle": "white",
