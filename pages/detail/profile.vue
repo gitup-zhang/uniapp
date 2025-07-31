@@ -1,16 +1,31 @@
 <template>
   <view class="profile-container">
     <!-- 状态栏占位 -->
-    <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
+    <!-- <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view> -->
     
     <!-- 导航栏 -->
-    <view class="nav-bar">
+    <!-- <view class="nav-bar">
       <view class="nav-back" @click="goBack">
         <uni-icons type="left" size="20" color="#fff"/>
       </view>
       <text class="nav-title">个人信息</text>
       <view class="nav-right"></view>
-    </view>
+    </view> -->
+	<uni-nav-bar
+	  statusBar="true"
+	  backgroundColor="#ff4757"
+	  fixed="true"
+	  :border="false"
+	  leftIcon="left"
+	  @clickLeft="goBack"
+	>
+	  <!-- 居中标题插槽 -->
+	  <template v-slot:default>
+	    <view class="navbar-center">
+	      <text class="navbar-title">个人信息</text>
+	    </view>
+	  </template>
+	</uni-nav-bar>
 
     <!-- 头部背景装饰 -->
     <view class="header-decoration">
@@ -850,6 +865,7 @@ const hideLoading = () => {
 </script>
 
 <style lang="scss" scoped>
+	@import "../../style/detail.css";
 .profile-container {
   min-height: 100vh;
   background: linear-gradient(180deg, #ff4757 0%, #ff6b7a 100%);
@@ -857,8 +873,10 @@ const hideLoading = () => {
 }
 
 .status-bar {
+	
   background: transparent;
 }
+
 
 .nav-bar {
   height: 88rpx;
@@ -868,6 +886,8 @@ const hideLoading = () => {
   padding: 0 32rpx;
   position: relative;
   z-index: 10;
+  
+
 
   .nav-back {
     width: 64rpx;

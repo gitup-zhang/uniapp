@@ -2,7 +2,12 @@
   <view class="container">
     <!-- 状态栏占位 -->
     <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
-    
+    <!-- 导航栏 -->
+    <view class="nav-bar">
+      
+      <text class="nav-title">个人信息</text>
+      <view class="nav-right"></view>
+    </view>
     <!-- 未登录状态 - 优化后的登录界面 -->
     <view v-if="!userInfo.signal" class="login-container">
       <view class="login-background">
@@ -152,6 +157,9 @@
               </view>
             </view>
           </view>
+		  
+		 
+		  
         </view>
 
         <!-- 活动区域 -->
@@ -514,7 +522,7 @@ const performCheckin = async (data) => {
 
 const viewAllActivities = () => {
   uni.navigateTo({
-    url: '/pages/activity/list'
+    url: '/pages/detail/activityjoined'
   })
 }
 </script>
@@ -523,6 +531,36 @@ const viewAllActivities = () => {
 .container {
   min-height: 100vh;
   background: linear-gradient(180deg, #ff4757 0%, #ff6b7a 100%);
+}
+.nav-bar {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32rpx;
+  position: relative;
+  z-index: 10;
+
+  .nav-back {
+    width: 64rpx;
+    height: 64rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    backdrop-filter: blur(10rpx);
+  }
+
+  .nav-title {
+    font-size: 36rpx;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .nav-right {
+    width: 64rpx;
+  }
 }
 
 .status-bar {
@@ -822,7 +860,7 @@ const viewAllActivities = () => {
 
 // 优化后的已登录主界面
 .main-container {
-  min-height: 100vh;
+  min-height: 80vh;
   background: linear-gradient(180deg, #ff4757 0%, #ff6b7a 100%);
 }
 
@@ -957,13 +995,19 @@ const viewAllActivities = () => {
 }
 
 .main-content {
+  // background: #f8f9fa;
+  // border-radius: 32rpx 32rpx 0 0;
+  // min-height: calc(100vh - 400rpx);
+  // padding: 32rpx;
+  // margin-top: -16rpx;
+  // position: relative;
+  // z-index: 1;
   background: #f8f9fa;
-  border-radius: 32rpx 32rpx 0 0;
-  min-height: calc(100vh - 400rpx);
-  padding: 32rpx;
-  margin-top: -16rpx;
-  position: relative;
-  z-index: 1;
+    border-radius: 32rpx 32rpx 0 0;
+    padding: 32rpx;
+    margin-top: -16rpx;
+    position: relative;
+    z-index: 1;
 }
 
 .stats-overview {

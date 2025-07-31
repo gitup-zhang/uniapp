@@ -24,59 +24,23 @@ const _sfc_main = {
     const loadingPopup = common_vendor.ref(null);
     const isLogging = common_vendor.ref(false);
     const loadingText = common_vendor.ref({ more: "加载中..." });
-    const loginFeatures = common_vendor.ref([
-      {
-        icon: "locked",
-        color: "#2ed573",
-        iconClass: "security-icon",
-        title: "安全保障",
-        desc: "银行级数据加密保护"
-      },
-      {
-        icon: "heart",
-        color: "#ff4757",
-        iconClass: "personal-icon",
-        title: "个性推荐",
-        desc: "智能内容个性化推送"
-      },
-      {
-        icon: "cloud",
-        color: "#3742fa",
-        iconClass: "sync-icon",
-        title: "云端同步",
-        desc: "多设备无缝数据同步"
-      }
-    ]);
-    common_vendor.ref([
-      {
-        icon: "gear",
-        text: "账户设置",
-        bgColor: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        iconColor: "#fff",
-        action: "settings"
-      },
-      {
-        icon: "heart",
-        text: "我的收藏",
-        bgColor: "linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)",
-        iconColor: "#fff",
-        action: "favorites"
-      },
-      {
-        icon: "chatbubble",
-        text: "消息中心",
-        bgColor: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
-        iconColor: "#fff",
-        action: "messages"
-      },
-      {
-        icon: "help",
-        text: "帮助中心",
-        bgColor: "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)",
-        iconColor: "#fff",
-        action: "help"
-      }
-    ]);
+    const loginType = common_vendor.ref("account");
+    const accountForm = common_vendor.reactive({
+      username: "",
+      password: "",
+      usernameError: "",
+      passwordError: ""
+    });
+    const smsForm = common_vendor.reactive({
+      phone: "",
+      code: "",
+      phoneError: "",
+      codeError: ""
+    });
+    const smsCountdown = common_vendor.ref(0);
+    const isValidPhone = common_vendor.computed(() => {
+      return /^1[3-9]\d{9}$/.test(smsForm.phone);
+    });
     const myActivityData = common_vendor.ref({
       title: "AI前沿研讨会",
       location: "北京中关村科技园",
@@ -84,11 +48,6 @@ const _sfc_main = {
       checkText: "查看须知",
       joinText: "加入群聊",
       statusText: "点击签到"
-    });
-    const authState = common_vendor.ref({
-      phoneAuthCode: "",
-      encryptedData: "",
-      iv: ""
     });
     common_vendor.onMounted(() => {
       initPage();
@@ -100,14 +59,14 @@ const _sfc_main = {
           await refreshUserData();
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:313", "页面初始化失败:", error);
+        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:355", "页面初始化失败:", error);
       }
     };
     const refreshUserData = async () => {
       try {
         await userInfo.getUserInfo();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:322", "获取用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:364", "获取用户信息失败:", error);
       }
     };
     const formatPhoneNumber = (phone) => {
@@ -115,8 +74,163 @@ const _sfc_main = {
         return "";
       return phone.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
     };
+    const switchLoginType = (type) => {
+      loginType.value = type;
+      accountForm.username = "";
+      accountForm.password = "";
+      accountForm.usernameError = "";
+      accountForm.passwordError = "";
+      smsForm.phone = "";
+      smsForm.code = "";
+      smsForm.phoneError = "";
+      smsForm.codeError = "";
+    };
+    const validateUsername = () => {
+      if (!accountForm.username.trim()) {
+        accountForm.usernameError = "请输入账号或手机号";
+        return false;
+      }
+      accountForm.usernameError = "";
+      return true;
+    };
+    const validatePassword = () => {
+      if (!accountForm.password.trim()) {
+        accountForm.passwordError = "请输入密码";
+        return false;
+      }
+      if (accountForm.password.length < 6) {
+        accountForm.passwordError = "密码长度不能少于6位";
+        return false;
+      }
+      accountForm.passwordError = "";
+      return true;
+    };
+    const validatePhone = () => {
+      if (!smsForm.phone.trim()) {
+        smsForm.phoneError = "请输入手机号";
+        return false;
+      }
+      if (!isValidPhone.value) {
+        smsForm.phoneError = "请输入正确的手机号格式";
+        return false;
+      }
+      smsForm.phoneError = "";
+      return true;
+    };
+    const validateSmsCode = () => {
+      if (!smsForm.code.trim()) {
+        smsForm.codeError = "请输入验证码";
+        return false;
+      }
+      if (smsForm.code.length !== 6) {
+        smsForm.codeError = "验证码为6位数字";
+        return false;
+      }
+      smsForm.codeError = "";
+      return true;
+    };
+    const clearUsernameError = () => {
+      if (accountForm.usernameError) {
+        accountForm.usernameError = "";
+      }
+    };
+    const clearPasswordError = () => {
+      if (accountForm.passwordError) {
+        accountForm.passwordError = "";
+      }
+    };
+    const clearPhoneError = () => {
+      if (smsForm.phoneError) {
+        smsForm.phoneError = "";
+      }
+    };
+    const clearCodeError = () => {
+      if (smsForm.codeError) {
+        smsForm.codeError = "";
+      }
+    };
+    const handleAccountLogin = async () => {
+      const isUsernameValid = validateUsername();
+      const isPasswordValid = validatePassword();
+      if (!isUsernameValid || !isPasswordValid) {
+        return;
+      }
+      try {
+        isLogging.value = true;
+        const loginResult = await callAccountLoginAPI({
+          username: accountForm.username,
+          password: accountForm.password
+        });
+        await userInfo.saveLoginInfo(loginResult);
+        await refreshUserData();
+        common_vendor.index.showToast({
+          title: "登录成功",
+          icon: "success"
+        });
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:490", "账号登录失败:", error);
+        common_vendor.index.showToast({
+          title: error.message || "登录失败，请重试",
+          icon: "error"
+        });
+      } finally {
+        isLogging.value = false;
+      }
+    };
+    const sendSmsCode = async () => {
+      if (!validatePhone()) {
+        return;
+      }
+      try {
+        smsCountdown.value = 60;
+        const timer = setInterval(() => {
+          smsCountdown.value--;
+          if (smsCountdown.value <= 0) {
+            clearInterval(timer);
+          }
+        }, 1e3);
+        common_vendor.index.showToast({
+          title: "验证码已发送",
+          icon: "success"
+        });
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:526", "发送验证码失败:", error);
+        common_vendor.index.showToast({
+          title: error.message || "发送失败，请重试",
+          icon: "error"
+        });
+      }
+    };
+    const handleSmsLogin = async () => {
+      const isPhoneValid = validatePhone();
+      const isCodeValid = validateSmsCode();
+      if (!isPhoneValid || !isCodeValid) {
+        return;
+      }
+      try {
+        isLogging.value = true;
+        const loginResult = await callSmsLoginAPI({
+          phone: smsForm.phone,
+          code: smsForm.code
+        });
+        await userInfo.saveLoginInfo(loginResult);
+        await refreshUserData();
+        common_vendor.index.showToast({
+          title: "登录成功",
+          icon: "success"
+        });
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:562", "短信登录失败:", error);
+        common_vendor.index.showToast({
+          title: error.message || "登录失败，请重试",
+          icon: "error"
+        });
+      } finally {
+        isLogging.value = false;
+      }
+    };
     const handlePhoneAuth = async (e) => {
-      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:334", "手机号授权回调:", e);
+      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:574", "手机号授权回调:", e);
       if (e.detail.errMsg !== "getPhoneNumber:ok") {
         common_vendor.index.showToast({
           title: "授权失败，请重试",
@@ -126,14 +240,27 @@ const _sfc_main = {
       }
       try {
         isLogging.value = true;
-        authState.value = {
-          phoneAuthCode: e.detail.code,
+        const loginRes = await common_vendor.index.login({
+          provider: "weixin"
+        });
+        if (loginRes[1].errMsg !== "login:ok") {
+          throw new Error("获取登录凭证失败");
+        }
+        const loginData = {
+          code: loginRes[1].code,
+          phoneCode: e.detail.code,
           encryptedData: e.detail.encryptedData,
           iv: e.detail.iv
         };
-        await performLogin();
+        const loginResult = await callWechatLoginAPI(loginData);
+        await userInfo.saveLoginInfo(loginResult);
+        await refreshUserData();
+        common_vendor.index.showToast({
+          title: "登录成功",
+          icon: "success"
+        });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:356", "登录失败:", error);
+        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:612", "微信登录失败:", error);
         common_vendor.index.showToast({
           title: "登录失败，请重试",
           icon: "error"
@@ -142,39 +269,55 @@ const _sfc_main = {
         isLogging.value = false;
       }
     };
-    const performLogin = async () => {
-      try {
-        const loginRes = await common_vendor.index.login({
-          provider: "weixin"
-        });
-        if (loginRes[1].errMsg !== "login:ok") {
-          throw new Error("获取登录凭证失败");
-        }
-        const loginCode = loginRes[1].code;
-        const loginData = {
-          code: loginCode,
-          phoneCode: authState.value.phoneAuthCode,
-          encryptedData: authState.value.encryptedData,
-          iv: authState.value.iv
-        };
-        const loginResult = await callLoginAPI(loginData);
-        await userInfo.saveLoginInfo(loginResult);
-        await refreshUserData();
-        common_vendor.index.showToast({
-          title: "登录成功",
-          icon: "success"
-        });
-      } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:396", "登录过程出错:", error);
-        throw error;
-      }
+    const handleForgotPassword = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/auth/forgot-password"
+      });
     };
-    const callLoginAPI = async (loginData) => {
+    const callAccountLoginAPI = async (data) => {
       return new Promise((resolve, reject) => {
         common_vendor.index.request({
-          url: "https://your-api-domain.com/api/login",
+          url: "https://your-api-domain.com/api/account-login",
           method: "POST",
-          data: loginData,
+          data,
+          success: (res) => {
+            if (res.data.success) {
+              resolve(res.data.data);
+            } else {
+              reject(new Error(res.data.message || "登录失败"));
+            }
+          },
+          fail: (error) => {
+            reject(error);
+          }
+        });
+      });
+    };
+    const callSmsLoginAPI = async (data) => {
+      return new Promise((resolve, reject) => {
+        common_vendor.index.request({
+          url: "https://your-api-domain.com/api/sms-login",
+          method: "POST",
+          data,
+          success: (res) => {
+            if (res.data.success) {
+              resolve(res.data.data);
+            } else {
+              reject(new Error(res.data.message || "登录失败"));
+            }
+          },
+          fail: (error) => {
+            reject(error);
+          }
+        });
+      });
+    };
+    const callWechatLoginAPI = async (data) => {
+      return new Promise((resolve, reject) => {
+        common_vendor.index.request({
+          url: "https://your-api-domain.com/api/wechat-login",
+          method: "POST",
+          data,
           success: (res) => {
             if (res.data.success) {
               resolve(res.data.data);
@@ -213,20 +356,20 @@ const _sfc_main = {
       (_a = loadingPopup.value) == null ? void 0 : _a.close();
     };
     const onCheck = (data) => {
-      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:482", "查看活动:", data);
+      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:744", "查看活动:", data);
       common_vendor.index.navigateTo({
         url: "/pages/activity/detail?id=" + data.id
       });
     };
     const onJoin = (data) => {
-      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:489", "加入群聊:", data);
+      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:751", "加入群聊:", data);
       common_vendor.index.showToast({
         title: "已加入群聊",
         icon: "success"
       });
     };
     const onStatus = async (data) => {
-      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:497", "状态操作:", data);
+      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:759", "状态操作:", data);
       try {
         showLoading("正在签到...");
         await performCheckin(data);
@@ -259,31 +402,46 @@ const _sfc_main = {
         b: !common_vendor.unref(userInfo).signal
       }, !common_vendor.unref(userInfo).signal ? common_vendor.e({
         c: common_assets._imports_0$1,
-        d: common_vendor.f(loginFeatures.value, (feature, index, i0) => {
-          return {
-            a: "a5a8e0a1-0-" + i0,
-            b: common_vendor.p({
-              type: feature.icon,
-              size: "24",
-              color: feature.color
-            }),
-            c: common_vendor.n(feature.iconClass),
-            d: common_vendor.t(feature.title),
-            e: common_vendor.t(feature.desc),
-            f: index
-          };
-        }),
-        e: !isLogging.value
-      }, !isLogging.value ? {
-        f: common_vendor.p({
-          type: "phone-filled",
+        d: loginType.value === "account" ? 1 : "",
+        e: common_vendor.o(($event) => switchLoginType("account")),
+        f: loginType.value === "sms" ? 1 : "",
+        g: common_vendor.o(($event) => switchLoginType("sms")),
+        h: loginType.value === "wechat" ? 1 : "",
+        i: common_vendor.o(($event) => switchLoginType("wechat")),
+        j: loginType.value === "account"
+      }, loginType.value === "account" ? common_vendor.e({
+        k: common_vendor.p({
+          type: "person",
           size: "20",
-          color: "#fff"
-        })
+          color: "#999"
+        }),
+        l: isLogging.value,
+        m: common_vendor.o(validateUsername),
+        n: common_vendor.o([($event) => accountForm.username = $event.detail.value, clearUsernameError]),
+        o: accountForm.username,
+        p: accountForm.usernameError ? 1 : "",
+        q: accountForm.usernameError
+      }, accountForm.usernameError ? {
+        r: common_vendor.t(accountForm.usernameError)
       } : {}, {
-        g: isLogging.value
+        s: common_vendor.p({
+          type: "locked",
+          size: "20",
+          color: "#999"
+        }),
+        t: isLogging.value,
+        v: common_vendor.o(validatePassword),
+        w: common_vendor.o([($event) => accountForm.password = $event.detail.value, clearPasswordError]),
+        x: accountForm.password,
+        y: common_vendor.o(handleForgotPassword),
+        z: accountForm.passwordError ? 1 : "",
+        A: accountForm.passwordError
+      }, accountForm.passwordError ? {
+        B: common_vendor.t(accountForm.passwordError)
+      } : {}, {
+        C: isLogging.value
       }, isLogging.value ? {
-        h: common_vendor.p({
+        D: common_vendor.p({
           status: "loading",
           color: "#fff",
           ["content-text"]: {
@@ -291,63 +449,135 @@ const _sfc_main = {
           }
         })
       } : {}, {
-        i: common_vendor.t(isLogging.value ? "正在登录..." : "手机号快速登录"),
-        j: common_vendor.o(handlePhoneAuth),
-        k: isLogging.value,
-        l: common_vendor.o(showUserAgreement),
-        m: common_vendor.o(showPrivacyPolicy)
+        E: common_vendor.o(handleAccountLogin),
+        F: isLogging.value
+      }) : {}, {
+        G: loginType.value === "sms"
+      }, loginType.value === "sms" ? common_vendor.e({
+        H: common_vendor.p({
+          type: "phone",
+          size: "20",
+          color: "#999"
+        }),
+        I: isLogging.value,
+        J: common_vendor.o(validatePhone),
+        K: common_vendor.o([($event) => smsForm.phone = $event.detail.value, clearPhoneError]),
+        L: smsForm.phone,
+        M: smsForm.phoneError ? 1 : "",
+        N: smsForm.phoneError
+      }, smsForm.phoneError ? {
+        O: common_vendor.t(smsForm.phoneError)
+      } : {}, {
+        P: common_vendor.p({
+          type: "chatboxes",
+          size: "20",
+          color: "#999"
+        }),
+        Q: isLogging.value,
+        R: common_vendor.o(validateSmsCode),
+        S: common_vendor.o([($event) => smsForm.code = $event.detail.value, clearCodeError]),
+        T: smsForm.code,
+        U: common_vendor.t(smsCountdown.value > 0 ? `${smsCountdown.value}s` : "获取验证码"),
+        V: common_vendor.o(sendSmsCode),
+        W: !isValidPhone.value || smsCountdown.value > 0,
+        X: smsForm.codeError ? 1 : "",
+        Y: smsForm.codeError
+      }, smsForm.codeError ? {
+        Z: common_vendor.t(smsForm.codeError)
+      } : {}, {
+        aa: isLogging.value
+      }, isLogging.value ? {
+        ab: common_vendor.p({
+          status: "loading",
+          color: "#fff",
+          ["content-text"]: {
+            contentnomore: ""
+          }
+        })
+      } : {}, {
+        ac: common_vendor.o(handleSmsLogin),
+        ad: isLogging.value
+      }) : {}, {
+        ae: loginType.value === "wechat"
+      }, loginType.value === "wechat" ? common_vendor.e({
+        af: common_vendor.p({
+          type: "weixin",
+          size: "60",
+          color: "#1aad19"
+        }),
+        ag: isLogging.value
+      }, isLogging.value ? {
+        ah: common_vendor.p({
+          status: "loading",
+          color: "#fff",
+          ["content-text"]: {
+            contentnomore: ""
+          }
+        })
+      } : {
+        ai: common_vendor.p({
+          type: "weixin",
+          size: "20",
+          color: "#fff"
+        })
+      }, {
+        aj: common_vendor.o(handlePhoneAuth),
+        ak: isLogging.value
+      }) : {}, {
+        al: common_vendor.o(showUserAgreement),
+        am: common_vendor.o(showPrivacyPolicy)
       }) : {
-        n: common_vendor.unref(userInfo).info.Image || "/static/icon/empty.png",
-        o: common_vendor.t(common_vendor.unref(userInfo).info.username || "用户"),
-        p: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
-        q: common_vendor.t(common_vendor.unref(userInfo).info.slogan || "点击设置个人签名"),
-        r: common_vendor.p({
+        an: common_vendor.unref(userInfo).info.Image || "/static/icon/empty.png",
+        ao: common_vendor.t(common_vendor.unref(userInfo).info.username || "用户"),
+        ap: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
+        aq: common_vendor.t(common_vendor.unref(userInfo).info.slogan || "点击设置个人签名"),
+        ar: common_vendor.p({
           type: "right",
           size: "18",
           color: "rgba(255,255,255,0.8)"
         }),
-        s: common_vendor.o(goToProfile),
-        t: common_assets._imports_1$1,
-        v: common_vendor.t(common_vendor.unref(userInfo).info.daysOnline || 0),
-        w: common_vendor.t(common_vendor.unref(userInfo).info.newsViews || 0),
-        x: common_vendor.p({
+        as: common_vendor.o(goToProfile),
+        at: common_assets._imports_1$1,
+        av: common_vendor.t(common_vendor.unref(userInfo).info.daysOnline || 0),
+        aw: common_vendor.t(common_vendor.unref(userInfo).info.newsViews || 0),
+        ax: common_vendor.p({
           type: "up",
           size: "12",
           color: "#2ed573"
         }),
-        y: common_vendor.t(common_vendor.unref(userInfo).info.policyViews || 0),
-        z: common_vendor.p({
+        ay: common_vendor.t(common_vendor.unref(userInfo).info.policyViews || 0),
+        az: common_vendor.p({
           type: "up",
           size: "12",
           color: "#2ed573"
         }),
-        A: common_vendor.t(common_vendor.unref(userInfo).info.field || 3),
-        B: common_vendor.p({
+        aA: common_vendor.t(common_vendor.unref(userInfo).info.field || 3),
+        aB: common_vendor.p({
           type: "minus",
           size: "12",
           color: "#ffa726"
         }),
-        C: common_vendor.p({
+        aC: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        D: common_vendor.o(viewAllActivities),
-        E: common_vendor.o(onCheck),
-        F: common_vendor.o(onJoin),
-        G: common_vendor.o(onStatus),
-        H: common_vendor.p({
+        aD: common_vendor.o(viewAllActivities),
+        aE: common_vendor.o(onCheck),
+        aF: common_vendor.o(onJoin),
+        aG: common_vendor.o(onStatus),
+        aH: common_vendor.p({
           activityData: myActivityData.value
         })
       }, {
-        I: common_vendor.p({
+        aI: common_vendor.p({
           status: "loading",
           ["content-text"]: loadingText.value
         }),
-        J: common_vendor.sr(loadingPopup, "a5a8e0a1-9", {
+        aJ: common_vendor.sr(loadingPopup, "a5a8e0a1-15", {
           "k": "loadingPopup"
         }),
-        K: common_vendor.p({
+        aK: common_vendor.p({
           type: "center"
         })
       });

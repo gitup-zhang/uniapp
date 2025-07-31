@@ -23,6 +23,35 @@
 /* 垂直间距 */
 /* 透明度 */
 /* 文章场景相关 */
+.navbar-title.data-v-7b181482 {
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 10px; /* 与左侧“新闻”一致的垂直视觉位置 */
+}
+.navbar-center.data-v-7b181482 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 10px;
+  pointer-events: none;
+  transform: translateY(10px); /* 替代 margin-top */
+}
+/* 标题样式 */
+.example-body.data-v-7b181482 {
+
+		display: block;
+
+		padding: 10px;
+}
+/* 	.mb-10 {
+		margin-bottom: 10px;
+	} */
 .profile-container.data-v-7b181482 {
   min-height: 100vh;
   background: linear-gradient(180deg, #ff4757 0%, #ff6b7a 100%);

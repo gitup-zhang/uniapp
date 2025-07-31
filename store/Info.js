@@ -9,7 +9,7 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	
 	const token =ref("")
 	// 标志位，判断是否登录
-	const signal=ref(true)
+	const signal=ref(false)
 	const getinfo=async()=>{
 		signal.value=true
 		info.value={

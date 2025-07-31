@@ -58,10 +58,6 @@
       }
     ]
   },
-  "permission": {
-    "scope.userInfo": {
-      "desc": "用于完善用户资料"
-    }
-  },
+  "permission": {},
   "usingComponents": {}
 }
