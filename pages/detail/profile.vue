@@ -1,16 +1,6 @@
 <template>
   <view class="profile-container">
-    <!-- 状态栏占位 -->
-    <!-- <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view> -->
     
-    <!-- 导航栏 -->
-    <!-- <view class="nav-bar">
-      <view class="nav-back" @click="goBack">
-        <uni-icons type="left" size="20" color="#fff"/>
-      </view>
-      <text class="nav-title">个人信息</text>
-      <view class="nav-right"></view>
-    </view> -->
 	<uni-nav-bar
 	  statusBar="true"
 	  backgroundColor="#ff4757"
