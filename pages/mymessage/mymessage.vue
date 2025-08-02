@@ -153,6 +153,7 @@
             open-type="getPhoneNumber" 
             @getphonenumber="handlePhoneAuth"
             :disabled="isLogging"
+			@click="wechatlogin"
           >
             <uni-load-more v-if="isLogging" status="loading" color="#fff" :content-text="{ contentnomore: '' }"/>
             <view v-else class="btn-content">
@@ -217,9 +218,9 @@
             <view class="stats-icon-wrapper">
               <image class="stats-icon" src="/static/icon/fire.png" mode="aspectFit"/>
             </view>
-            <view class="stats-info">
+           <view class="stats-info">
               <text class="stats-title">我的数据统计</text>
-              <text class="stats-subtitle">累计在线 {{ userInfo.info.daysOnline || 0 }} 天</text>
+              <!-- <text class="stats-subtitle">累计在线 {{ userInfo.info.daysOnline || 0 }} 天</text> -->
             </view>
           </view>
           
@@ -227,10 +228,10 @@
             <view class="stat-item">
               <text class="stat-number">{{ userInfo.info.newsViews || 0 }}</text>
               <text class="stat-label">新闻阅读</text>
-              <view class="stat-trend">
+<!--              <view class="stat-trend">
                 <uni-icons type="up" size="12" color="#2ed573"/>
                 <text class="trend-value">+12</text>
-              </view>
+              </view> -->
             </view>
             
             <view class="stat-divider"></view>
@@ -238,10 +239,10 @@
             <view class="stat-item">
               <text class="stat-number">{{ userInfo.info.policyViews || 0 }}</text>
               <text class="stat-label">政策查看</text>
-              <view class="stat-trend">
+             <!-- <view class="stat-trend">
                 <uni-icons type="up" size="12" color="#2ed573"/>
                 <text class="trend-value">+5</text>
-              </view>
+              </view> -->
             </view>
             
             <view class="stat-divider"></view>
@@ -249,10 +250,10 @@
             <view class="stat-item">
               <text class="stat-number">{{ userInfo.info.field || 3 }}</text>
               <text class="stat-label">关注领域</text>
-              <view class="stat-trend">
+              <!-- <view class="stat-trend">
                 <uni-icons type="minus" size="12" color="#ffa726"/>
                 <text class="trend-value">0</text>
-              </view>
+              </view> -->
             </view>
           </view>
         </view>
@@ -568,56 +569,71 @@ const handleSmsLogin = async () => {
     isLogging.value = false
   }
 }
+const wechatlogin=async()=>{
+	console.log("1111111")
+	
+	try{
+		await userInfo.loginWithWeChat()
+	}catch(e){
+		console.log(e)
+	}
+	
+	
+}
 
 // 处理微信手机号授权
-const handlePhoneAuth = async (e) => {
-  console.log('手机号授权回调:', e)
+// const handlePhoneAuth = async (e) => {
+	
+	
+// 	// 微信手机号授权逻辑
+//   // console.log('手机号授权回调:', e)
   
-  if (e.detail.errMsg !== 'getPhoneNumber:ok') {
-    uni.showToast({
-      title: '授权失败，请重试',
-      icon: 'error'
-    })
-    return
-  }
+//   // if (e.detail.errMsg !== 'getPhoneNumber:ok') {
+//   //   uni.showToast({
+//   //     title: '授权失败，请重试',
+//   //     icon: 'error'
+//   //   })
+//   //   return
+//   // }
 
-  try {
-    isLogging.value = true
+//   try {
+//     isLogging.value = true
     
-    const loginRes = await uni.login({
-      provider: 'weixin'
-    })
+//     const loginRes = await uni.login({
+//       provider: 'weixin'
+//     })
     
-    if (loginRes[1].errMsg !== 'login:ok') {
-      throw new Error('获取登录凭证失败')
-    }
+//     if (loginRes[1].errMsg !== 'login:ok') {
+//       throw new Error('获取登录凭证失败')
+//     }
+// 	console.log(loginRes)
 
-    const loginData = {
-      code: loginRes[1].code,
-      phoneCode: e.detail.code,
-      encryptedData: e.detail.encryptedData,
-      iv: e.detail.iv
-    }
+//   //   const loginData = {
+//   //     code: loginRes[1].code,
+//   //     phoneCode: e.detail.code,
+//   //     encryptedData: e.detail.encryptedData,
+//   //     iv: e.detail.iv
+//   //   }
 
-    const loginResult = await callWechatLoginAPI(loginData)
-    await userInfo.saveLoginInfo(loginResult)
-    await refreshUserData()
+//   //   const loginResult = await callWechatLoginAPI(loginData)
+//   //   await userInfo.saveLoginInfo(loginResult)
+//   //   await refreshUserData()
     
-    uni.showToast({
-      title: '登录成功',
-      icon: 'success'
-    })
+//     uni.showToast({
+//       title: '登录成功',
+//       icon: 'success'
+//     })
 
-  } catch (error) {
-    console.error('微信登录失败:', error)
-    uni.showToast({
-      title: '登录失败，请重试',
-      icon: 'error'
-    })
-  } finally {
-    isLogging.value = false
-  }
-}
+//   } catch (error) {
+//     console.error('微信登录失败:', error)
+//     uni.showToast({
+//       title: '登录失败，请重试',
+//       icon: 'error'
+//     })
+//   } finally {
+//     isLogging.value = false
+//   }
+// }
 
 // 忘记密码
 const handleForgotPassword = () => {

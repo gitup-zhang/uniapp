@@ -59,14 +59,14 @@ const _sfc_main = {
           await refreshUserData();
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:355", "页面初始化失败:", error);
+        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:356", "页面初始化失败:", error);
       }
     };
     const refreshUserData = async () => {
       try {
         await userInfo.getUserInfo();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:364", "获取用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:365", "获取用户信息失败:", error);
       }
     };
     const formatPhoneNumber = (phone) => {
@@ -168,7 +168,7 @@ const _sfc_main = {
           icon: "success"
         });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:490", "账号登录失败:", error);
+        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:491", "账号登录失败:", error);
         common_vendor.index.showToast({
           title: error.message || "登录失败，请重试",
           icon: "error"
@@ -194,7 +194,7 @@ const _sfc_main = {
           icon: "success"
         });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:526", "发送验证码失败:", error);
+        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:527", "发送验证码失败:", error);
         common_vendor.index.showToast({
           title: error.message || "发送失败，请重试",
           icon: "error"
@@ -220,7 +220,7 @@ const _sfc_main = {
           icon: "success"
         });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:562", "短信登录失败:", error);
+        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:563", "短信登录失败:", error);
         common_vendor.index.showToast({
           title: error.message || "登录失败，请重试",
           icon: "error"
@@ -229,44 +229,12 @@ const _sfc_main = {
         isLogging.value = false;
       }
     };
-    const handlePhoneAuth = async (e) => {
-      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:574", "手机号授权回调:", e);
-      if (e.detail.errMsg !== "getPhoneNumber:ok") {
-        common_vendor.index.showToast({
-          title: "授权失败，请重试",
-          icon: "error"
-        });
-        return;
-      }
+    const wechatlogin = async () => {
+      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:573", "1111111");
       try {
-        isLogging.value = true;
-        const loginRes = await common_vendor.index.login({
-          provider: "weixin"
-        });
-        if (loginRes[1].errMsg !== "login:ok") {
-          throw new Error("获取登录凭证失败");
-        }
-        const loginData = {
-          code: loginRes[1].code,
-          phoneCode: e.detail.code,
-          encryptedData: e.detail.encryptedData,
-          iv: e.detail.iv
-        };
-        const loginResult = await callWechatLoginAPI(loginData);
-        await userInfo.saveLoginInfo(loginResult);
-        await refreshUserData();
-        common_vendor.index.showToast({
-          title: "登录成功",
-          icon: "success"
-        });
-      } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:612", "微信登录失败:", error);
-        common_vendor.index.showToast({
-          title: "登录失败，请重试",
-          icon: "error"
-        });
-      } finally {
-        isLogging.value = false;
+        await userInfo.loginWithWeChat();
+      } catch (e) {
+        common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:578", e);
       }
     };
     const handleForgotPassword = () => {
@@ -312,25 +280,6 @@ const _sfc_main = {
         });
       });
     };
-    const callWechatLoginAPI = async (data) => {
-      return new Promise((resolve, reject) => {
-        common_vendor.index.request({
-          url: "https://your-api-domain.com/api/wechat-login",
-          method: "POST",
-          data,
-          success: (res) => {
-            if (res.data.success) {
-              resolve(res.data.data);
-            } else {
-              reject(new Error(res.data.message || "登录失败"));
-            }
-          },
-          fail: (error) => {
-            reject(error);
-          }
-        });
-      });
-    };
     const goToProfile = () => {
       common_vendor.index.navigateTo({
         url: "/pages/detail/profile"
@@ -356,20 +305,20 @@ const _sfc_main = {
       (_a = loadingPopup.value) == null ? void 0 : _a.close();
     };
     const onCheck = (data) => {
-      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:744", "查看活动:", data);
+      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:760", "查看活动:", data);
       common_vendor.index.navigateTo({
         url: "/pages/activity/detail?id=" + data.id
       });
     };
     const onJoin = (data) => {
-      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:751", "加入群聊:", data);
+      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:767", "加入群聊:", data);
       common_vendor.index.showToast({
         title: "已加入群聊",
         icon: "success"
       });
     };
     const onStatus = async (data) => {
-      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:759", "状态操作:", data);
+      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:775", "状态操作:", data);
       try {
         showLoading("正在签到...");
         await performCheckin(data);
@@ -521,63 +470,48 @@ const _sfc_main = {
           color: "#fff"
         })
       }, {
-        aj: common_vendor.o(handlePhoneAuth),
-        ak: isLogging.value
+        aj: common_vendor.o((...args) => _ctx.handlePhoneAuth && _ctx.handlePhoneAuth(...args)),
+        ak: isLogging.value,
+        al: common_vendor.o(wechatlogin)
       }) : {}, {
-        al: common_vendor.o(showUserAgreement),
-        am: common_vendor.o(showPrivacyPolicy)
+        am: common_vendor.o(showUserAgreement),
+        an: common_vendor.o(showPrivacyPolicy)
       }) : {
-        an: common_vendor.unref(userInfo).info.Image || "/static/icon/empty.png",
-        ao: common_vendor.t(common_vendor.unref(userInfo).info.username || "用户"),
-        ap: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
-        aq: common_vendor.t(common_vendor.unref(userInfo).info.slogan || "点击设置个人签名"),
-        ar: common_vendor.p({
+        ao: common_vendor.unref(userInfo).info.Image || "/static/icon/empty.png",
+        ap: common_vendor.t(common_vendor.unref(userInfo).info.username || "用户"),
+        aq: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
+        ar: common_vendor.t(common_vendor.unref(userInfo).info.slogan || "点击设置个人签名"),
+        as: common_vendor.p({
           type: "right",
           size: "18",
           color: "rgba(255,255,255,0.8)"
         }),
-        as: common_vendor.o(goToProfile),
-        at: common_assets._imports_1$1,
-        av: common_vendor.t(common_vendor.unref(userInfo).info.daysOnline || 0),
+        at: common_vendor.o(goToProfile),
+        av: common_assets._imports_1$1,
         aw: common_vendor.t(common_vendor.unref(userInfo).info.newsViews || 0),
-        ax: common_vendor.p({
-          type: "up",
-          size: "12",
-          color: "#2ed573"
-        }),
-        ay: common_vendor.t(common_vendor.unref(userInfo).info.policyViews || 0),
+        ax: common_vendor.t(common_vendor.unref(userInfo).info.policyViews || 0),
+        ay: common_vendor.t(common_vendor.unref(userInfo).info.field || 3),
         az: common_vendor.p({
-          type: "up",
-          size: "12",
-          color: "#2ed573"
-        }),
-        aA: common_vendor.t(common_vendor.unref(userInfo).info.field || 3),
-        aB: common_vendor.p({
-          type: "minus",
-          size: "12",
-          color: "#ffa726"
-        }),
-        aC: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        aD: common_vendor.o(viewAllActivities),
-        aE: common_vendor.o(onCheck),
-        aF: common_vendor.o(onJoin),
-        aG: common_vendor.o(onStatus),
-        aH: common_vendor.p({
+        aA: common_vendor.o(viewAllActivities),
+        aB: common_vendor.o(onCheck),
+        aC: common_vendor.o(onJoin),
+        aD: common_vendor.o(onStatus),
+        aE: common_vendor.p({
           activityData: myActivityData.value
         })
       }, {
-        aI: common_vendor.p({
+        aF: common_vendor.p({
           status: "loading",
           ["content-text"]: loadingText.value
         }),
-        aJ: common_vendor.sr(loadingPopup, "a5a8e0a1-15", {
+        aG: common_vendor.sr(loadingPopup, "a5a8e0a1-12", {
           "k": "loadingPopup"
         }),
-        aK: common_vendor.p({
+        aH: common_vendor.p({
           type: "center"
         })
       });

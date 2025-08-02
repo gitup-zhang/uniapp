@@ -823,7 +823,7 @@ const logout = async () => {
     showLoading('正在退出...')
     
     // 清空本地存储
-    await userInfo.logout()
+    await userInfo.deleteinfo()
     
     uni.showToast({
       title: '已退出登录',
@@ -832,7 +832,7 @@ const logout = async () => {
     
     // 返回首页或登录页
     uni.reLaunch({
-      url: '/pages/index/index'
+      url: '/pages/mymessage/mymessage'
     })
     
   } catch (error) {

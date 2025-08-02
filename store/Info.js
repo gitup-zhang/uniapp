@@ -10,6 +10,7 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	const token =ref("")
 	// 标志位，判断是否登录
 	const signal=ref(false)
+	
 	const getinfo=async()=>{
 		signal.value=true
 		info.value={
@@ -34,8 +35,9 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	      // 2. 发送 code 到你自己的后端
 	      const res = await getinfologin({code:codes})
 		  token.value=res.token
-		  console.log(token.value)
+		  console.log("token:"+token.value)
 			if(res.code===200){
+				signal.value=true
 				console.log("1111111111111111111111111111")
 				console.log("登录成功")
 			}

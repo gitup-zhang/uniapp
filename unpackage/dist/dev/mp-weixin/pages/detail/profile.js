@@ -343,13 +343,13 @@ const _sfc_main = {
     const logout = async () => {
       try {
         showLoading("正在退出...");
-        await userInfo.logout();
+        await userInfo.deleteinfo();
         common_vendor.index.showToast({
           title: "已退出登录",
           icon: "success"
         });
         common_vendor.index.reLaunch({
-          url: "/pages/index/index"
+          url: "/pages/mymessage/mymessage"
         });
       } catch (error) {
         common_vendor.index.__f__("error", "at pages/detail/profile.vue:839", "退出登录失败:", error);
