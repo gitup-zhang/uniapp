@@ -6,6 +6,70 @@
   background-color: #f5f6fa;
 }
 
+/* 登录提示样式 */
+.login-required.data-v-bb2249ad {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  background: linear-gradient(135deg, #ff4757 0%, #ff6b7a 100%);
+}
+.login-card.data-v-bb2249ad {
+  background: white;
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600rpx;
+}
+.login-icon.data-v-bb2249ad {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.8;
+}
+.login-title.data-v-bb2249ad {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 16rpx;
+}
+.login-desc.data-v-bb2249ad {
+  font-size: 28rpx;
+  color: #718096;
+  margin-bottom: 40rpx;
+  line-height: 1.5;
+}
+.login-btn.data-v-bb2249ad {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50rpx;
+  padding: 24rpx 60rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+.login-btn.data-v-bb2249ad:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.4);
+}
+.login-btn-text.data-v-bb2249ad {
+  color: white;
+}
+
+/* 消息容器 */
+.message-container.data-v-bb2249ad {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 /* 自定义导航栏 */
 .custom-navbar.data-v-bb2249ad {
   background-color: #ff4757;
@@ -23,11 +87,27 @@
   height: 44px;
   display: flex;
   align-items: center;
-  padding-left: 16px;
+  justify-content: space-between;
+  padding: 0 16px;
 }
 .nav-title.data-v-bb2249ad {
   font-size: 18px;
   font-weight: bold;
+}
+.nav-right.data-v-bb2249ad {
+  display: flex;
+  align-items: center;
+}
+.logout-btn.data-v-bb2249ad {
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.logout-text.data-v-bb2249ad {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* 固定筛选标签 - 重新布局 */

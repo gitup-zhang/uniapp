@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const store_Info = require("../../store/Info.js");
 if (!Array) {
   const _component_recycle_item = common_vendor.resolveComponent("recycle-item");
   const _component_recycle_view = common_vendor.resolveComponent("recycle-view");
@@ -8,8 +9,10 @@ if (!Array) {
 const _sfc_main = {
   __name: "mes",
   setup(__props) {
+    const userStore = store_Info.useInfoStore();
     const statusBarHeight = common_vendor.ref(0);
     const activeTab = common_vendor.ref("all");
+    const isLoggedIn = common_vendor.computed(() => userStore.signal);
     const messages = common_vendor.ref([
       {
         id: 1,
@@ -103,24 +106,71 @@ const _sfc_main = {
       }
     ]);
     const filteredMessages = common_vendor.computed(() => {
+      if (!isLoggedIn.value)
+        return [];
       if (activeTab.value === "all") {
         return messages.value;
       }
       return messages.value.filter((msg) => msg.type === activeTab.value);
     });
     const unreadCount = common_vendor.computed(() => {
+      if (!isLoggedIn.value)
+        return 0;
       return messages.value.filter((msg) => !msg.isRead).length;
     });
     const systemUnreadCount = common_vendor.computed(() => {
+      if (!isLoggedIn.value)
+        return 0;
       return messages.value.filter((msg) => msg.type === "system" && !msg.isRead).length;
     });
     const groupUnreadCount = common_vendor.computed(() => {
+      if (!isLoggedIn.value)
+        return 0;
       return messages.value.filter((msg) => msg.type === "group" && !msg.isRead).length;
     });
     common_vendor.onMounted(() => {
       const sysInfo = common_vendor.index.getSystemInfoSync();
       statusBarHeight.value = sysInfo.statusBarHeight;
     });
+    common_vendor.watch(isLoggedIn, (newVal) => {
+      if (newVal) {
+        common_vendor.index.__f__("log", "at pages/mes/mes.vue:305", "用户已登录，加载消息数据");
+        loadUserMessages();
+      } else {
+        common_vendor.index.__f__("log", "at pages/mes/mes.vue:309", "用户已登出，清空消息数据");
+      }
+    });
+    const goToLogin = () => {
+      common_vendor.index.switchTab({
+        url: "../mymessage/mymessage"
+      });
+    };
+    const handleLogout = () => {
+      common_vendor.index.showModal({
+        title: "确认登出",
+        content: "确定要退出登录吗？",
+        success: (res) => {
+          if (res.confirm) {
+            userStore.logout();
+            common_vendor.index.showToast({
+              title: "已退出登录",
+              icon: "success"
+            });
+          }
+        }
+      });
+    };
+    const loadUserMessages = async () => {
+      try {
+        common_vendor.index.__f__("log", "at pages/mes/mes.vue:343", "加载用户消息数据");
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/mes/mes.vue:345", "加载消息失败:", error);
+        common_vendor.index.showToast({
+          title: "加载消息失败",
+          icon: "error"
+        });
+      }
+    };
     const messageItemClass = (msg) => {
       const classes = [];
       if (msg.type === "system")
@@ -135,6 +185,8 @@ const _sfc_main = {
       activeTab.value = tab;
     };
     const handleMessageTap = (msg, index) => {
+      if (!isLoggedIn.value)
+        return;
       if (!msg.isRead) {
         const messageIndex = messages.value.findIndex((m) => m.id === msg.id);
         messages.value[messageIndex].isRead = true;
@@ -150,6 +202,8 @@ const _sfc_main = {
       }
     };
     const toggleRead = (msg, index) => {
+      if (!isLoggedIn.value)
+        return;
       const messageIndex = messages.value.findIndex((m) => m.id === msg.id);
       messages.value[messageIndex].isRead = !msg.isRead;
     };
@@ -182,7 +236,7 @@ const _sfc_main = {
       return result;
     };
     const handleAvatarError = () => {
-      common_vendor.index.__f__("log", "at pages/mes/mes.vue:336", "头像加载失败");
+      common_vendor.index.__f__("log", "at pages/mes/mes.vue:428", "头像加载失败");
     };
     const getEmptyTitle = () => {
       const titles = {
@@ -201,48 +255,54 @@ const _sfc_main = {
       return descs[activeTab.value];
     };
     const markAllAsRead = () => {
+      if (!isLoggedIn.value)
+        return;
       const currentMessages = activeTab.value === "all" ? messages.value : messages.value.filter((msg) => msg.type === activeTab.value);
-      currentMessages.forEach((msg) => {
-        if (!msg.isRead) {
-          const messageIndex = messages.value.findIndex((m) => m.id === msg.id);
-          if (messageIndex !== -1) {
-            messages.value[messageIndex].isRead = true;
-          }
+      const unreadMessages = currentMessages.filter((msg) => !msg.isRead);
+      unreadMessages.forEach((msg) => {
+        const messageIndex = messages.value.findIndex((m) => m.id === msg.id);
+        if (messageIndex !== -1) {
+          messages.value[messageIndex].isRead = true;
         }
       });
       common_vendor.index.showToast({
-        title: `已标记${currentMessages.filter((msg) => !msg.isRead).length || "所有"}条消息为已读`,
+        title: `已标记${unreadMessages.length || "所有"}条消息为已读`,
         icon: "success",
         duration: 1500
       });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: statusBarHeight.value + "px",
-        b: unreadCount.value > 0
+        a: !isLoggedIn.value
+      }, !isLoggedIn.value ? {
+        b: common_vendor.o(goToLogin)
+      } : common_vendor.e({
+        c: statusBarHeight.value + "px",
+        d: common_vendor.o(handleLogout),
+        e: unreadCount.value > 0
       }, unreadCount.value > 0 ? {
-        c: common_vendor.t(unreadCount.value > 99 ? "99+" : unreadCount.value)
+        f: common_vendor.t(unreadCount.value > 99 ? "99+" : unreadCount.value)
       } : {}, {
-        d: activeTab.value === "all" ? 1 : "",
-        e: common_vendor.o(($event) => switchTab("all")),
-        f: systemUnreadCount.value > 0
+        g: activeTab.value === "all" ? 1 : "",
+        h: common_vendor.o(($event) => switchTab("all")),
+        i: systemUnreadCount.value > 0
       }, systemUnreadCount.value > 0 ? {
-        g: common_vendor.t(systemUnreadCount.value)
+        j: common_vendor.t(systemUnreadCount.value)
       } : {}, {
-        h: activeTab.value === "system" ? 1 : "",
-        i: common_vendor.o(($event) => switchTab("system")),
-        j: groupUnreadCount.value > 0
+        k: activeTab.value === "system" ? 1 : "",
+        l: common_vendor.o(($event) => switchTab("system")),
+        m: groupUnreadCount.value > 0
       }, groupUnreadCount.value > 0 ? {
-        k: common_vendor.t(groupUnreadCount.value)
+        n: common_vendor.t(groupUnreadCount.value)
       } : {}, {
-        l: activeTab.value === "group" ? 1 : "",
-        m: common_vendor.o(($event) => switchTab("group")),
-        n: unreadCount.value > 0
+        o: activeTab.value === "group" ? 1 : "",
+        p: common_vendor.o(($event) => switchTab("group")),
+        q: unreadCount.value > 0
       }, unreadCount.value > 0 ? {
-        o: common_vendor.o(markAllAsRead)
+        r: common_vendor.o(markAllAsRead)
       } : {}, {
-        p: statusBarHeight.value + 44 + "px",
-        q: common_vendor.f(filteredMessages.value, (msg, index, i0) => {
+        s: statusBarHeight.value + 44 + "px",
+        t: common_vendor.f(filteredMessages.value, (msg, index, i0) => {
           return common_vendor.e({
             a: common_vendor.n(msg.type),
             b: msg.type === "group"
@@ -273,19 +333,19 @@ const _sfc_main = {
             s: "bb2249ad-1-" + i0 + ",bb2249ad-0"
           });
         }),
-        r: filteredMessages.value.length === 0
+        v: filteredMessages.value.length === 0
       }, filteredMessages.value.length === 0 ? {
-        s: common_vendor.t(getEmptyTitle()),
-        t: common_vendor.t(getEmptyDesc())
+        w: common_vendor.t(getEmptyTitle()),
+        x: common_vendor.t(getEmptyDesc())
       } : {}, {
-        v: statusBarHeight.value + 44 + 68 + "px",
-        w: common_vendor.p({
+        y: statusBarHeight.value + 44 + 68 + "px",
+        z: common_vendor.p({
           ["enable-back-to-top"]: true,
           bounces: false,
           batch: "8",
           cache: "4"
         })
-      });
+      }));
     };
   }
 };

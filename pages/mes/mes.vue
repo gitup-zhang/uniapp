@@ -1,147 +1,175 @@
 <template>
   <view class="container">
-    <!-- 自定义导航栏 -->
-    <view class="custom-navbar">
-      <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
-      <view class="nav-content">
-        <text class="nav-title">消息</text>
+    <!-- 未登录状态 -->
+    <view v-if="!isLoggedIn" class="login-required">
+      <view class="login-card">
+        <view class="login-icon">🔐</view>
+        <text class="login-title">请先登录</text>
+        <text class="login-desc">登录后即可查看和管理您的消息</text>
+        <button class="login-btn" @tap="goToLogin">
+          <text class="login-btn-text">立即登录</text>
+        </button>
       </view>
     </view>
-    
-    <!-- 固定筛选标签 -->
-    <view class="filter-tabs-fixed" :style="{ top: statusBarHeight + 44 + 'px' }">
-      <view class="tabs-container">
-        <view 
-          class="filter-tab" 
-          :class="{ active: activeTab === 'all' }"
-          @tap="switchTab('all')"
-        >
-          全部
-           <view class="tab-badge" v-if="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</view>
-        </view>
-        <view 
-          class="filter-tab" 
-          :class="{ active: activeTab === 'system' }"
-          @tap="switchTab('system')"
-        >
-          系统消息
-            <view class="tab-badge" v-if="systemUnreadCount > 0">{{ systemUnreadCount }}</view>
-        </view>
-        <view 
-          class="filter-tab" 
-          :class="{ active: activeTab === 'group' }"
-          @tap="switchTab('group')"
-        >
-          群组消息
-           <view class="tab-badge" v-if="groupUnreadCount > 0">{{ groupUnreadCount }}</view>
+
+    <!-- 已登录状态 - 显示消息界面 -->
+    <view v-else class="message-container">
+      <!-- 自定义导航栏 -->
+      <view class="custom-navbar">
+        <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
+        <view class="nav-content">
+          <text class="nav-title">消息</text>
+          <!-- 可选：添加登出按钮 -->
+          <view class="nav-right">
+            <view class="logout-btn" @tap="handleLogout">
+              <text class="logout-text">登出</text>
+            </view>
+          </view>
         </view>
       </view>
       
-      <!-- 一键已读按钮 -->
-      <view 
-        class="mark-all-read-btn" 
-        @tap="markAllAsRead"
-        v-if="unreadCount > 0"
-      >
-        <text class="mark-all-icon">✓</text>
-        <text class="mark-all-text">全部已读</text>
-      </view>
-    </view>
-    
-    <!-- 消息列表 - 使用recycle-view优化长列表性能 -->
-    <recycle-view
-      class="message-list"
-      :style="{ marginTop: statusBarHeight + 44 + 68 + 'px' }"
-      :enable-back-to-top="true"
-      :bounces="false"
-      batch="8"
-      cache="4"
-    >
-      <recycle-item 
-        v-for="(msg, index) in filteredMessages" 
-        :key="`msg-${msg.id}`"
-        class="message-item-wrapper"
-      >
-        <view 
-          class="message-item" 
-          :class="messageItemClass(msg)"
-          @tap="handleMessageTap(msg, index)"
-        >
-          <!-- 消息类型指示器 - 简化 -->
-          <view class="message-indicator">
-            <view class="indicator-dot" :class="msg.type"></view>
+      <!-- 固定筛选标签 -->
+      <view class="filter-tabs-fixed" :style="{ top: statusBarHeight + 44 + 'px' }">
+        <view class="tabs-container">
+          <view 
+            class="filter-tab" 
+            :class="{ active: activeTab === 'all' }"
+            @tap="switchTab('all')"
+          >
+            全部
+             <view class="tab-badge" v-if="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</view>
           </view>
-          
-          <!-- 头像/图标 - 优化图片加载 -->
-          <view class="avatar-container">
-            <image 
-              v-if="msg.type === 'group'" 
-              :src="msg.avatar" 
-              class="avatar group-avatar"
-              mode="aspectFill"
-              :lazy-load="true"
-              :fade-show="false"
-              @error="handleAvatarError"
-            />
-            <view v-else class="system-icon">
-              <text class="icon">📢</text>
-            </view>
-            <!-- 简化未读小红点 -->
-            <view v-if="!msg.isRead" class="unread-badge"></view>
+          <view 
+            class="filter-tab" 
+            :class="{ active: activeTab === 'system' }"
+            @tap="switchTab('system')"
+          >
+            系统消息
+              <view class="tab-badge" v-if="systemUnreadCount > 0">{{ systemUnreadCount }}</view>
           </view>
-          
-          <!-- 消息内容 - 优化布局 -->
-          <view class="msg-content">
-            <!-- 标题行 - 单独一行确保不被遮挡 -->
-            <view class="msg-title-row">
-              <text class="msg-title">{{ msg.title }}</text>
-              <view class="msg-priority" v-if="msg.priority === 'high'">
-                
-              </view>
-            </view>
-            
-            <!-- 消息简介 -->
-            <text class="msg-brief">{{ msg.brief }}</text>
-            
-            <!-- 底部信息行 -->
-            <view class="msg-footer">
-              <view class="msg-meta">
-                <text class="msg-time">{{ formatTime(msg.time) }}</text>
-                <text v-if="msg.type === 'group'" class="member-count">{{ msg.memberCount }}人</text>
-              </view>
-              <view class="msg-source">
-                <text v-if="msg.type === 'system'" class="tag system-tag">系统消息</text>
-                <text v-else class="tag group-tag">{{ msg.groupName }}</text>
-              </view>
-            </view>
-          </view>
-          
-          <!-- 右侧操作 - 简化 -->
-          <view class="msg-actions">
-            <view class="action-btn" @tap.stop="toggleRead(msg, index)">
-              <text class="action-icon">{{ msg.isRead ? '📖' : '👁️' }}</text>
-            </view>
-            <text class="chevron-icon">›</text>
+          <view 
+            class="filter-tab" 
+            :class="{ active: activeTab === 'group' }"
+            @tap="switchTab('group')"
+          >
+            群组消息
+             <view class="tab-badge" v-if="groupUnreadCount > 0">{{ groupUnreadCount }}</view>
           </view>
         </view>
-      </recycle-item>
-      
-      <!-- 空状态 -->
-      <view v-if="filteredMessages.length === 0" class="empty">
-        <view class="empty-icon">💬</view>
-        <text class="empty-title">{{ getEmptyTitle() }}</text>
-        <text class="empty-desc">{{ getEmptyDesc() }}</text>
+        
+        <!-- 一键已读按钮 -->
+        <view 
+          class="mark-all-read-btn" 
+          @tap="markAllAsRead"
+          v-if="unreadCount > 0"
+        >
+          <text class="mark-all-icon">✓</text>
+          <text class="mark-all-text">全部已读</text>
+        </view>
       </view>
-    </recycle-view>
+      
+      <!-- 消息列表 - 使用recycle-view优化长列表性能 -->
+      <recycle-view
+        class="message-list"
+        :style="{ marginTop: statusBarHeight + 44 + 68 + 'px' }"
+        :enable-back-to-top="true"
+        :bounces="false"
+        batch="8"
+        cache="4"
+      >
+        <recycle-item 
+          v-for="(msg, index) in filteredMessages" 
+          :key="`msg-${msg.id}`"
+          class="message-item-wrapper"
+        >
+          <view 
+            class="message-item" 
+            :class="messageItemClass(msg)"
+            @tap="handleMessageTap(msg, index)"
+          >
+            <!-- 消息类型指示器 - 简化 -->
+            <view class="message-indicator">
+              <view class="indicator-dot" :class="msg.type"></view>
+            </view>
+            
+            <!-- 头像/图标 - 优化图片加载 -->
+            <view class="avatar-container">
+              <image 
+                v-if="msg.type === 'group'" 
+                :src="msg.avatar" 
+                class="avatar group-avatar"
+                mode="aspectFill"
+                :lazy-load="true"
+                :fade-show="false"
+                @error="handleAvatarError"
+              />
+              <view v-else class="system-icon">
+                <text class="icon">📢</text>
+              </view>
+              <!-- 简化未读小红点 -->
+              <view v-if="!msg.isRead" class="unread-badge"></view>
+            </view>
+            
+            <!-- 消息内容 - 优化布局 -->
+            <view class="msg-content">
+              <!-- 标题行 - 单独一行确保不被遮挡 -->
+              <view class="msg-title-row">
+                <text class="msg-title">{{ msg.title }}</text>
+                <view class="msg-priority" v-if="msg.priority === 'high'">
+                  
+                </view>
+              </view>
+              
+              <!-- 消息简介 -->
+              <text class="msg-brief">{{ msg.brief }}</text>
+              
+              <!-- 底部信息行 -->
+              <view class="msg-footer">
+                <view class="msg-meta">
+                  <text class="msg-time">{{ formatTime(msg.time) }}</text>
+                  <text v-if="msg.type === 'group'" class="member-count">{{ msg.memberCount }}人</text>
+                </view>
+                <view class="msg-source">
+                  <text v-if="msg.type === 'system'" class="tag system-tag">系统消息</text>
+                  <text v-else class="tag group-tag">{{ msg.groupName }}</text>
+                </view>
+              </view>
+            </view>
+            
+            <!-- 右侧操作 - 简化 -->
+            <view class="msg-actions">
+              <view class="action-btn" @tap.stop="toggleRead(msg, index)">
+                <text class="action-icon">{{ msg.isRead ? '📖' : '👁️' }}</text>
+              </view>
+              <text class="chevron-icon">›</text>
+            </view>
+          </view>
+        </recycle-item>
+        
+        <!-- 空状态 -->
+        <view v-if="filteredMessages.length === 0" class="empty">
+          <view class="empty-icon">💬</view>
+          <text class="empty-title">{{ getEmptyTitle() }}</text>
+          <text class="empty-desc">{{ getEmptyDesc() }}</text>
+        </view>
+      </recycle-view>
+    </view>
   </view>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useInfoStore } from '@/store/Info.js' // 请根据你的实际路径调整
+
+// 获取用户状态管理
+const userStore = useInfoStore()
 
 // 响应式数据
 const statusBarHeight = ref(0)
 const activeTab = ref('all')
+
+// 登录状态计算属性
+const isLoggedIn = computed(() => userStore.signal)
 
 const messages = ref([
   {
@@ -238,6 +266,7 @@ const messages = ref([
 
 // 计算属性
 const filteredMessages = computed(() => {
+  if (!isLoggedIn.value) return []
   if (activeTab.value === 'all') {
     return messages.value
   }
@@ -245,14 +274,17 @@ const filteredMessages = computed(() => {
 })
 
 const unreadCount = computed(() => {
+  if (!isLoggedIn.value) return 0
   return messages.value.filter(msg => !msg.isRead).length
 })
 
 const systemUnreadCount = computed(() => {
+  if (!isLoggedIn.value) return 0
   return messages.value.filter(msg => msg.type === 'system' && !msg.isRead).length
 })
 
 const groupUnreadCount = computed(() => {
+  if (!isLoggedIn.value) return 0
   return messages.value.filter(msg => msg.type === 'group' && !msg.isRead).length
 })
 
@@ -260,9 +292,65 @@ const groupUnreadCount = computed(() => {
 onMounted(() => {
   const sysInfo = uni.getSystemInfoSync()
   statusBarHeight.value = sysInfo.statusBarHeight
+  
+  // 检查登录状态，如果未登录可以选择自动跳转到登录页
+  // if (!isLoggedIn.value) {
+  //   console.log('用户未登录，显示登录提示')
+  // }
 })
 
-// 方法 - 优化class计算
+// 监听登录状态变化
+watch(isLoggedIn, (newVal) => {
+  if (newVal) {
+    console.log('用户已登录，加载消息数据')
+    // 这里可以调用API获取用户的消息数据
+    loadUserMessages()
+  } else {
+    console.log('用户已登出，清空消息数据')
+    // 可以选择清空敏感数据
+  }
+})
+
+// 登录相关方法
+const goToLogin = () => {
+  uni.switchTab({
+  	url: '../mymessage/mymessage'
+  });
+}
+
+const handleLogout = () => {
+  uni.showModal({
+    title: '确认登出',
+    content: '确定要退出登录吗？',
+    success: (res) => {
+      if (res.confirm) {
+        userStore.logout() // 假设你的store有logout方法
+        uni.showToast({
+          title: '已退出登录',
+          icon: 'success'
+        })
+      }
+    }
+  })
+}
+
+// 加载用户消息数据的方法
+const loadUserMessages = async () => {
+  try {
+    // 这里应该调用实际的API获取用户消息
+    // const response = await api.getUserMessages()
+    // messages.value = response.data
+    console.log('加载用户消息数据')
+  } catch (error) {
+    console.error('加载消息失败:', error)
+    uni.showToast({
+      title: '加载消息失败',
+      icon: 'error'
+    })
+  }
+}
+
+// 原有方法保持不变
 const messageItemClass = (msg) => {
   const classes = []
   if (msg.type === 'system') classes.push('system-message')
@@ -276,6 +364,8 @@ const switchTab = (tab) => {
 }
 
 const handleMessageTap = (msg, index) => {
+  if (!isLoggedIn.value) return
+  
   // 标记为已读
   if (!msg.isRead) {
     const messageIndex = messages.value.findIndex(m => m.id === msg.id)
@@ -295,6 +385,8 @@ const handleMessageTap = (msg, index) => {
 }
 
 const toggleRead = (msg, index) => {
+  if (!isLoggedIn.value) return
+  
   const messageIndex = messages.value.findIndex(m => m.id === msg.id)
   messages.value[messageIndex].isRead = !msg.isRead
 }
@@ -355,22 +447,24 @@ const getEmptyDesc = () => {
 }
 
 const markAllAsRead = () => {
+  if (!isLoggedIn.value) return
+  
   const currentMessages = activeTab.value === 'all' 
     ? messages.value 
     : messages.value.filter(msg => msg.type === activeTab.value)
   
-  currentMessages.forEach(msg => {
-    if (!msg.isRead) {
-      const messageIndex = messages.value.findIndex(m => m.id === msg.id)
-      if (messageIndex !== -1) {
-        messages.value[messageIndex].isRead = true
-      }
+  const unreadMessages = currentMessages.filter(msg => !msg.isRead)
+  
+  unreadMessages.forEach(msg => {
+    const messageIndex = messages.value.findIndex(m => m.id === msg.id)
+    if (messageIndex !== -1) {
+      messages.value[messageIndex].isRead = true
     }
   })
   
   // 显示成功提示
   uni.showToast({
-    title: `已标记${currentMessages.filter(msg => !msg.isRead).length || '所有'}条消息为已读`,
+    title: `已标记${unreadMessages.length || '所有'}条消息为已读`,
     icon: 'success',
     duration: 1500
   })
@@ -383,6 +477,77 @@ const markAllAsRead = () => {
   flex-direction: column;
   height: 100vh;
   background-color: #f5f6fa;
+}
+
+/* 登录提示样式 */
+.login-required {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  background: linear-gradient(135deg, #ff4757 0%, #ff6b7a 100%);
+}
+
+.login-card {
+  background: white;
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600rpx;
+}
+
+.login-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.8;
+}
+
+.login-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 16rpx;
+}
+
+.login-desc {
+  font-size: 28rpx;
+  color: #718096;
+  margin-bottom: 40rpx;
+  line-height: 1.5;
+}
+
+.login-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50rpx;
+  padding: 24rpx 60rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.login-btn:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.4);
+}
+
+.login-btn-text {
+  color: white;
+}
+
+/* 消息容器 */
+.message-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 自定义导航栏 */
@@ -404,12 +569,31 @@ const markAllAsRead = () => {
   height: 44px;
   display: flex;
   align-items: center;
-  padding-left: 16px;
+  justify-content: space-between;
+  padding: 0 16px;
 }
 
 .nav-title {
   font-size: 18px;
   font-weight: bold;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+}
+
+.logout-btn {
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.logout-text {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* 固定筛选标签 - 重新布局 */

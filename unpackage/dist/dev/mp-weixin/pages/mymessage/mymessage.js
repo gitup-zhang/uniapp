@@ -480,38 +480,37 @@ const _sfc_main = {
         ao: common_vendor.unref(userInfo).info.Image || "/static/icon/empty.png",
         ap: common_vendor.t(common_vendor.unref(userInfo).info.username || "用户"),
         aq: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
-        ar: common_vendor.t(common_vendor.unref(userInfo).info.slogan || "点击设置个人签名"),
-        as: common_vendor.p({
+        ar: common_vendor.p({
           type: "right",
           size: "18",
           color: "rgba(255,255,255,0.8)"
         }),
-        at: common_vendor.o(goToProfile),
-        av: common_assets._imports_1$1,
-        aw: common_vendor.t(common_vendor.unref(userInfo).info.newsViews || 0),
-        ax: common_vendor.t(common_vendor.unref(userInfo).info.policyViews || 0),
-        ay: common_vendor.t(common_vendor.unref(userInfo).info.field || 3),
-        az: common_vendor.p({
+        as: common_vendor.o(goToProfile),
+        at: common_assets._imports_1$1,
+        av: common_vendor.t(common_vendor.unref(userInfo).info.newsViews || 0),
+        aw: common_vendor.t(common_vendor.unref(userInfo).info.policyViews || 0),
+        ax: common_vendor.t(common_vendor.unref(userInfo).info.field || 3),
+        ay: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        aA: common_vendor.o(viewAllActivities),
-        aB: common_vendor.o(onCheck),
-        aC: common_vendor.o(onJoin),
-        aD: common_vendor.o(onStatus),
-        aE: common_vendor.p({
+        az: common_vendor.o(viewAllActivities),
+        aA: common_vendor.o(onCheck),
+        aB: common_vendor.o(onJoin),
+        aC: common_vendor.o(onStatus),
+        aD: common_vendor.p({
           activityData: myActivityData.value
         })
       }, {
-        aF: common_vendor.p({
+        aE: common_vendor.p({
           status: "loading",
           ["content-text"]: loadingText.value
         }),
-        aG: common_vendor.sr(loadingPopup, "a5a8e0a1-12", {
+        aF: common_vendor.sr(loadingPopup, "a5a8e0a1-12", {
           "k": "loadingPopup"
         }),
-        aH: common_vendor.p({
+        aG: common_vendor.p({
           type: "center"
         })
       });

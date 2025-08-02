@@ -68,7 +68,7 @@
                 <uni-icons type="right" size="14" color="#ccc"/>
               </view>
             </view>
-            <view class="info-item clickable" @click="editField('slogan')">
+            <!-- <view class="info-item clickable" @click="editField('slogan')">
               <view class="item-icon">
                 <uni-icons type="chatbubble" size="16" color="#666"/>
               </view>
@@ -79,7 +79,7 @@
               <view class="item-arrow">
                 <uni-icons type="right" size="14" color="#ccc"/>
               </view>
-            </view>
+            </view> -->
             <view class="info-item clickable" @click="editField('gender')">
               <view class="item-icon">
                 <uni-icons type="flag" size="16" color="#666"/>
@@ -92,7 +92,7 @@
                 <uni-icons type="right" size="14" color="#ccc"/>
               </view>
             </view>
-            <view class="info-item clickable" @click="editField('birthday')">
+            <!-- <view class="info-item clickable" @click="editField('birthday')">
               <view class="item-icon">
                 <uni-icons type="calendar" size="16" color="#666"/>
               </view>
@@ -103,7 +103,7 @@
               <view class="item-arrow">
                 <uni-icons type="right" size="14" color="#ccc"/>
               </view>
-            </view>
+            </view> -->
           </view>
         </view>
 

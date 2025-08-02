@@ -194,7 +194,7 @@
             <view class="user-details">
               <text class="user-name">{{ userInfo.info.username || '用户' }}</text>
               <text class="user-phone">{{ formatPhoneNumber(userInfo.info.phone) }}</text>
-              <text class="user-signature">{{ userInfo.info.slogan || '点击设置个人签名' }}</text>
+              <!-- <text class="user-signature">{{ userInfo.info.slogan || '点击设置个人签名' }}</text> -->
             </view>
             
             <view class="profile-enter">
