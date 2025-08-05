@@ -23,10 +23,10 @@ const _sfc_main = {
     const notice = store_Notice.useNoticeStore();
     common_vendor.onLoad(async (option) => {
       id = decodeURIComponent(option.id);
-      common_vendor.index.__f__("log", "at pages/detail/noticedetail.vue:49", "接收到的ID：", id);
+      console.log("接收到的ID：", id);
       await notice.getnoticedetailstore(id);
       content.value = notice.noticedetail.content;
-      common_vendor.index.__f__("log", "at pages/detail/noticedetail.vue:53", content.value);
+      console.log(content.value);
     });
     function onBack() {
       common_vendor.index.navigateBack();
@@ -60,4 +60,3 @@ const _sfc_main = {
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-5d01593b"]]);
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/detail/noticedetail.js.map

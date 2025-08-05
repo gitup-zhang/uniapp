@@ -26,7 +26,7 @@ const _sfc_main = {
       });
     }
     function onclickactivity(id) {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:151", id);
+      console.log(id);
       common_vendor.index.navigateTo({
         url: `/pages/detail/articledetail?id=${id}`
       });
@@ -112,4 +112,3 @@ const _sfc_main = {
   }
 };
 wx.createPage(_sfc_main);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/index/index.js.map

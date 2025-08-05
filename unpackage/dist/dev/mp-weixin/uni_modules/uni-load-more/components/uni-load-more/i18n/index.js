@@ -20,4 +20,3 @@ const messages = {
   "zh-Hant": zhHant
 };
 exports.messages = messages;
-//# sourceMappingURL=../../../../../../.sourcemap/mp-weixin/uni_modules/uni-load-more/components/uni-load-more/i18n/index.js.map

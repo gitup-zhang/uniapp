@@ -37,7 +37,7 @@ const _sfc_main = {
       article_type: activeTab.value.toUpperCase()
     };
     common_vendor.watch(activeTab, (newVal, oldVal) => {
-      common_vendor.index.__f__("log", "at pages/policy/policy.vue:199", "Tab 变化:", oldVal, "=>", newVal);
+      console.log("Tab 变化:", oldVal, "=>", newVal);
       if (newVal === "news") {
         listarticles.resetpage(1);
         Params.article_type = "NEWS";
@@ -50,7 +50,7 @@ const _sfc_main = {
       Params.article_title = searchbar.value;
       Params.page = 1;
       listarticles.getlistpolicy(Params);
-      common_vendor.index.__f__("log", "at pages/policy/policy.vue:214", "搜索关键词:", searchbar.value);
+      console.log("搜索关键词:", searchbar.value);
     }
     function cancel() {
       searchbar.value = "";
@@ -61,7 +61,7 @@ const _sfc_main = {
     function loadMore() {
       Params.page = listarticles.page + 1;
       listarticles.getarticlemore(Params);
-      common_vendor.index.__f__("log", "at pages/policy/policy.vue:229", "到底了");
+      console.log("到底了");
     }
     function toggleDropdown(type) {
       currentDropdown.value = currentDropdown.value === type ? null : type;
@@ -81,7 +81,7 @@ const _sfc_main = {
         }
       }
       if (type === "time") {
-        common_vendor.index.__f__("log", "at pages/policy/policy.vue:254", value);
+        console.log(value);
         selectedTime.value = value;
         if (value === "最近一周") {
           Params.release_time = utils_data.getLastWeekDate();
@@ -98,13 +98,13 @@ const _sfc_main = {
       currentDropdown.value = null;
     }
     const handlePolicyClick = (policyItem) => {
-      common_vendor.index.__f__("log", "at pages/policy/policy.vue:279", "点击了政策:", policyItem);
+      console.log("点击了政策:", policyItem);
       common_vendor.index.navigateTo({
         url: `/pages/detail/articledetail?id=${policyItem.article_id}`
       });
     };
     const handleNewsClick = (newsItem) => {
-      common_vendor.index.__f__("log", "at pages/policy/policy.vue:287", "点击了新闻:", newsItem.article_id);
+      console.log("点击了新闻:", newsItem.article_id);
       common_vendor.index.navigateTo({
         url: `/pages/detail/articledetail?id=${newsItem.article_id}`
       });
@@ -113,7 +113,7 @@ const _sfc_main = {
       const source = common_vendor.index.getStorageSync("tabSource") || "tabbar";
       field.getfield();
       if (source === "switchTab") {
-        common_vendor.index.__f__("log", "at pages/policy/policy.vue:322", "来源：通过 uni.switchTab() 跳转");
+        console.log("来源：通过 uni.switchTab() 跳转");
         Params.is_selection = 1;
         Params.page = 1;
         listarticles.getlistpolicy(Params);
@@ -121,7 +121,7 @@ const _sfc_main = {
         listarticles.getlistpolicy(Params);
         Params.article_type = activeTab.value.toUpperCase();
       } else {
-        common_vendor.index.__f__("log", "at pages/policy/policy.vue:330", "来源：用户点击 tabBar 进入");
+        console.log("来源：用户点击 tabBar 进入");
         isselected.value = 0;
         Params.page = 1;
         listarticles.getlistpolicy(Params);
@@ -227,4 +227,3 @@ const _sfc_main = {
   }
 };
 wx.createPage(_sfc_main);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/policy/policy.js.map

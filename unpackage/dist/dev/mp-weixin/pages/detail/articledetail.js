@@ -23,10 +23,10 @@ const _sfc_main = {
     const articledetail = store_ArticleDetail.useArticleDeatilStore();
     common_vendor.onLoad(async (option) => {
       id = decodeURIComponent(option.id);
-      common_vendor.index.__f__("log", "at pages/detail/articledetail.vue:49", "接收到的ID：", id);
+      console.log("接收到的ID：", id);
       await articledetail.getarticledetail(id);
       content.value = articledetail.detail.article_content;
-      common_vendor.index.__f__("log", "at pages/detail/articledetail.vue:53", content.value);
+      console.log(content.value);
     });
     function onBack() {
       common_vendor.index.navigateBack();
@@ -61,4 +61,3 @@ const _sfc_main = {
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-5a514493"]]);
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/detail/articledetail.js.map

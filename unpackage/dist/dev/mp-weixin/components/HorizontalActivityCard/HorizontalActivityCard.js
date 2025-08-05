@@ -31,7 +31,7 @@ const _sfc_main = {
   setup(__props, { emit: __emit }) {
     const emit = __emit;
     function handleClick() {
-      common_vendor.index.__f__("log", "at components/HorizontalActivityCard/HorizontalActivityCard.vue:50", "卡片点击事件触发");
+      console.log("卡片点击事件触发");
       emit("click");
     }
     return (_ctx, _cache) => {
@@ -58,4 +58,3 @@ const _sfc_main = {
 };
 const Component = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-20ccd4e2"]]);
 wx.createComponent(Component);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/components/HorizontalActivityCard/HorizontalActivityCard.js.map

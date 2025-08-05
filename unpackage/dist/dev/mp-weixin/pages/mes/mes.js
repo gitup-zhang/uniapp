@@ -134,10 +134,10 @@ const _sfc_main = {
     });
     common_vendor.watch(isLoggedIn, (newVal) => {
       if (newVal) {
-        common_vendor.index.__f__("log", "at pages/mes/mes.vue:305", "用户已登录，加载消息数据");
+        console.log("用户已登录，加载消息数据");
         loadUserMessages();
       } else {
-        common_vendor.index.__f__("log", "at pages/mes/mes.vue:309", "用户已登出，清空消息数据");
+        console.log("用户已登出，清空消息数据");
       }
     });
     const goToLogin = () => {
@@ -145,26 +145,11 @@ const _sfc_main = {
         url: "../mymessage/mymessage"
       });
     };
-    const handleLogout = () => {
-      common_vendor.index.showModal({
-        title: "确认登出",
-        content: "确定要退出登录吗？",
-        success: (res) => {
-          if (res.confirm) {
-            userStore.logout();
-            common_vendor.index.showToast({
-              title: "已退出登录",
-              icon: "success"
-            });
-          }
-        }
-      });
-    };
     const loadUserMessages = async () => {
       try {
-        common_vendor.index.__f__("log", "at pages/mes/mes.vue:343", "加载用户消息数据");
+        console.log("加载用户消息数据");
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mes/mes.vue:345", "加载消息失败:", error);
+        console.error("加载消息失败:", error);
         common_vendor.index.showToast({
           title: "加载消息失败",
           icon: "error"
@@ -236,7 +221,7 @@ const _sfc_main = {
       return result;
     };
     const handleAvatarError = () => {
-      common_vendor.index.__f__("log", "at pages/mes/mes.vue:428", "头像加载失败");
+      console.log("头像加载失败");
     };
     const getEmptyTitle = () => {
       const titles = {
@@ -278,31 +263,30 @@ const _sfc_main = {
         b: common_vendor.o(goToLogin)
       } : common_vendor.e({
         c: statusBarHeight.value + "px",
-        d: common_vendor.o(handleLogout),
-        e: unreadCount.value > 0
+        d: unreadCount.value > 0
       }, unreadCount.value > 0 ? {
-        f: common_vendor.t(unreadCount.value > 99 ? "99+" : unreadCount.value)
+        e: common_vendor.t(unreadCount.value > 99 ? "99+" : unreadCount.value)
       } : {}, {
-        g: activeTab.value === "all" ? 1 : "",
-        h: common_vendor.o(($event) => switchTab("all")),
-        i: systemUnreadCount.value > 0
+        f: activeTab.value === "all" ? 1 : "",
+        g: common_vendor.o(($event) => switchTab("all")),
+        h: systemUnreadCount.value > 0
       }, systemUnreadCount.value > 0 ? {
-        j: common_vendor.t(systemUnreadCount.value)
+        i: common_vendor.t(systemUnreadCount.value)
       } : {}, {
-        k: activeTab.value === "system" ? 1 : "",
-        l: common_vendor.o(($event) => switchTab("system")),
-        m: groupUnreadCount.value > 0
+        j: activeTab.value === "system" ? 1 : "",
+        k: common_vendor.o(($event) => switchTab("system")),
+        l: groupUnreadCount.value > 0
       }, groupUnreadCount.value > 0 ? {
-        n: common_vendor.t(groupUnreadCount.value)
+        m: common_vendor.t(groupUnreadCount.value)
       } : {}, {
-        o: activeTab.value === "group" ? 1 : "",
-        p: common_vendor.o(($event) => switchTab("group")),
-        q: unreadCount.value > 0
+        n: activeTab.value === "group" ? 1 : "",
+        o: common_vendor.o(($event) => switchTab("group")),
+        p: unreadCount.value > 0
       }, unreadCount.value > 0 ? {
-        r: common_vendor.o(markAllAsRead)
+        q: common_vendor.o(markAllAsRead)
       } : {}, {
-        s: statusBarHeight.value + 44 + "px",
-        t: common_vendor.f(filteredMessages.value, (msg, index, i0) => {
+        r: statusBarHeight.value + 44 + "px",
+        s: common_vendor.f(filteredMessages.value, (msg, index, i0) => {
           return common_vendor.e({
             a: common_vendor.n(msg.type),
             b: msg.type === "group"
@@ -333,13 +317,13 @@ const _sfc_main = {
             s: "bb2249ad-1-" + i0 + ",bb2249ad-0"
           });
         }),
-        v: filteredMessages.value.length === 0
+        t: filteredMessages.value.length === 0
       }, filteredMessages.value.length === 0 ? {
-        w: common_vendor.t(getEmptyTitle()),
-        x: common_vendor.t(getEmptyDesc())
+        v: common_vendor.t(getEmptyTitle()),
+        w: common_vendor.t(getEmptyDesc())
       } : {}, {
-        y: statusBarHeight.value + 44 + 68 + "px",
-        z: common_vendor.p({
+        x: statusBarHeight.value + 44 + 68 + "px",
+        y: common_vendor.p({
           ["enable-back-to-top"]: true,
           bounces: false,
           batch: "8",
@@ -351,4 +335,3 @@ const _sfc_main = {
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-bb2249ad"]]);
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/mes/mes.js.map

@@ -29,4 +29,3 @@ const _sfc_main = {
   }
 };
 wx.createPage(_sfc_main);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/detail/activityjoined.js.map

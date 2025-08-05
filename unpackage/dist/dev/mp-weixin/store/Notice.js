@@ -13,7 +13,7 @@ const useNoticeStore = common_vendor.defineStore("notice", () => {
       const res = await newApis_index.getnotice();
       notice.value = res.data;
     } catch (error) {
-      common_vendor.index.__f__("log", "at store/Notice.js:19", error);
+      console.log(error);
     } finally {
       common_vendor.index.hideLoading();
     }
@@ -27,7 +27,7 @@ const useNoticeStore = common_vendor.defineStore("notice", () => {
       const res = await newApis_index.getnoticedetail(id);
       noticedetail.value = res.data;
     } catch (error) {
-      common_vendor.index.__f__("error", "at store/Notice.js:36", "获取详情失败:", error);
+      console.error("获取详情失败:", error);
       common_vendor.index.showToast({
         title: "加载失败",
         icon: "none"
@@ -44,4 +44,3 @@ const useNoticeStore = common_vendor.defineStore("notice", () => {
   };
 });
 exports.useNoticeStore = useNoticeStore;
-//# sourceMappingURL=../../.sourcemap/mp-weixin/store/Notice.js.map

@@ -401,4 +401,3 @@ wx.createComponent(Component);
 const RTovcHJvamVjdC91bmlhcHAvdW5pYXBwLW5ld3MvdW5pX21vZHVsZXMvbXAtaHRtbC9jb21wb25lbnRzL21wLWh0bWwvbm9kZS9ub2RlLnZ1ZQ = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null
 }, Symbol.toStringTag, { value: "Module" }));
-//# sourceMappingURL=../../../../../../.sourcemap/mp-weixin/uni_modules/mp-html/components/mp-html/node/node.js.map

@@ -54,19 +54,18 @@ const _sfc_main = {
     });
     const initPage = async () => {
       try {
-        await userInfo.checkLoginStatus();
         if (userInfo.signal) {
           await refreshUserData();
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:356", "页面初始化失败:", error);
+        console.error("页面初始化失败:", error);
       }
     };
     const refreshUserData = async () => {
       try {
-        await userInfo.getUserInfo();
+        await userInfo.getinfo();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:365", "获取用户信息失败:", error);
+        console.error("获取用户信息失败:", error);
       }
     };
     const formatPhoneNumber = (phone) => {
@@ -168,7 +167,7 @@ const _sfc_main = {
           icon: "success"
         });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:491", "账号登录失败:", error);
+        console.error("账号登录失败:", error);
         common_vendor.index.showToast({
           title: error.message || "登录失败，请重试",
           icon: "error"
@@ -194,7 +193,7 @@ const _sfc_main = {
           icon: "success"
         });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:527", "发送验证码失败:", error);
+        console.error("发送验证码失败:", error);
         common_vendor.index.showToast({
           title: error.message || "发送失败，请重试",
           icon: "error"
@@ -220,7 +219,7 @@ const _sfc_main = {
           icon: "success"
         });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/mymessage/mymessage.vue:563", "短信登录失败:", error);
+        console.error("短信登录失败:", error);
         common_vendor.index.showToast({
           title: error.message || "登录失败，请重试",
           icon: "error"
@@ -230,11 +229,11 @@ const _sfc_main = {
       }
     };
     const wechatlogin = async () => {
-      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:573", "1111111");
       try {
         await userInfo.loginWithWeChat();
+        initPage();
       } catch (e) {
-        common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:578", e);
+        console.log(e);
       }
     };
     const handleForgotPassword = () => {
@@ -305,20 +304,20 @@ const _sfc_main = {
       (_a = loadingPopup.value) == null ? void 0 : _a.close();
     };
     const onCheck = (data) => {
-      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:760", "查看活动:", data);
+      console.log("查看活动:", data);
       common_vendor.index.navigateTo({
         url: "/pages/activity/detail?id=" + data.id
       });
     };
     const onJoin = (data) => {
-      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:767", "加入群聊:", data);
+      console.log("加入群聊:", data);
       common_vendor.index.showToast({
         title: "已加入群聊",
         icon: "success"
       });
     };
     const onStatus = async (data) => {
-      common_vendor.index.__f__("log", "at pages/mymessage/mymessage.vue:775", "状态操作:", data);
+      console.log("状态操作:", data);
       try {
         showLoading("正在签到...");
         await performCheckin(data);
@@ -477,8 +476,8 @@ const _sfc_main = {
         am: common_vendor.o(showUserAgreement),
         an: common_vendor.o(showPrivacyPolicy)
       }) : {
-        ao: common_vendor.unref(userInfo).info.Image || "/static/icon/empty.png",
-        ap: common_vendor.t(common_vendor.unref(userInfo).info.username || "用户"),
+        ao: common_vendor.unref(userInfo).info.avatar_url || "/static/icon/empty.png",
+        ap: common_vendor.t(common_vendor.unref(userInfo).info.nickname || "用户"),
         aq: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
         ar: common_vendor.p({
           type: "right",
@@ -519,4 +518,3 @@ const _sfc_main = {
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-a5a8e0a1"]]);
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/mymessage/mymessage.js.map

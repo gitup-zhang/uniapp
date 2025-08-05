@@ -31,7 +31,7 @@
         <view class="avatar-wrapper" @click="changeAvatar">
           <image 
             class="profile-avatar" 
-            :src="userInfo.info.avatar_url || '/static/icon/empty.png'" 
+            :src="userInfo.info.Image || '/static/icon/empty.png'" 
             mode="aspectFill"
           />
           <view class="avatar-overlay">
@@ -41,7 +41,7 @@
             <view class="badge-dot"></view>
           </view>
         </view>
-        <text class="username">{{ userInfo.info.nickname || '用户' }}</text>
+        <text class="username">{{ userInfo.info.username || '用户' }}</text>
         <text class="user-id">ID: {{ userInfo.info.userId || '123456789' }}</text>
       </view>
 
@@ -56,13 +56,13 @@
             <text class="card-title">基本信息</text>
           </view>
           <view class="card-content">
-            <view class="info-item clickable" @click="editField('nickname')">
+            <view class="info-item clickable" @click="editField('username')">
               <view class="item-icon">
                 <uni-icons type="person-filled" size="16" color="#666"/>
               </view>
               <view class="item-content">
                 <text class="item-label">昵称</text>
-                <text class="item-value">{{ userInfo.info.nickname || '点击设置' }}</text>
+                <text class="item-value">{{ userInfo.info.username || '点击设置' }}</text>
               </view>
               <view class="item-arrow">
                 <uni-icons type="right" size="14" color="#ccc"/>
@@ -116,13 +116,13 @@
             <text class="card-title">工作信息</text>
           </view>
           <view class="card-content">
-            <view class="info-item clickable" @click="editField('unit')">
+            <view class="info-item clickable" @click="editField('company')">
               <view class="item-icon">
                 <uni-icons type="home" size="16" color="#666"/>
               </view>
               <view class="item-content">
                 <text class="item-label">单位</text>
-                <text class="item-value">{{ userInfo.info.unit || '点击设置单位' }}</text>
+                <text class="item-value">{{ userInfo.info.company || '点击设置单位' }}</text>
               </view>
               <view class="item-arrow">
                 <uni-icons type="right" size="14" color="#ccc"/>
@@ -476,11 +476,11 @@ const getGenderText = (gender) => {
 // 获取字段标签
 const getFieldLabel = (field) => {
   const labels = {
-    'nickname': '昵称',
+    'username': '昵称',
     'slogan': '个性签名',
     'gender': '性别',
     'birthday': '生日',
-    'unit': '单位',
+    'company': '单位',
     'department': '部门',
     'position': '职位',
     'industry': '行业',
@@ -493,8 +493,8 @@ const getFieldLabel = (field) => {
 // 获取字段占位符
 const getFieldPlaceholder = (field) => {
   const placeholders = {
-    'nickname': '请输入昵称',
-    'unit': '请输入单位名称',
+    'username': '请输入昵称',
+    'company': '请输入单位名称',
     'department': '请输入部门名称',
     'position': '请输入职位名称',
     'email': '请输入邮箱地址',
@@ -506,8 +506,8 @@ const getFieldPlaceholder = (field) => {
 // 获取字段最大长度
 const getFieldMaxLength = (field) => {
   const maxLengths = {
-    'nickname': 20,
-    'unit': 50,
+    'username': 20,
+    'company': 50,
     'department': 30,
     'position': 30,
     'email': 50,
@@ -518,7 +518,7 @@ const getFieldMaxLength = (field) => {
 
 // 判断是否为文本输入
 const isTextInput = (field) => {
-  return ['nickname', 'unit', 'department', 'position', 'email', 'phone'].includes(field)
+  return ['username', 'company', 'department', 'position', 'email', 'phone'].includes(field)
 }
 
 // 编辑字段
@@ -710,11 +710,10 @@ const saveField = async () => {
       updateData.verifyCode = verifyCode.value
     }
     console.log("更新的数据：",updateData)
-    // await updateinfo(updateData)
+    await saveUserProfile(updateData)
     
     // 更新本地数据
-	await userInfo.updateinfo(updateData)
-    await userInfo.getinfo()
+    userInfo.updateUserInfo(updateData)
     
     uni.showToast({
       title: '保存成功',
@@ -765,7 +764,6 @@ const changeAvatar = () => {
     sizeType: ['compressed'],
     sourceType: ['album', 'camera'],
     success: (res) => {
-		
       uploadAvatar(res.tempFilePaths[0])
     }
   })
@@ -775,21 +773,8 @@ const changeAvatar = () => {
 const uploadAvatar = async (filePath) => {
   try {
     showLoading('上传头像中...')
-	const res=await userInfo.uploadimage(filePath)
-	await userInfo.updateinfo({'avatar_url':res.data.url})
-	await userInfo.getinfo()
-	console.log("res:",res)
     // 这里实现头像上传逻辑
-    // await new Promise(resolve => setTimeout(resolve, 2000))
-	// uni.uploadFile({
-	// 			url: 'http://47.113.194.28:8080/api/file/upload', //仅为示例，非真实的接口地址
-	// 			filePath: filePath,
-	// 			name: 'file',
-
-	// 			success: (uploadFileRes) => {
-	// 				console.log(uploadFileRes.data);
-	// 			}
-	// 		});
+    await new Promise(resolve => setTimeout(resolve, 2000))
     
     uni.showToast({
       title: '头像更新成功',

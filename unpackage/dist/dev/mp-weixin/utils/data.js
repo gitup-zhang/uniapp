@@ -24,4 +24,3 @@ function getLastYearDate() {
 exports.getLastMonthDate = getLastMonthDate;
 exports.getLastWeekDate = getLastWeekDate;
 exports.getLastYearDate = getLastYearDate;
-//# sourceMappingURL=../../.sourcemap/mp-weixin/utils/data.js.map

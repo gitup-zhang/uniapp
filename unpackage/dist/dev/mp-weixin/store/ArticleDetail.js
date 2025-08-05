@@ -11,11 +11,11 @@ const useArticleDeatilStore = common_vendor.defineStore("articleDetail", () => {
     try {
       detail.value = {};
       const res = await newApis_articles.getArticleDetail(params);
-      common_vendor.index.__f__("log", "at store/ArticleDetail.js:17", "接口返回成功:", res);
+      console.log("接口返回成功:", res);
       detail.value = res.data;
-      common_vendor.index.__f__("log", "at store/ArticleDetail.js:19", "详情数据已更新:", detail.value);
+      console.log("详情数据已更新:", detail.value);
     } catch (error) {
-      common_vendor.index.__f__("error", "at store/ArticleDetail.js:21", "获取详情失败:", error);
+      console.error("获取详情失败:", error);
       common_vendor.index.showToast({
         title: "加载失败",
         icon: "none"
@@ -30,4 +30,3 @@ const useArticleDeatilStore = common_vendor.defineStore("articleDetail", () => {
   };
 });
 exports.useArticleDeatilStore = useArticleDeatilStore;
-//# sourceMappingURL=../../.sourcemap/mp-weixin/store/ArticleDetail.js.map

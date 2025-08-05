@@ -61,4 +61,3 @@ const _sfc_main = {
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-5f8dda5f"]]);
 exports.MiniProgramPage = MiniProgramPage;
-//# sourceMappingURL=../.sourcemap/mp-weixin/ArticlePolicy.js.map

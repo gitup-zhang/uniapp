@@ -12,4 +12,3 @@ function getArticleList(params) {
 exports.getArticleDetail = getArticleDetail;
 exports.getArticleField = getArticleField;
 exports.getArticleList = getArticleList;
-//# sourceMappingURL=../../.sourcemap/mp-weixin/new-apis/articles.js.map

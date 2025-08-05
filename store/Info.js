@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getinfologin,getinfoprofile } from '@/new-apis/info.js'
+import { getinfologin,getinfoprofile,updateprofile } from '@/new-apis/info.js'
 
 
 export const useInfoStore=defineStore('peopleinfo',()=>{
@@ -11,18 +11,16 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	// 标志位，判断是否登录
 	const signal=ref(false)
 	
+	// 获取个人信息
 	const getinfo=async()=>{
 		signal.value=true
-		info.value={
-			username: '胡歌',
-			slogan: '在阳光灿烂的日子里睡觉呀',
-			newsViews: 123,
-			policyViews: 234,
-			daysOnline :128,
-			field : '人工智能',
-			Image :'/static/picture.jpg'
-		}
 		
+		const res=await getinfoprofile()
+		info.value=res.data
+	}
+	// 更新个人信息
+	const updateinfo=async(params)=>{
+		await updateprofile(params)
 	}
 	const loginWithWeChat = async () => {
 	  try {
@@ -38,8 +36,9 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 		  console.log("token:"+token.value)
 			if(res.code===200){
 				signal.value=true
-				console.log("1111111111111111111111111111")
+			
 				console.log("登录成功")
+			
 			}
 			
 			
@@ -62,6 +61,40 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 		signal.value=false
 		info.value={}
 	}
+	// 上传图片
+	const uploadimage = async (filepath) => {
+	  return new Promise((resolve, reject) => {
+	    uni.uploadFile({
+	      url: 'http://47.113.194.28:8080/api/file/upload',
+	      filePath: filepath,
+	      name: 'file',
+	      header: {
+	        'Content-Type': 'multipart/form-data',
+	        Authorization: token.value ? `Bearer ${token.value}` : '',
+	      },
+	      success: (res) => {
+	        try {
+	          const data = JSON.parse(res.data) // 后端返回的通常是 JSON 字符串
+	          console.log('上传成功:', data)
+	          resolve(data) // 返回给调用者
+	        } catch (e) {
+	          console.error('解析失败:', e)
+	          reject(e)
+	        }
+	      },
+	      fail: (err) => {
+	        console.error('上传失败:', err)
+	        uni.showToast({
+	          title: '上传失败',
+	          icon: 'none'
+	        })
+	        reject(err)
+	      }
+	    })
+	  })
+	}
+
+	
 	
 	const getUserProfile = async () => {
 	  uni.getUserProfile({
@@ -90,11 +123,14 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	
 	return{
 		info,
+		token,
 		signal,
 		getinfo,
 		deleteinfo,
 		loginWithWeChat,
-		getUserProfile
+		getUserProfile,
+		updateinfo,
+		uploadimage
 	}
 	
 })

@@ -73,11 +73,11 @@ const _sfc_main = {
     };
     const getFieldLabel = (field) => {
       const labels = {
-        "username": "昵称",
+        "nickname": "昵称",
         "slogan": "个性签名",
         "gender": "性别",
         "birthday": "生日",
-        "company": "单位",
+        "unit": "单位",
         "department": "部门",
         "position": "职位",
         "industry": "行业",
@@ -88,8 +88,8 @@ const _sfc_main = {
     };
     const getFieldPlaceholder = (field) => {
       const placeholders = {
-        "username": "请输入昵称",
-        "company": "请输入单位名称",
+        "nickname": "请输入昵称",
+        "unit": "请输入单位名称",
         "department": "请输入部门名称",
         "position": "请输入职位名称",
         "email": "请输入邮箱地址",
@@ -99,8 +99,8 @@ const _sfc_main = {
     };
     const getFieldMaxLength = (field) => {
       const maxLengths = {
-        "username": 20,
-        "company": 50,
+        "nickname": 20,
+        "unit": 50,
         "department": 30,
         "position": 30,
         "email": 50,
@@ -109,7 +109,7 @@ const _sfc_main = {
       return maxLengths[field] || 50;
     };
     const isTextInput = (field) => {
-      return ["username", "company", "department", "position", "email", "phone"].includes(field);
+      return ["nickname", "unit", "department", "position", "email", "phone"].includes(field);
     };
     const editField = (field) => {
       var _a;
@@ -156,7 +156,7 @@ const _sfc_main = {
         });
         startCountdown();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/detail/profile.vue:583", "发送验证码失败:", error);
+        console.error("发送验证码失败:", error);
         common_vendor.index.showToast({
           title: "发送失败，请重试",
           icon: "error"
@@ -262,15 +262,16 @@ const _sfc_main = {
         if (currentField.value === "phone") {
           updateData.verifyCode = verifyCode.value;
         }
-        await saveUserProfile(updateData);
-        userInfo.updateUserInfo(updateData);
+        console.log("更新的数据：", updateData);
+        await userInfo.updateinfo(updateData);
+        await userInfo.getinfo();
         common_vendor.index.showToast({
           title: "保存成功",
           icon: "success"
         });
         closeEdit();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/detail/profile.vue:725", "保存失败:", error);
+        console.error("保存失败:", error);
         common_vendor.index.showToast({
           title: error.message || "保存失败，请重试",
           icon: "error"
@@ -278,28 +279,6 @@ const _sfc_main = {
       } finally {
         isSaving.value = false;
       }
-    };
-    const saveUserProfile = async (formData) => {
-      return new Promise((resolve, reject) => {
-        common_vendor.index.request({
-          url: "https://your-api-domain.com/api/profile/update",
-          method: "POST",
-          data: formData,
-          header: {
-            "Authorization": `Bearer ${userInfo.token}`
-          },
-          success: (res) => {
-            if (res.data.success) {
-              resolve(res.data.data);
-            } else {
-              reject(new Error(res.data.message || "保存失败"));
-            }
-          },
-          fail: (error) => {
-            reject(error);
-          }
-        });
-      });
     };
     const changeAvatar = () => {
       common_vendor.index.chooseImage({
@@ -314,7 +293,10 @@ const _sfc_main = {
     const uploadAvatar = async (filePath) => {
       try {
         showLoading("上传头像中...");
-        await new Promise((resolve) => setTimeout(resolve, 2e3));
+        const res = await userInfo.uploadimage(filePath);
+        await userInfo.updateinfo({ "avatar_url": res.data.url });
+        await userInfo.getinfo();
+        console.log("res:", res);
         common_vendor.index.showToast({
           title: "头像更新成功",
           icon: "success"
@@ -352,7 +334,7 @@ const _sfc_main = {
           url: "/pages/mymessage/mymessage"
         });
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/detail/profile.vue:839", "退出登录失败:", error);
+        console.error("退出登录失败:", error);
       } finally {
         hideLoading();
       }
@@ -376,14 +358,14 @@ const _sfc_main = {
           border: false,
           leftIcon: "left"
         }),
-        c: common_vendor.unref(userInfo).info.Image || "/static/icon/empty.png",
+        c: common_vendor.unref(userInfo).info.avatar_url || "/static/icon/empty.png",
         d: common_vendor.p({
           type: "camera",
           size: "24",
           color: "#fff"
         }),
         e: common_vendor.o(changeAvatar),
-        f: common_vendor.t(common_vendor.unref(userInfo).info.username || "用户"),
+        f: common_vendor.t(common_vendor.unref(userInfo).info.nickname || "用户"),
         g: common_vendor.t(common_vendor.unref(userInfo).info.userId || "123456789"),
         h: common_vendor.p({
           type: "person",
@@ -395,13 +377,13 @@ const _sfc_main = {
           size: "16",
           color: "#666"
         }),
-        j: common_vendor.t(common_vendor.unref(userInfo).info.username || "点击设置"),
+        j: common_vendor.t(common_vendor.unref(userInfo).info.nickname || "点击设置"),
         k: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        l: common_vendor.o(($event) => editField("username")),
+        l: common_vendor.o(($event) => editField("nickname")),
         m: common_vendor.p({
           type: "flag",
           size: "16",
@@ -424,13 +406,13 @@ const _sfc_main = {
           size: "16",
           color: "#666"
         }),
-        s: common_vendor.t(common_vendor.unref(userInfo).info.company || "点击设置单位"),
+        s: common_vendor.t(common_vendor.unref(userInfo).info.unit || "点击设置单位"),
         t: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        v: common_vendor.o(($event) => editField("company")),
+        v: common_vendor.o(($event) => editField("unit")),
         w: common_vendor.p({
           type: "gear",
           size: "16",
@@ -597,4 +579,3 @@ const _sfc_main = {
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-7b181482"]]);
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/detail/profile.js.map

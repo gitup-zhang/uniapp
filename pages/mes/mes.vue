@@ -20,11 +20,11 @@
         <view class="nav-content">
           <text class="nav-title">消息</text>
           <!-- 可选：添加登出按钮 -->
-          <view class="nav-right">
+          <!-- <view class="nav-right">
             <view class="logout-btn" @tap="handleLogout">
               <text class="logout-text">登出</text>
             </view>
-          </view>
+          </view> -->
         </view>
       </view>
       

@@ -21,20 +21,20 @@ const _sfc_main = {
   setup(__props) {
     function change(e) {
       const clickedIndex = e.detail.index;
-      common_vendor.index.__f__("log", "at pages/news/news.vue:52", "点击了第", clickedIndex + 1, "个宫格");
+      console.log("点击了第", clickedIndex + 1, "个宫格");
       common_vendor.index.navigateTo({
         url: `/pages/detail/activitydetail`
       });
     }
     function handleCardClick(eventData) {
-      common_vendor.index.__f__("log", "at pages/news/news.vue:60", "点击了卡片:", eventData);
+      console.log("点击了卡片:", eventData);
       common_vendor.index.navigateTo({
         url: `/pages/detail/activitydetail`
         // 举例，传递 title 作为参数
       });
     }
     function goMorehotactivity() {
-      common_vendor.index.__f__("log", "at pages/news/news.vue:68", "11111111");
+      console.log("11111111");
       common_vendor.index.navigateTo({
         url: `/pages/detail/activitymore`
       });
@@ -106,4 +106,3 @@ const _sfc_main = {
   }
 };
 wx.createPage(_sfc_main);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/news/news.js.map

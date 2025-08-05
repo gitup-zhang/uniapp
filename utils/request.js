@@ -56,13 +56,14 @@ let BASE_URL = '';
 
 // #ifdef H5
 BASE_URL = import.meta.env.DEV ? '/api' : 'http://47.113.194.28:8080/api';
-// BASE_URL = import.meta.env.DEV ? '/api' : 'http://localhost:8080/api';
 // #endif
 
 // #ifndef H5
 BASE_URL = 'http://47.113.194.28:8080/api';
-// BASE_URL = 'http://localhost:8080/api';
 // #endif
+
+// ✅ 引入 pinia store
+import { useInfoStore } from '@/store/Info.js'
 
 // 辅助函数：将对象参数转为 URL 查询字符串
 function buildQuery(params) {
@@ -73,10 +74,13 @@ function buildQuery(params) {
 
 // 通用请求方法
 function request(url, method, data = {}, header = {}) {
+  const userStore = useInfoStore(); // ✅ 每次都动态获取
+  const token = userStore.token;
+  console.log("获取到的token："+token)
+
   let requestUrl = url;
   const upperMethod = method.toUpperCase();
 
-  // GET 请求时，将参数拼接到 URL
   if (upperMethod === 'GET' && Object.keys(data).length > 0) {
     const queryString = buildQuery(data);
     requestUrl += (requestUrl.includes('?') ? '&' : '?') + queryString;
@@ -88,6 +92,7 @@ function request(url, method, data = {}, header = {}) {
       method: upperMethod,
       header: {
         'Content-Type': 'application/json',
+        Authorization: token ? `Bearer ${token}` : '', // ✅ 加入 token
         ...header
       },
       data: upperMethod === 'GET' ? undefined : data,
@@ -106,7 +111,6 @@ function request(url, method, data = {}, header = {}) {
   });
 }
 
-// 导出 get/post 方法
 export default {
   get: (url, data, header) => request(url, 'GET', data, header),
   post: (url, data, header) => request(url, 'POST', data, header),

@@ -183,7 +183,7 @@
             <view class="avatar-section">
               <image 
                 class="user-avatar" 
-                :src="userInfo.info.Image || '/static/icon/empty.png'" 
+                :src="userInfo.info.avatar_url || '/static/icon/empty.png'" 
                 mode="aspectFill"
               />
               <view class="online-indicator">
@@ -192,7 +192,7 @@
             </view>
             
             <view class="user-details">
-              <text class="user-name">{{ userInfo.info.username || '用户' }}</text>
+              <text class="user-name">{{ userInfo.info.nickname || '用户' }}</text>
               <text class="user-phone">{{ formatPhoneNumber(userInfo.info.phone) }}</text>
               <!-- <text class="user-signature">{{ userInfo.info.slogan || '点击设置个人签名' }}</text> -->
             </view>
@@ -348,7 +348,7 @@ onMounted(() => {
 // 初始化页面
 const initPage = async () => {
   try {
-    await userInfo.checkLoginStatus()
+    // await userInfo.checkLoginStatus()
     if (userInfo.signal) {
       await refreshUserData()
     }
@@ -360,7 +360,7 @@ const initPage = async () => {
 // 刷新用户数据
 const refreshUserData = async () => {
   try {
-    await userInfo.getUserInfo()
+    await userInfo.getinfo()
   } catch (error) {
     console.error('获取用户信息失败:', error)
   }
@@ -570,10 +570,11 @@ const handleSmsLogin = async () => {
   }
 }
 const wechatlogin=async()=>{
-	console.log("1111111")
+	
 	
 	try{
 		await userInfo.loginWithWeChat()
+		initPage()
 	}catch(e){
 		console.log(e)
 	}

@@ -11,9 +11,9 @@ const usefieldstore = common_vendor.defineStore("field", () => {
     try {
       const res = await newApis_articles.getArticleField();
       fieldlist.value = res.data;
-      common_vendor.index.__f__("log", "at store/field.js:21", fieldlist.value);
+      console.log(fieldlist.value);
     } catch (error) {
-      common_vendor.index.__f__("log", "at store/field.js:23", error);
+      console.log(error);
     } finally {
       common_vendor.index.hideLoading();
     }
@@ -24,4 +24,3 @@ const usefieldstore = common_vendor.defineStore("field", () => {
   };
 });
 exports.usefieldstore = usefieldstore;
-//# sourceMappingURL=../../.sourcemap/mp-weixin/store/field.js.map

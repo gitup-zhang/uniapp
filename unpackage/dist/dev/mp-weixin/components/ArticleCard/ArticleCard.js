@@ -27,7 +27,7 @@ const _sfc_main = {
       emit("click", props.newsData);
     };
     const handleImageError = () => {
-      common_vendor.index.__f__("log", "at components/ArticleCard/ArticleCard.vue:83", "图片加载失败");
+      console.log("图片加载失败");
     };
     const formatTime = (time) => {
       if (!time)
@@ -67,4 +67,3 @@ const _sfc_main = {
 };
 const Component = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-67a517e8"]]);
 wx.createComponent(Component);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/components/ArticleCard/ArticleCard.js.map

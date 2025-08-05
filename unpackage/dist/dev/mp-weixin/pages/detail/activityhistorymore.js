@@ -14,7 +14,7 @@ const _sfc_main = {
   __name: "activityhistorymore",
   setup(__props) {
     function handleCardClick(eventData) {
-      common_vendor.index.__f__("log", "at pages/detail/activityhistorymore.vue:31", "点击了卡片:", eventData);
+      console.log("点击了卡片:", eventData);
       common_vendor.index.navigateTo({
         url: `/pages/detail/activitydetail`
         // 举例，传递 title 作为参数
@@ -51,4 +51,3 @@ const _sfc_main = {
   }
 };
 wx.createPage(_sfc_main);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/detail/activityhistorymore.js.map

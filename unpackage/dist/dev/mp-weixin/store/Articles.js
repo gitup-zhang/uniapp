@@ -30,7 +30,7 @@ const useArticlesStore = common_vendor.defineStore("articlelist", () => {
         listnew.value = res.data;
       }
     } catch (error) {
-      common_vendor.index.__f__("log", "at store/Articles.js:48", error);
+      console.log(error);
     } finally {
       common_vendor.index.hideLoading();
     }
@@ -54,7 +54,7 @@ const useArticlesStore = common_vendor.defineStore("articlelist", () => {
         listnew.value = listnew.value.concat(res.data);
       }
     } catch (error) {
-      common_vendor.index.__f__("log", "at store/Articles.js:85", error);
+      console.log(error);
     } finally {
       loading.value = false;
     }
@@ -76,4 +76,3 @@ const useArticlesStore = common_vendor.defineStore("articlelist", () => {
   };
 });
 exports.useArticlesStore = useArticlesStore;
-//# sourceMappingURL=../../.sourcemap/mp-weixin/store/Articles.js.map

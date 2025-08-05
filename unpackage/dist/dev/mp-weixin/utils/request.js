@@ -1,11 +1,15 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
+const store_Info = require("../store/Info.js");
 let BASE_URL = "";
 BASE_URL = "http://47.113.194.28:8080/api";
 function buildQuery(params) {
   return Object.entries(params).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`).join("&");
 }
 function request(url, method, data = {}, header = {}) {
+  const userStore = store_Info.useInfoStore();
+  const token = userStore.token;
+  console.log("获取到的token：" + token);
   let requestUrl = url;
   const upperMethod = method.toUpperCase();
   if (upperMethod === "GET" && Object.keys(data).length > 0) {
@@ -18,6 +22,8 @@ function request(url, method, data = {}, header = {}) {
       method: upperMethod,
       header: {
         "Content-Type": "application/json",
+        Authorization: token ? `Bearer ${token}` : "",
+        // ✅ 加入 token
         ...header
       },
       data: upperMethod === "GET" ? void 0 : data,
@@ -40,4 +46,3 @@ const http = {
   post: (url, data, header) => request(url, "POST", data, header)
 };
 exports.http = http;
-//# sourceMappingURL=../../.sourcemap/mp-weixin/utils/request.js.map

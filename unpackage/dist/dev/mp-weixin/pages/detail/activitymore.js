@@ -18,7 +18,7 @@ const _sfc_main = {
   setup(__props) {
     function change(e) {
       const clickedIndex = e.detail.index;
-      common_vendor.index.__f__("log", "at pages/detail/activitymore.vue:38", "点击了第", clickedIndex + 1, "个宫格");
+      console.log("点击了第", clickedIndex + 1, "个宫格");
       common_vendor.index.navigateTo({
         url: `/pages/detail/activitydetail`
       });
@@ -65,4 +65,3 @@ const _sfc_main = {
   }
 };
 wx.createPage(_sfc_main);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/detail/activitymore.js.map

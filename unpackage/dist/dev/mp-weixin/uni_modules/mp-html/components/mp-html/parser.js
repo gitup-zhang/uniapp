@@ -1044,4 +1044,3 @@ Lexer.prototype.endTag = function() {
   }
 };
 exports.Parser = Parser;
-//# sourceMappingURL=../../../../../.sourcemap/mp-weixin/uni_modules/mp-html/components/mp-html/parser.js.map

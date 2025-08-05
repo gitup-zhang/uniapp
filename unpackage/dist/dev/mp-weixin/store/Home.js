@@ -15,7 +15,7 @@ const useSelectedstore = common_vendor.defineStore("selected", () => {
       const res_policy = await newApis_articles.getArticleList({ is_selection: 1, page_size: 8, article_type: "POLICY" });
       policys.value = res_policy.data;
     } catch (error) {
-      common_vendor.index.__f__("log", "at store/Home.js:25", error);
+      console.log(error);
     } finally {
       common_vendor.index.hideLoading();
     }
@@ -27,4 +27,3 @@ const useSelectedstore = common_vendor.defineStore("selected", () => {
   };
 });
 exports.useSelectedstore = useSelectedstore;
-//# sourceMappingURL=../../.sourcemap/mp-weixin/store/Home.js.map

@@ -8,4 +8,3 @@ function getnoticedetail(params) {
 }
 exports.getnotice = getnotice;
 exports.getnoticedetail = getnoticedetail;
-//# sourceMappingURL=../../.sourcemap/mp-weixin/new-apis/index.js.map
