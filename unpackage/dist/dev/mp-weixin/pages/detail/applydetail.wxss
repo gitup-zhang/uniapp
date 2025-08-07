@@ -105,11 +105,30 @@
   border-radius: 20rpx;
   overflow: hidden;
 }
-.form-title.data-v-123ce677 {
+.form-header.data-v-123ce677 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 40rpx 40rpx 20rpx;
+}
+.form-title.data-v-123ce677 {
   font-size: 36rpx;
   font-weight: bold;
   color: #333333;
+}
+.edit-btn.data-v-123ce677 {
+  padding: 12rpx 24rpx;
+  background-color: #007aff;
+  color: #ffffff;
+  font-size: 26rpx;
+  border-radius: 8rpx;
+  border: none;
+}
+.edit-btn.save-btn.data-v-123ce677 {
+  background-color: #34c759;
+}
+.edit-btn.data-v-123ce677:active {
+  opacity: 0.8;
 }
 .form-content.data-v-123ce677 {
   padding: 0 40rpx;
@@ -132,6 +151,10 @@
   font-size: 28rpx;
   color: #333333;
   box-sizing: border-box;
+}
+.form-item .input.disabled.data-v-123ce677 {
+  background-color: #f0f0f0;
+  color: #999999;
 }
 .form-item .input.phone-input.data-v-123ce677 {
   width: calc(100% - 220rpx);
@@ -158,11 +181,11 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
-.form-item .phone-input-wrapper .verify-btn.data-v-123ce677:disabled {
+.form-item .phone-input-wrapper .verify-btn.disabled.data-v-123ce677, .form-item .phone-input-wrapper .verify-btn.data-v-123ce677:disabled {
   background-color: #cccccc;
   color: #999999;
 }
-.form-item .phone-input-wrapper .verify-btn.data-v-123ce677:not(:disabled):active {
+.form-item .phone-input-wrapper .verify-btn.data-v-123ce677:not(:disabled):not(.disabled):active {
   background-color: #c53030;
 }
 .form-item .picker-input.data-v-123ce677 {
@@ -175,6 +198,12 @@
   align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
+}
+.form-item .picker-input.disabled.data-v-123ce677 {
+  background-color: #f0f0f0;
+}
+.form-item .picker-input.disabled .picker-text.data-v-123ce677 {
+  color: #999999;
 }
 .form-item .picker-input .picker-text.data-v-123ce677 {
   font-size: 28rpx;
@@ -204,6 +233,10 @@
   align-items: center;
   justify-content: center;
 }
-.submit-section .submit-btn.data-v-123ce677:active {
+.submit-section .submit-btn.disabled.data-v-123ce677, .submit-section .submit-btn.data-v-123ce677:disabled {
+  background-color: #cccccc;
+  color: #999999;
+}
+.submit-section .submit-btn.data-v-123ce677:not(:disabled):not(.disabled):active {
   background-color: #c53030;
 }

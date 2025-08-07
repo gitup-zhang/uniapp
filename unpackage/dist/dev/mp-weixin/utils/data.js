@@ -1,5 +1,8 @@
 "use strict";
-require("../common/vendor.js");
+const common_vendor = require("../common/vendor.js");
+function Dataformat(timeStr) {
+  return common_vendor.dayjs(timeStr).format("YYYY-MM-DD HH:mm:ss");
+}
 function formatDate(date) {
   const year = date.getFullYear();
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -16,11 +19,18 @@ function getLastMonthDate() {
   currentDate.setMonth(currentDate.getMonth() - 1);
   return formatDate(currentDate);
 }
+function formatEventDate(start, end) {
+  const startDate = common_vendor.dayjs(start);
+  const endDate = common_vendor.dayjs(end);
+  return `${startDate.month() + 1}月${startDate.date()}日 - ${endDate.month() + 1}月${endDate.date()}日`;
+}
 function getLastYearDate() {
   const currentDate = /* @__PURE__ */ new Date();
   currentDate.setFullYear(currentDate.getFullYear() - 1);
   return formatDate(currentDate);
 }
+exports.Dataformat = Dataformat;
+exports.formatEventDate = formatEventDate;
 exports.getLastMonthDate = getLastMonthDate;
 exports.getLastWeekDate = getLastWeekDate;
 exports.getLastYearDate = getLastYearDate;

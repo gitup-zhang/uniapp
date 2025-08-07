@@ -5,6 +5,11 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
   let info = common_vendor.ref({});
   const token = common_vendor.ref("");
   const signal = common_vendor.ref(false);
+  const setToken = (t) => {
+    token.value = t;
+    signal.value = true;
+    common_vendor.index.setStorageSync("token", t);
+  };
   const getinfo = async () => {
     signal.value = true;
     const res = await newApis_info.getinfoprofile();
@@ -20,10 +25,10 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
         const codes = loginRes.code;
         console.log(codes);
         const res = await newApis_info.getinfologin({ code: codes });
-        token.value = res.token;
         console.log("token:" + token.value);
         if (res.code === 200) {
           signal.value = true;
+          setToken(res.token);
           console.log("登录成功");
         }
       }
@@ -32,8 +37,10 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
     }
   };
   function deleteinfo() {
+    token.value = "";
     signal.value = false;
     info.value = {};
+    common_vendor.index.removeStorageSync("token");
   }
   const uploadimage = async (filepath) => {
     return new Promise((resolve, reject) => {
@@ -94,7 +101,8 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
     loginWithWeChat,
     getUserProfile,
     updateinfo,
-    uploadimage
+    uploadimage,
+    setToken
   };
 });
 exports.useInfoStore = useInfoStore;

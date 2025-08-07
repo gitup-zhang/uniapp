@@ -14,14 +14,15 @@
 	
 	<!-- 热门活动 -->
 			<uni-grid :column="2" :highlight="false" :show-border="false" @change="change" :square="false">
-				<uni-grid-item v-for="(item, index) in 2" :index="index" :key="index">
+				<uni-grid-item v-for="item in EventStore.eventing" :index="item.id" :key="item.id">
 <!-- 					<view class="grid-item-box" style="background-color: #fff;" > -->
 						  <ActivityCard
-						    imgSrc="https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg"
-						    title="深圳市插画协会、英国插画师协会联合展览"
-						    date="3月17日 - 3月30日"
-						    location="深圳"
-							:isJoined="true"
+						    :imgSrc="item.cover_image_url"
+						    :title="item.title"
+						    :date="formatEventDate(item.event_start_time,item.event_end_time)"
+						    :location="item.event_address"
+							:isJoined="false"
+							:fee="item.registration_fee"
 						  />
 <!-- 					</view> -->
 				</uni-grid-item>
@@ -31,35 +32,46 @@
 	  <uni-section title="历史活动回顾" titleFontSize="20px" type="line" />
 	   <text class="more-link" @click="goMorehistoryactivity">查看更多</text>
 	</view >
-	  <HorizontalActivityCard  v-for="(item,index) in 3" 
-	    imgSrc="https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg"
-	    title="中国大模型人才大会"
-	    date="3月15日 - 4月10日"
-	    location="深圳华侨城创意文化园北区 C2 展厅"
+	  <HorizontalActivityCard  v-for="item in EventStore.eventoutdate" 
+	    :imgSrc="item.cover_image_url"
+	    :title="item.title"
+	    :date="formatEventDate(item.event_start_time,item.event_end_time)"
+	    :location="item.event_address"
 	    status="已结束"
-		@click="handleCardClick"
+		@click="handleCardClick(item.id)"
 	  />
 
   </view>
 </template>
 
 <script setup>
+import {ref,onMounted} from 'vue'
+import { onLoad,onShow } from '@dcloudio/uni-app'
+import {useEventstore} from '@/store/Event.js'
 import ActivityCard from '@/components/ActivityCard/ActivityCard.vue'
+import {formatEventDate} from '@/utils/data.js'
 import HorizontalActivityCard from '@/components/HorizontalActivityCard/HorizontalActivityCard.vue'
+
+// 初始化pinia
+const EventStore=useEventstore()
+
+
 // 热门活动点击
 function change(e){
+	// console.log(e)
 	const clickedIndex = e.detail.index
-	console.log('点击了第', clickedIndex+1, '个宫格')
+	console.log('点击了第', clickedIndex, '个宫格')
+	const disable = false
 	uni.navigateTo({
-	  url: `/pages/detail/activitydetail`
+	  url: `/pages/detail/activitydetail?id=${clickedIndex}&disable=${disable}`
 	})
 }
 // 历史活动点击
-
 function handleCardClick(eventData) {
   console.log("点击了卡片:", eventData);
+  const disable = true
 	uni.navigateTo({
-	url: `/pages/detail/activitydetail` // 举例，传递 title 作为参数
+	url: `/pages/detail/activitydetail?id=${eventData}&disable=${disable}` // 举例，传递 title 作为参数
   });
 }
 
@@ -76,6 +88,11 @@ function goMorehistoryactivity(){
 	  url: `/pages/detail/activityhistorymore`
 	})
 }
+// 初始化
+onShow(()=>{
+	EventStore.getlisting(2)
+	EventStore.getlisoutdate(3)
+})
 </script>
 <style>
 .page {

@@ -1,5 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const store_Event = require("../../store/Event.js");
+const utils_data = require("../../utils/data.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_HorizontalActivityCard2 = common_vendor.resolveComponent("HorizontalActivityCard");
@@ -13,6 +15,7 @@ if (!Math) {
 const _sfc_main = {
   __name: "activityhistorymore",
   setup(__props) {
+    const EventStore = store_Event.useEventstore();
     function handleCardClick(eventData) {
       console.log("点击了卡片:", eventData);
       common_vendor.index.navigateTo({
@@ -23,6 +26,9 @@ const _sfc_main = {
     function onBack() {
       common_vendor.index.navigateBack();
     }
+    common_vendor.onLoad(() => {
+      EventStore.getlisoutdate(10);
+    });
     return (_ctx, _cache) => {
       return {
         a: common_vendor.o(onBack),
@@ -33,19 +39,19 @@ const _sfc_main = {
           border: false,
           leftIcon: "left"
         }),
-        c: common_vendor.f(10, (item, index, i0) => {
+        c: common_vendor.f(common_vendor.unref(EventStore).eventoutdate, (item, k0, i0) => {
           return {
-            a: "d008db7a-1-" + i0
+            a: "d008db7a-1-" + i0,
+            b: common_vendor.p({
+              imgSrc: item.cover_image_url,
+              title: item.title,
+              date: common_vendor.unref(utils_data.formatEventDate)(item.event_start_time, item.event_end_time),
+              location: item.event_address,
+              status: "已结束"
+            })
           };
         }),
-        d: common_vendor.o(handleCardClick),
-        e: common_vendor.p({
-          imgSrc: "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
-          title: "中国大模型人才大会",
-          date: "3月15日 - 4月10日",
-          location: "深圳华侨城创意文化园北区 C2 展厅",
-          status: "已结束"
-        })
+        d: common_vendor.o(($event) => handleCardClick())
       };
     };
   }

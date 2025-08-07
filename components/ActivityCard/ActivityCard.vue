@@ -7,12 +7,12 @@
     <view class="info-box">
       <view class="tag-title">
         <!-- 根据 isJoined 显示不同的状态 -->
-        <text
+      <!--  <text
           class="status-tag"
           :class="isJoined ? 'joined' : 'not-joined'"
         >
           {{ isJoined ? '已报名' : '未报名' }}
-        </text>
+        </text> -->
         <text class="title" :title="title">{{ title }}</text>
       </view>
       <view class="info-line">
@@ -24,7 +24,7 @@
         <text class="info-text">{{ location }}</text>
       </view>
       <view class="info-line">
-        <text class="free-tag">免费，免预约</text>
+        <text class="free-tag">所需费用：{{fee}}</text>
       </view>
     </view>
   </view>
@@ -51,6 +51,10 @@ defineProps({
   isJoined: {
     type: Boolean,
     default: false
+  },
+  fee:{
+	  type: Number,
+	  required: true
   }
 })
 </script>

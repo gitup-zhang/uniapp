@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
 const common_vendor = require("./common/vendor.js");
+const store_Info = require("./store/Info.js");
 if (!Math) {
   "./pages/index/index.js";
   "./pages/policy/policy.js";
@@ -18,14 +19,27 @@ if (!Math) {
   "./pages/detail/noticedetail.js";
 }
 const _sfc_main = {
-  onLaunch: function() {
-    console.log("App Launch");
-  },
-  onShow: function() {
-    console.log("App Show");
-  },
-  onHide: function() {
-    console.log("App Hide");
+  __name: "App",
+  setup(__props) {
+    common_vendor.onLaunch(async () => {
+      const infoStore = store_Info.useInfoStore();
+      const localToken = common_vendor.index.getStorageSync("token");
+      if (localToken) {
+        infoStore.token = localToken;
+        infoStore.signal = true;
+        try {
+          await infoStore.getUserInfo();
+          console.log("登录状态恢复成功");
+        } catch (e) {
+          console.log("用户信息拉取失败，清除登录状态");
+          infoStore.logout();
+        }
+      } else {
+        console.log("本地无登录状态");
+      }
+    });
+    return () => {
+    };
   }
 };
 function createApp() {

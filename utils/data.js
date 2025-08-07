@@ -31,6 +31,14 @@ export function getLastMonthDate() {
   return formatDate(currentDate);
 }
 
+// 获取3月15日 - 4月10日这样的格式
+
+export function formatEventDate(start, end){
+  const startDate = dayjs(start)
+  const endDate = dayjs(end)
+  return `${startDate.month() + 1}月${startDate.date()}日 - ${endDate.month() + 1}月${endDate.date()}日`
+}
+
 /**
  * 获取当前日期的最近一年日期
  * @returns {string} 最近一年的日期，格式为 yyyy-mm-dd

@@ -99,7 +99,13 @@ function request(url, method, data = {}, header = {}) {
       success: (res) => {
         if (res.statusCode === 200) {
           resolve(res.data);
-        } else {
+        } else if (res.statusCode === 401) {
+    // 登录失效，自动跳转登录
+    uni.removeStorageSync('token');
+    uni.redirectTo({ url: '/pages/mymessage/mymessage' });
+    reject(new Error('未登录或登录已过期'));
+			} 
+		else {
           reject(res);
         }
       },

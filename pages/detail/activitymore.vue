@@ -15,23 +15,32 @@
 	  </template>
 	</uni-nav-bar>
 	<uni-grid :column="2" :highlight="false" :show-border="false" @change="change" :square="false">
-					<uni-grid-item v-for="(item, index) in 10" :index="index" :key="index">
-	<!-- 					<view class="grid-item-box" style="background-color: #fff;" > -->
-							  <ActivityCard
-							    imgSrc="https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg"
-							    title="深圳市插画协会、英国插画师协会联合展览"
-							    date="3月17日 - 3月30日"
-							    location="深圳"
-								:isJoined="true"
-							  />
-	<!-- 					</view> -->
+					<uni-grid-item v-for="item in EventStore.eventing" :index="item.id" :key="item.id">
+					<!-- 					<view class="grid-item-box" style="background-color: #fff;" > -->
+					  <ActivityCard
+						:imgSrc="item.cover_image_url"
+						:title="item.title"
+						:date="formatEventDate(item.event_start_time,item.event_end_time)"
+						:location="item.event_address"
+						:isJoined="false"
+						:fee="item.registration_fee"
+					  />
+					<!-- 					</view> -->
 					</uni-grid-item>
 	</uni-grid>
 	
 </template>
 
 <script setup>
+import {ref,onMounted} from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
+import {useEventstore} from '@/store/Event.js'	
+import {formatEventDate} from '@/utils/data.js'
 import ActivityCard from '@/components/ActivityCard/ActivityCard.vue'
+
+// 初始化pinia
+const EventStore=useEventstore()
+
 
 function change(e){
 	const clickedIndex = e.detail.index
@@ -44,6 +53,10 @@ function change(e){
 function onBack() {
   uni.navigateBack();
 }
+onLoad(()=>{
+	EventStore.getlisting(10)
+	
+})
 </script>
 
 <style>

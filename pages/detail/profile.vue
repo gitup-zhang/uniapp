@@ -41,7 +41,10 @@
             <view class="badge-dot"></view>
           </view>
         </view>
-        <text class="username">{{ userInfo.info.nickname || '用户' }}</text>
+        <!-- 修改：姓名变为可点击编辑 -->
+        <text class="username clickable-name" @click="editField('name')">
+          {{ userInfo.info.name || '点击设置姓名' }}
+        </text>
         <text class="user-id">ID: {{ userInfo.info.userId || '123456789' }}</text>
       </view>
 
@@ -68,18 +71,6 @@
                 <uni-icons type="right" size="14" color="#ccc"/>
               </view>
             </view>
-            <!-- <view class="info-item clickable" @click="editField('slogan')">
-              <view class="item-icon">
-                <uni-icons type="chatbubble" size="16" color="#666"/>
-              </view>
-              <view class="item-content">
-                <text class="item-label">个性签名</text>
-                <text class="item-value">{{ userInfo.info.slogan || '点击设置个性签名' }}</text>
-              </view>
-              <view class="item-arrow">
-                <uni-icons type="right" size="14" color="#ccc"/>
-              </view>
-            </view> -->
             <view class="info-item clickable" @click="editField('gender')">
               <view class="item-icon">
                 <uni-icons type="flag" size="16" color="#666"/>
@@ -92,18 +83,6 @@
                 <uni-icons type="right" size="14" color="#ccc"/>
               </view>
             </view>
-            <!-- <view class="info-item clickable" @click="editField('birthday')">
-              <view class="item-icon">
-                <uni-icons type="calendar" size="16" color="#666"/>
-              </view>
-              <view class="item-content">
-                <text class="item-label">生日</text>
-                <text class="item-value">{{ userInfo.info.birthday || '点击设置生日' }}</text>
-              </view>
-              <view class="item-arrow">
-                <uni-icons type="right" size="14" color="#ccc"/>
-              </view>
-            </view> -->
           </view>
         </view>
 
@@ -140,13 +119,14 @@
                 <uni-icons type="right" size="14" color="#ccc"/>
               </view>
             </view>
+            <!-- 修改：职位改为选择器 -->
             <view class="info-item clickable" @click="editField('position')">
               <view class="item-icon">
                 <uni-icons type="star" size="16" color="#666"/>
               </view>
               <view class="item-content">
                 <text class="item-label">职位</text>
-                <text class="item-value">{{ userInfo.info.position || '点击设置职位' }}</text>
+                <text class="item-value">{{ userInfo.info.position || '点击选择职位' }}</text>
               </view>
               <view class="item-arrow">
                 <uni-icons type="right" size="14" color="#ccc"/>
@@ -202,68 +182,6 @@
             </view>
           </view>
         </view>
-
-        <!-- 账户统计卡片 -->
-        <!-- <view class="info-card">
-          <view class="card-header">
-            <view class="header-icon stats-icon">
-              <uni-icons type="bars" size="18" color="#fff"/>
-            </view>
-            <text class="card-title">账户统计</text>
-          </view>
-          <view class="card-content">
-            <view class="stats-grid">
-              <view class="stats-item">
-                <text class="stats-number">{{ userInfo.info.daysOnline || 0 }}</text>
-                <text class="stats-label">在线天数</text>
-              </view>
-              <view class="stats-item">
-                <text class="stats-number">{{ userInfo.info.totalViews || 0 }}</text>
-                <text class="stats-label">总浏览量</text>
-              </view>
-              <view class="stats-item">
-                <text class="stats-number">{{ userInfo.info.totalLikes || 0 }}</text>
-                <text class="stats-label">获赞数量</text>
-              </view>
-            </view>
-          </view>
-        </view> -->
-
-        <!-- 安全设置卡片 -->
-        <!-- <view class="info-card">
-          <view class="card-header">
-            <view class="header-icon security-icon">
-              <uni-icons type="locked" size="18" color="#fff"/>
-            </view>
-            <text class="card-title">安全设置</text>
-          </view>
-          <view class="card-content">
-            <view class="info-item clickable" @click="changePassword">
-              <view class="item-icon">
-                <uni-icons type="locked-filled" size="16" color="#666"/>
-              </view>
-              <view class="item-content">
-                <text class="item-label">登录密码</text>
-                <text class="item-value">已设置</text>
-              </view>
-              <view class="item-arrow">
-                <uni-icons type="right" size="14" color="#ccc"/>
-              </view>
-            </view>
-            <view class="info-item clickable" @click="privacySettings">
-              <view class="item-icon">
-                <uni-icons type="eye" size="16" color="#666"/>
-              </view>
-              <view class="item-content">
-                <text class="item-label">隐私设置</text>
-                <text class="item-value">管理隐私选项</text>
-              </view>
-              <view class="item-arrow">
-                <uni-icons type="right" size="14" color="#ccc"/>
-              </view>
-            </view>
-          </view>
-        </view>-->
       </view> 
       <!-- 退出登录按钮 -->
       <view class="logout-section">
@@ -331,19 +249,19 @@
             <view class="gender-options">
               <view 
                 class="gender-item" 
-                :class="{ active: editValue === 'male' }"
-                @click="editValue = 'male'"
+                :class="{ active: editValue === 'F' }"
+                @click="editValue = 'F'"
               >
-                <uni-icons type="person" size="16" :color="editValue === 'male' ? '#fff' : '#666'"/>
-                <text class="gender-label">男</text>
+                <uni-icons type="person" size="16" :color="editValue === 'F' ? '#fff' : '#666'"/>
+                <text class="gender-label">女</text>
               </view>
               <view 
                 class="gender-item" 
-                :class="{ active: editValue === 'female' }"
-                @click="editValue = 'female'"
+                :class="{ active: editValue === 'M' }"
+                @click="editValue = 'M'"
               >
-                <uni-icons type="person" size="16" :color="editValue === 'female' ? '#fff' : '#666'"/>
-                <text class="gender-label">女</text>
+                <uni-icons type="person" size="16" :color="editValue === 'M' ? '#fff' : '#666'"/>
+                <text class="gender-label">男</text>
               </view>
             </view>
           </view>
@@ -372,6 +290,20 @@
               <view class="industry-picker">
                 <text class="picker-text">{{ editValue || '请选择行业' }}</text>
                 <uni-icons type="calendar" size="16" color="#999"/>
+              </view>
+            </picker>
+          </view>
+          
+          <!-- 修改：职位选择器 -->
+          <view v-if="currentField === 'position'" class="form-group">
+            <picker 
+              :value="positionIndex" 
+              :range="positionOptions"
+              @change="onPositionChange"
+            >
+              <view class="position-picker">
+                <text class="picker-text">{{ editValue || '请选择职位' }}</text>
+                <uni-icons type="star" size="16" color="#999"/>
               </view>
             </picker>
           </view>
@@ -438,9 +370,63 @@ const industryOptions = [
   '其他'
 ]
 
+// 新增：职位选项
+const positionOptions = [
+  '总经理/CEO',
+  '副总经理/副CEO',
+  '总监',
+  '副总监',
+  '部门经理',
+  '副经理',
+  '主管/组长',
+  '高级工程师',
+  '工程师',
+  '初级工程师',
+  '高级专员',
+  '专员',
+  '助理专员',
+  '销售总监',
+  '销售经理',
+  '销售代表',
+  '市场总监',
+  '市场经理',
+  '市场专员',
+  '产品总监',
+  '产品经理',
+  '产品专员',
+  '技术总监',
+  '技术经理',
+  '架构师',
+  '开发工程师',
+  '测试工程师',
+  '运维工程师',
+  '设计总监',
+  '设计经理',
+  'UI设计师',
+  '平面设计师',
+  '人事总监',
+  '人事经理',
+  '人事专员',
+  '财务总监',
+  '财务经理',
+  '会计',
+  '出纳',
+  '行政总监',
+  '行政经理',
+  '行政专员',
+  '客服经理',
+  '客服专员',
+  '其他'
+]
+
 // 计算当前选中的行业索引
 const industryIndex = computed(() => {
   return industryOptions.indexOf(editValue.value) >= 0 ? industryOptions.indexOf(editValue.value) : 0
+})
+
+// 新增：计算当前选中的职位索引
+const positionIndex = computed(() => {
+  return positionOptions.indexOf(editValue.value) >= 0 ? positionOptions.indexOf(editValue.value) : 0
 })
 
 // 页面挂载
@@ -466,16 +452,19 @@ const formatPhoneNumber = (phone) => {
 
 // 获取性别文本
 const getGenderText = (gender) => {
+	console.log("获取到的性别：",gender)
   const genderMap = {
-    'male': '男',
-    'female': '女'
+    'M': '男',
+    'F': '女'
   }
-  return genderMap[gender] || '点击设置性别'
+  // return genderMap[gender] || '点击设置性别'
+  return gender
 }
 
 // 获取字段标签
 const getFieldLabel = (field) => {
   const labels = {
+	'name': '姓名',
     'nickname': '昵称',
     'slogan': '个性签名',
     'gender': '性别',
@@ -493,10 +482,11 @@ const getFieldLabel = (field) => {
 // 获取字段占位符
 const getFieldPlaceholder = (field) => {
   const placeholders = {
+	'name': '请输入姓名',
     'nickname': '请输入昵称',
     'unit': '请输入单位名称',
     'department': '请输入部门名称',
-    'position': '请输入职位名称',
+    'position': '请选择职位',
     'email': '请输入邮箱地址',
     'phone': '请输入新手机号码'
   }
@@ -506,6 +496,7 @@ const getFieldPlaceholder = (field) => {
 // 获取字段最大长度
 const getFieldMaxLength = (field) => {
   const maxLengths = {
+	'name': 20,  
     'nickname': 20,
     'unit': 50,
     'department': 30,
@@ -516,9 +507,9 @@ const getFieldMaxLength = (field) => {
   return maxLengths[field] || 50
 }
 
-// 判断是否为文本输入
+// 修改：判断是否为文本输入（职位不再是文本输入）
 const isTextInput = (field) => {
-  return ['nickname', 'unit', 'department', 'position', 'email', 'phone'].includes(field)
+  return ['name','nickname', 'unit', 'department', 'email', 'phone'].includes(field)
 }
 
 // 编辑字段
@@ -647,6 +638,12 @@ const onIndustryChange = (e) => {
   editValue.value = industryOptions[index]
 }
 
+// 新增：职位选择变化
+const onPositionChange = (e) => {
+  const index = e.detail.value
+  editValue.value = positionOptions[index]
+}
+
 // 保存字段
 const saveField = async () => {
   if (!editValue.value && currentField.value !== 'slogan') {
@@ -710,7 +707,6 @@ const saveField = async () => {
       updateData.verifyCode = verifyCode.value
     }
     console.log("更新的数据：",updateData)
-    // await updateinfo(updateData)
     
     // 更新本地数据
 	await userInfo.updateinfo(updateData)
@@ -734,30 +730,6 @@ const saveField = async () => {
   }
 }
 
-// 调用保存API
-// const saveUserProfile = async (formData) => {
-//   return new Promise((resolve, reject) => {
-//     uni.request({
-//       url: 'https://your-api-domain.com/api/profile/update',
-//       method: 'POST',
-//       data: formData,
-//       header: {
-//         'Authorization': `Bearer ${userInfo.token}`
-//       },
-//       success: (res) => {
-//         if (res.data.success) {
-//           resolve(res.data.data)
-//         } else {
-//           reject(new Error(res.data.message || '保存失败'))
-//         }
-//       },
-//       fail: (error) => {
-//         reject(error)
-//       }
-//     })
-//   })
-// }
-
 // 更换头像
 const changeAvatar = () => {
   uni.chooseImage({
@@ -779,17 +751,6 @@ const uploadAvatar = async (filePath) => {
 	await userInfo.updateinfo({'avatar_url':res.data.url})
 	await userInfo.getinfo()
 	console.log("res:",res)
-    // 这里实现头像上传逻辑
-    // await new Promise(resolve => setTimeout(resolve, 2000))
-	// uni.uploadFile({
-	// 			url: 'http://47.113.194.28:8080/api/file/upload', //仅为示例，非真实的接口地址
-	// 			filePath: filePath,
-	// 			name: 'file',
-
-	// 			success: (uploadFileRes) => {
-	// 				console.log(uploadFileRes.data);
-	// 			}
-	// 		});
     
     uni.showToast({
       title: '头像更新成功',
@@ -1025,6 +986,36 @@ const hideLoading = () => {
     font-weight: 700;
     color: #fff;
     margin-bottom: 8rpx;
+    
+    /* 新增：可点击姓名样式 */
+    &.clickable-name {
+      cursor: pointer;
+      position: relative;
+      padding: 8rpx 16rpx;
+      border-radius: 20rpx;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      
+      &:active {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(0.98);
+      }
+      
+      /* 添加编辑图标提示 */
+      &::after {
+        content: '';
+        display: inline-block;
+        width: 24rpx;
+        height: 24rpx;
+        background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTExLjc0MiAyLjAxNUM2LjQxIDMuNzUgMS41IDUuNDE1IDEuNSA3LjVDMS41IDkuNTg1IDYuNDEgMTEuMjUgMTEuNzQyIDEyLjk4NUMxMi4wMzQgMTMuMDk3IDEyLjM1OSAxMy4wOTcgMTIuNjUxIDEyLjk4NUMxNy45ODMgMTEuMjUgMjIuOTAzIDkuNTg1IDIyLjkwMyA3LjVDMjIuOTAzIDUuNDE1IDE3Ljk4MyAzLjc1IDEyLjY1MSAyLjAxNUMxMi4zNTkgMS45MDMgMTIuMDM0IDEuOTAzIDExLjc0MiAyLjAxNVoiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuNyIvPgo8L3N2Zz4K') no-repeat center;
+        background-size: contain;
+        margin-left: 8rpx;
+        opacity: 0.7;
+      }
+    }
   }
 
   .user-id {
@@ -1315,9 +1306,6 @@ const hideLoading = () => {
         resize: none;
         font-family: inherit;
         vertical-align: top;
-		// min-height: 140rpx;
-		//         resize: none;
-		//         font-family: inherit;
       }
 
       .phone-verify {
@@ -1419,7 +1407,7 @@ const hideLoading = () => {
         }
       }
 
-      .date-picker, .industry-picker {
+      .date-picker, .industry-picker, .position-picker {
         height: 96rpx;
         padding: 0 32rpx;
         border: 2rpx solid #e8e8e8;
@@ -1594,7 +1582,7 @@ const hideLoading = () => {
       }
     }
     
-    .form-input, .form-textarea, .date-picker, .industry-picker {
+    .form-input, .form-textarea, .date-picker, .industry-picker, .position-picker {
       background: #3d3d3d;
       border-color: #4d4d4d;
       color: #fff;

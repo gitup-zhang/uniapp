@@ -53,7 +53,6 @@
 		margin-bottom: 10px;
 	} */
 .container.data-v-9fc11f58 {
-  min-height: 100vh;
   background-color: #f5f5f5;
 }
 .banner-section.data-v-9fc11f58 {
@@ -134,9 +133,18 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 20rpx;
+  transition: background-color 0.3s ease;
 }
-.register-section .register-btn.data-v-9fc11f58:active {
+.register-section .register-btn.data-v-9fc11f58:active:not(.register-btn-disabled) {
   background-color: #c53030;
+}
+.register-section .register-btn.register-btn-disabled.data-v-9fc11f58 {
+  background-color: #cccccc !important;
+  color: #999999 !important;
+  cursor: not-allowed;
+}
+.register-section .register-btn.register-btn-disabled.data-v-9fc11f58:active {
+  background-color: #cccccc !important;
 }
 .register-section .deadline.data-v-9fc11f58 {
   text-align: center;

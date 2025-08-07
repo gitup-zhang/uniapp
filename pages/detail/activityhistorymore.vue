@@ -14,18 +14,27 @@
 	    </view>
 	  </template>
 	</uni-nav-bar>
-	<HorizontalActivityCard  v-for="(item,index) in 10"
-	  imgSrc="https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg"
-	  title="中国大模型人才大会"
-	  date="3月15日 - 4月10日"
-	  location="深圳华侨城创意文化园北区 C2 展厅"
+
+	<HorizontalActivityCard  v-for="item in EventStore.eventoutdate"
+	  :imgSrc="item.cover_image_url"
+	  :title="item.title"
+	  :date="formatEventDate(item.event_start_time,item.event_end_time)"
+	  :location="item.event_address"
 	  status="已结束"
-	@click="handleCardClick"
+	@click="handleCardClick()"
 	/>
+	
 	
 </template>
 
 <script setup>
+import {ref,onMounted} from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
+import {useEventstore} from '@/store/Event.js'	
+import {formatEventDate} from '@/utils/data.js'
+
+// 初始化pinia
+const EventStore=useEventstore()
 	// 活动点击逻辑
 function handleCardClick(eventData) {
   console.log("点击了卡片:", eventData);
@@ -37,6 +46,10 @@ function handleCardClick(eventData) {
 function onBack() {
   uni.navigateBack();
 }
+onLoad(()=>{
+	
+	EventStore.getlisoutdate(10)
+})
 </script>
 
 <style>

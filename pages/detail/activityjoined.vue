@@ -14,6 +14,8 @@
 	    </view>
 	  </template>
 	</uni-nav-bar>
+	
+	
 </template>
 
 <script setup>

@@ -48,8 +48,58 @@ const _sfc_main = {
       "咨询/法律",
       "其他"
     ];
+    const positionOptions = [
+      "总经理/CEO",
+      "副总经理/副CEO",
+      "总监",
+      "副总监",
+      "部门经理",
+      "副经理",
+      "主管/组长",
+      "高级工程师",
+      "工程师",
+      "初级工程师",
+      "高级专员",
+      "专员",
+      "助理专员",
+      "销售总监",
+      "销售经理",
+      "销售代表",
+      "市场总监",
+      "市场经理",
+      "市场专员",
+      "产品总监",
+      "产品经理",
+      "产品专员",
+      "技术总监",
+      "技术经理",
+      "架构师",
+      "开发工程师",
+      "测试工程师",
+      "运维工程师",
+      "设计总监",
+      "设计经理",
+      "UI设计师",
+      "平面设计师",
+      "人事总监",
+      "人事经理",
+      "人事专员",
+      "财务总监",
+      "财务经理",
+      "会计",
+      "出纳",
+      "行政总监",
+      "行政经理",
+      "行政专员",
+      "客服经理",
+      "客服专员",
+      "其他"
+    ];
     const industryIndex = common_vendor.computed(() => {
       return industryOptions.indexOf(editValue.value) >= 0 ? industryOptions.indexOf(editValue.value) : 0;
+    });
+    const positionIndex = common_vendor.computed(() => {
+      return positionOptions.indexOf(editValue.value) >= 0 ? positionOptions.indexOf(editValue.value) : 0;
     });
     common_vendor.onMounted(() => {
       initPage();
@@ -65,14 +115,12 @@ const _sfc_main = {
       return phone.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
     };
     const getGenderText = (gender) => {
-      const genderMap = {
-        "male": "男",
-        "female": "女"
-      };
-      return genderMap[gender] || "点击设置性别";
+      console.log("获取到的性别：", gender);
+      return gender;
     };
     const getFieldLabel = (field) => {
       const labels = {
+        "name": "姓名",
         "nickname": "昵称",
         "slogan": "个性签名",
         "gender": "性别",
@@ -88,10 +136,11 @@ const _sfc_main = {
     };
     const getFieldPlaceholder = (field) => {
       const placeholders = {
+        "name": "请输入姓名",
         "nickname": "请输入昵称",
         "unit": "请输入单位名称",
         "department": "请输入部门名称",
-        "position": "请输入职位名称",
+        "position": "请选择职位",
         "email": "请输入邮箱地址",
         "phone": "请输入新手机号码"
       };
@@ -99,6 +148,7 @@ const _sfc_main = {
     };
     const getFieldMaxLength = (field) => {
       const maxLengths = {
+        "name": 20,
         "nickname": 20,
         "unit": 50,
         "department": 30,
@@ -109,7 +159,7 @@ const _sfc_main = {
       return maxLengths[field] || 50;
     };
     const isTextInput = (field) => {
-      return ["nickname", "unit", "department", "position", "email", "phone"].includes(field);
+      return ["name", "nickname", "unit", "department", "email", "phone"].includes(field);
     };
     const editField = (field) => {
       var _a;
@@ -211,6 +261,10 @@ const _sfc_main = {
     const onIndustryChange = (e) => {
       const index = e.detail.value;
       editValue.value = industryOptions[index];
+    };
+    const onPositionChange = (e) => {
+      const index = e.detail.value;
+      editValue.value = positionOptions[index];
     };
     const saveField = async () => {
       if (!editValue.value && currentField.value !== "slogan") {
@@ -365,212 +419,225 @@ const _sfc_main = {
           color: "#fff"
         }),
         e: common_vendor.o(changeAvatar),
-        f: common_vendor.t(common_vendor.unref(userInfo).info.nickname || "用户"),
-        g: common_vendor.t(common_vendor.unref(userInfo).info.userId || "123456789"),
-        h: common_vendor.p({
+        f: common_vendor.t(common_vendor.unref(userInfo).info.name || "点击设置姓名"),
+        g: common_vendor.o(($event) => editField("name")),
+        h: common_vendor.t(common_vendor.unref(userInfo).info.userId || "123456789"),
+        i: common_vendor.p({
           type: "person",
           size: "18",
           color: "#fff"
         }),
-        i: common_vendor.p({
+        j: common_vendor.p({
           type: "person-filled",
           size: "16",
           color: "#666"
         }),
-        j: common_vendor.t(common_vendor.unref(userInfo).info.nickname || "点击设置"),
-        k: common_vendor.p({
+        k: common_vendor.t(common_vendor.unref(userInfo).info.nickname || "点击设置"),
+        l: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        l: common_vendor.o(($event) => editField("nickname")),
-        m: common_vendor.p({
+        m: common_vendor.o(($event) => editField("nickname")),
+        n: common_vendor.p({
           type: "flag",
           size: "16",
           color: "#666"
         }),
-        n: common_vendor.t(getGenderText(common_vendor.unref(userInfo).info.gender)),
-        o: common_vendor.p({
+        o: common_vendor.t(getGenderText(common_vendor.unref(userInfo).info.gender)),
+        p: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        p: common_vendor.o(($event) => editField("gender")),
-        q: common_vendor.p({
+        q: common_vendor.o(($event) => editField("gender")),
+        r: common_vendor.p({
           type: "briefcase",
           size: "18",
           color: "#fff"
         }),
-        r: common_vendor.p({
+        s: common_vendor.p({
           type: "home",
           size: "16",
           color: "#666"
         }),
-        s: common_vendor.t(common_vendor.unref(userInfo).info.unit || "点击设置单位"),
-        t: common_vendor.p({
+        t: common_vendor.t(common_vendor.unref(userInfo).info.unit || "点击设置单位"),
+        v: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        v: common_vendor.o(($event) => editField("unit")),
-        w: common_vendor.p({
+        w: common_vendor.o(($event) => editField("unit")),
+        x: common_vendor.p({
           type: "gear",
           size: "16",
           color: "#666"
         }),
-        x: common_vendor.t(common_vendor.unref(userInfo).info.department || "点击设置部门"),
-        y: common_vendor.p({
+        y: common_vendor.t(common_vendor.unref(userInfo).info.department || "点击设置部门"),
+        z: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        z: common_vendor.o(($event) => editField("department")),
-        A: common_vendor.p({
+        A: common_vendor.o(($event) => editField("department")),
+        B: common_vendor.p({
           type: "star",
           size: "16",
           color: "#666"
         }),
-        B: common_vendor.t(common_vendor.unref(userInfo).info.position || "点击设置职位"),
-        C: common_vendor.p({
+        C: common_vendor.t(common_vendor.unref(userInfo).info.position || "点击选择职位"),
+        D: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        D: common_vendor.o(($event) => editField("position")),
-        E: common_vendor.p({
+        E: common_vendor.o(($event) => editField("position")),
+        F: common_vendor.p({
           type: "calendar",
           size: "16",
           color: "#666"
         }),
-        F: common_vendor.t(common_vendor.unref(userInfo).info.industry || "点击选择行业"),
-        G: common_vendor.p({
+        G: common_vendor.t(common_vendor.unref(userInfo).info.industry || "点击选择行业"),
+        H: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        H: common_vendor.o(($event) => editField("industry")),
-        I: common_vendor.p({
+        I: common_vendor.o(($event) => editField("industry")),
+        J: common_vendor.p({
           type: "phone",
           size: "18",
           color: "#fff"
         }),
-        J: common_vendor.p({
+        K: common_vendor.p({
           type: "phone-filled",
           size: "16",
           color: "#666"
         }),
-        K: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
-        L: common_vendor.p({
+        L: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
+        M: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        M: common_vendor.o(($event) => editField("phone")),
-        N: common_vendor.p({
+        N: common_vendor.o(($event) => editField("phone")),
+        O: common_vendor.p({
           type: "email",
           size: "16",
           color: "#666"
         }),
-        O: common_vendor.t(common_vendor.unref(userInfo).info.email || "点击绑定邮箱"),
-        P: common_vendor.p({
+        P: common_vendor.t(common_vendor.unref(userInfo).info.email || "点击绑定邮箱"),
+        Q: common_vendor.p({
           type: "right",
           size: "14",
           color: "#ccc"
         }),
-        Q: common_vendor.o(($event) => editField("email")),
-        R: common_vendor.p({
+        R: common_vendor.o(($event) => editField("email")),
+        S: common_vendor.p({
           type: "loop",
           size: "20",
           color: "#ff4757"
         }),
-        S: common_vendor.o(confirmLogout),
-        T: common_vendor.t(getFieldLabel(currentField.value)),
-        U: common_vendor.p({
+        T: common_vendor.o(confirmLogout),
+        U: common_vendor.t(getFieldLabel(currentField.value)),
+        V: common_vendor.p({
           type: "closeempty",
           size: "20",
           color: "#999"
         }),
-        V: common_vendor.o(closeEdit),
-        W: isTextInput(currentField.value)
+        W: common_vendor.o(closeEdit),
+        X: isTextInput(currentField.value)
       }, isTextInput(currentField.value) ? {
-        X: getFieldPlaceholder(currentField.value),
-        Y: getFieldMaxLength(currentField.value),
-        Z: currentField.value === "phone" ? "number" : "text",
-        aa: editValue.value,
-        ab: common_vendor.o(($event) => editValue.value = $event.detail.value)
+        Y: getFieldPlaceholder(currentField.value),
+        Z: getFieldMaxLength(currentField.value),
+        aa: currentField.value === "phone" ? "number" : "text",
+        ab: editValue.value,
+        ac: common_vendor.o(($event) => editValue.value = $event.detail.value)
       } : {}, {
-        ac: currentField.value === "phone"
+        ad: currentField.value === "phone"
       }, currentField.value === "phone" ? {
-        ad: verifyCode.value,
-        ae: common_vendor.o(($event) => verifyCode.value = $event.detail.value),
-        af: common_vendor.t(getCodeButtonText()),
-        ag: common_vendor.o(sendVerifyCode),
-        ah: !canSendCode.value || codeSending.value
+        ae: verifyCode.value,
+        af: common_vendor.o(($event) => verifyCode.value = $event.detail.value),
+        ag: common_vendor.t(getCodeButtonText()),
+        ah: common_vendor.o(sendVerifyCode),
+        ai: !canSendCode.value || codeSending.value
       } : {}, {
-        ai: currentField.value === "slogan"
+        aj: currentField.value === "slogan"
       }, currentField.value === "slogan" ? {
-        aj: editValue.value,
-        ak: common_vendor.o(($event) => editValue.value = $event.detail.value)
+        ak: editValue.value,
+        al: common_vendor.o(($event) => editValue.value = $event.detail.value)
       } : {}, {
-        al: currentField.value === "gender"
+        am: currentField.value === "gender"
       }, currentField.value === "gender" ? {
-        am: common_vendor.p({
+        an: common_vendor.p({
           type: "person",
           size: "16",
-          color: editValue.value === "male" ? "#fff" : "#666"
+          color: editValue.value === "F" ? "#fff" : "#666"
         }),
-        an: editValue.value === "male" ? 1 : "",
-        ao: common_vendor.o(($event) => editValue.value = "male"),
-        ap: common_vendor.p({
+        ao: editValue.value === "F" ? 1 : "",
+        ap: common_vendor.o(($event) => editValue.value = "F"),
+        aq: common_vendor.p({
           type: "person",
           size: "16",
-          color: editValue.value === "female" ? "#fff" : "#666"
+          color: editValue.value === "M" ? "#fff" : "#666"
         }),
-        aq: editValue.value === "female" ? 1 : "",
-        ar: common_vendor.o(($event) => editValue.value = "female")
+        ar: editValue.value === "M" ? 1 : "",
+        as: common_vendor.o(($event) => editValue.value = "M")
       } : {}, {
-        as: currentField.value === "birthday"
+        at: currentField.value === "birthday"
       }, currentField.value === "birthday" ? {
-        at: common_vendor.t(editValue.value || "请选择生日"),
-        av: common_vendor.p({
+        av: common_vendor.t(editValue.value || "请选择生日"),
+        aw: common_vendor.p({
           type: "calendar",
           size: "16",
           color: "#999"
         }),
-        aw: editValue.value,
-        ax: common_vendor.o(onDateChange)
+        ax: editValue.value,
+        ay: common_vendor.o(onDateChange)
       } : {}, {
-        ay: currentField.value === "industry"
+        az: currentField.value === "industry"
       }, currentField.value === "industry" ? {
-        az: common_vendor.t(editValue.value || "请选择行业"),
-        aA: common_vendor.p({
+        aA: common_vendor.t(editValue.value || "请选择行业"),
+        aB: common_vendor.p({
           type: "calendar",
           size: "16",
           color: "#999"
         }),
-        aB: industryIndex.value,
-        aC: industryOptions,
-        aD: common_vendor.o(onIndustryChange)
+        aC: industryIndex.value,
+        aD: industryOptions,
+        aE: common_vendor.o(onIndustryChange)
       } : {}, {
-        aE: common_vendor.o(closeEdit),
-        aF: common_vendor.t(isSaving.value ? "保存中..." : "保存"),
-        aG: common_vendor.o(saveField),
-        aH: isSaving.value,
-        aI: common_vendor.sr(editPopup, "7b181482-22", {
+        aF: currentField.value === "position"
+      }, currentField.value === "position" ? {
+        aG: common_vendor.t(editValue.value || "请选择职位"),
+        aH: common_vendor.p({
+          type: "star",
+          size: "16",
+          color: "#999"
+        }),
+        aI: positionIndex.value,
+        aJ: positionOptions,
+        aK: common_vendor.o(onPositionChange)
+      } : {}, {
+        aL: common_vendor.o(closeEdit),
+        aM: common_vendor.t(isSaving.value ? "保存中..." : "保存"),
+        aN: common_vendor.o(saveField),
+        aO: isSaving.value,
+        aP: common_vendor.sr(editPopup, "7b181482-22", {
           "k": "editPopup"
         }),
-        aJ: common_vendor.p({
+        aQ: common_vendor.p({
           type: "center",
           ["mask-click"]: false
         }),
-        aK: common_vendor.p({
+        aR: common_vendor.p({
           status: "loading",
           ["content-text"]: loadingText.value
         }),
-        aL: common_vendor.sr(loadingPopup, "7b181482-28", {
+        aS: common_vendor.sr(loadingPopup, "7b181482-29", {
           "k": "loadingPopup"
         }),
-        aM: common_vendor.p({
+        aT: common_vendor.p({
           type: "center"
         })
       });

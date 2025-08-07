@@ -28,7 +28,12 @@
 
     <!-- 表单区域 -->
     <view class="form-section">
-      <view class="form-title">完善基本资料</view>
+      <view class="form-header">
+        <view class="form-title">完善基本资料</view>
+        <button class="edit-btn" @click="handleEdit" :class="{ 'save-btn': isEditing }">
+          {{ isEditing ? '保存' : '编辑' }}
+        </button>
+      </view>
       
       <view class="form-content">
         <!-- 姓名 -->
@@ -39,6 +44,8 @@
             v-model="formData.name" 
             placeholder="请输入姓名"
             placeholder-class="placeholder"
+            :disabled="!isEditing"
+            :class="{ 'disabled': !isEditing }"
           />
         </view>
 
@@ -52,8 +59,15 @@
               placeholder="请输入手机号码"
               placeholder-class="placeholder"
               type="number"
+              :disabled="!isEditing"
+              :class="{ 'disabled': !isEditing }"
             />
-            <button class="verify-btn" @click="sendVerifyCode" :disabled="isCountingDown">
+            <button 
+              class="verify-btn" 
+              @click="sendVerifyCode" 
+              :disabled="isCountingDown"
+              :class="{ 'disabled': !isEditing }"
+            >
               {{ countDownText }}
             </button>
           </view>
@@ -68,6 +82,8 @@
             placeholder="请输入验证码"
             placeholder-class="placeholder"
             type="number"
+            
+            :class="{ 'disabled': !isEditing }"
           />
         </view>
 
@@ -80,6 +96,8 @@
             placeholder="请输入邮箱地址"
             placeholder-class="placeholder"
             type="email"
+            :disabled="!isEditing"
+            :class="{ 'disabled': !isEditing }"
           />
         </view>
 
@@ -91,6 +109,8 @@
             v-model="formData.unit" 
             placeholder="请输入单位名称"
             placeholder-class="placeholder"
+            :disabled="!isEditing"
+            :class="{ 'disabled': !isEditing }"
           />
         </view>
 		<!-- 部门 -->
@@ -101,6 +121,8 @@
 		    v-model="formData.sectoral" 
 		    placeholder="请输入部门名称"
 		    placeholder-class="placeholder"
+		    :disabled="!isEditing"
+		    :class="{ 'disabled': !isEditing }"
 		  />
 		</view>
 		<!-- 职位 -->
@@ -111,6 +133,8 @@
 		    v-model="formData.office" 
 		    placeholder="请输入职位名称"
 		    placeholder-class="placeholder"
+		    :disabled="!isEditing"
+		    :class="{ 'disabled': !isEditing }"
 		  />
 		</view>
 
@@ -122,12 +146,13 @@
             :range="careerOptions" 
             :value="formData.careerIndex"
             @change="onCareerChange"
+            :disabled="!isEditing"
           >
-            <view class="picker-input">
+            <view class="picker-input" :class="{ 'disabled': !isEditing }">
               <text class="picker-text" :class="{ 'placeholder': formData.careerIndex === -1 }">
                 {{ formData.careerIndex === -1 ? '请选择职业' : careerOptions[formData.careerIndex] }}
               </text>
-              <text class="picker-arrow">></text>
+              <text class="picker-arrow" v-if="isEditing">></text>
             </view>
           </picker>
         </view>
@@ -140,12 +165,13 @@
             :value="formData.birthDate" 
             @change="onDateChange"
             :end="maxDate"
+            :disabled="!isEditing"
           >
-            <view class="picker-input">
+            <view class="picker-input" :class="{ 'disabled': !isEditing }">
               <text class="picker-text" :class="{ 'placeholder': !formData.birthDate }">
                 {{ formData.birthDate || '请选择出生日期' }}
               </text>
-              <text class="picker-arrow">></text>
+              <text class="picker-arrow" v-if="isEditing">></text>
             </view>
           </picker>
         </view>
@@ -158,13 +184,22 @@
             v-model="formData.idCard" 
             placeholder="请输入身份证号码"
             placeholder-class="placeholder"
+            :disabled="!isEditing"
+            :class="{ 'disabled': !isEditing }"
           />
         </view>
       </view>
 
       <!-- 提交按钮 -->
       <view class="submit-section">
-        <button class="submit-btn" @click="handleSubmit">马上报名</button>
+        <button 
+          class="submit-btn" 
+          @click="handleSubmit"
+          :disabled="isEditing"
+          :class="{ 'disabled': isEditing }"
+        >
+          马上报名
+        </button>
       </view>
     </view>
   </view>
@@ -193,6 +228,9 @@ const careerOptions = [
   '其他'
 ]
 
+// 编辑状态
+const isEditing = ref(false)
+
 // 表单数据
 const formData = reactive({
   name: '尹慧',
@@ -219,6 +257,33 @@ const maxDate = computed(() => {
   const today = new Date()
   return today.toISOString().split('T')[0]
 })
+
+// 处理编辑按钮点击
+const handleEdit = () => {
+  if (!isEditing.value) {
+    // 点击编辑按钮，显示确认提示
+    uni.showModal({
+      title: '编辑提示',
+      content: '表单编辑的内容会同步改变个人信息，是否继续编辑？',
+      confirmText: '确认',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          isEditing.value = true
+        }
+      }
+    })
+  } else {
+    // 点击保存按钮
+    if (validateFormData()) {
+      isEditing.value = false
+      uni.showToast({
+        title: '保存成功',
+        icon: 'success'
+      })
+    }
+  }
+}
 
 // 发送验证码
 const sendVerifyCode = () => {
@@ -269,7 +334,37 @@ function onBack() {
   uni.navigateBack();
 }
 
-// 表单验证
+// 表单数据验证（用于保存时）
+const validateFormData = () => {
+  if (!formData.name.trim()) {
+    uni.showToast({ title: '请输入姓名', icon: 'none' })
+    return false
+  }
+
+  if (!formData.phone) {
+    uni.showToast({ title: '请输入手机号码', icon: 'none' })
+    return false
+  }
+
+  if (!/^1[3-9]\d{9}$/.test(formData.phone)) {
+    uni.showToast({ title: '请输入正确的手机号码', icon: 'none' })
+    return false
+  }
+
+  if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    uni.showToast({ title: '请输入正确的邮箱格式', icon: 'none' })
+    return false
+  }
+
+  if (formData.idCard && !/^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/.test(formData.idCard)) {
+    uni.showToast({ title: '请输入正确的身份证号码', icon: 'none' })
+    return false
+  }
+
+  return true
+}
+
+// 表单提交验证
 const validateForm = () => {
   if (!formData.name.trim()) {
     uni.showToast({ title: '请输入姓名', icon: 'none' })
@@ -333,6 +428,14 @@ const validateForm = () => {
 
 // 提交表单
 const handleSubmit = () => {
+  if (isEditing.value) {
+    uni.showToast({
+      title: '请先保存编辑的内容',
+      icon: 'none'
+    })
+    return
+  }
+
   if (!validateForm()) return
 
   uni.showLoading({ title: '提交中...' })
@@ -417,11 +520,34 @@ const handleSubmit = () => {
   overflow: hidden;
 }
 
-.form-title {
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 40rpx 40rpx 20rpx;
+}
+
+.form-title {
   font-size: 36rpx;
   font-weight: bold;
   color: #333333;
+}
+
+.edit-btn {
+  padding: 12rpx 24rpx;
+  background-color: #007aff;
+  color: #ffffff;
+  font-size: 26rpx;
+  border-radius: 8rpx;
+  border: none;
+  
+  &.save-btn {
+    background-color: #34c759;
+  }
+  
+  &:active {
+    opacity: 0.8;
+  }
 }
 
 .form-content {
@@ -447,6 +573,11 @@ const handleSubmit = () => {
     font-size: 28rpx;
     color: #333333;
     box-sizing: border-box;
+    
+    &.disabled {
+      background-color: #f0f0f0;
+      color: #999999;
+    }
     
     &.phone-input {
       width: calc(100% - 220rpx);
@@ -476,12 +607,13 @@ const handleSubmit = () => {
       white-space: nowrap;
       flex-shrink: 0;
       
+      &.disabled,
       &:disabled {
         background-color: #cccccc;
         color: #999999;
       }
       
-      &:not(:disabled):active {
+      &:not(:disabled):not(.disabled):active {
         background-color: #c53030;
       }
     }
@@ -497,6 +629,14 @@ const handleSubmit = () => {
     align-items: center;
     justify-content: space-between;
     box-sizing: border-box;
+    
+    &.disabled {
+      background-color: #f0f0f0;
+      
+      .picker-text {
+        color: #999999;
+      }
+    }
     
     .picker-text {
       font-size: 28rpx;
@@ -531,7 +671,13 @@ const handleSubmit = () => {
     align-items: center;
     justify-content: center;
     
-    &:active {
+    &.disabled,
+    &:disabled {
+      background-color: #cccccc;
+      color: #999999;
+    }
+    
+    &:not(:disabled):not(.disabled):active {
       background-color: #c53030;
     }
   }

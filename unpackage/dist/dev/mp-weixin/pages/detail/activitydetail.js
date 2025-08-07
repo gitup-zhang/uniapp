@@ -1,5 +1,8 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const store_Event = require("../../store/Event.js");
+const store_Info = require("../../store/Info.js");
+const utils_data = require("../../utils/data.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   _easycom_uni_nav_bar2();
@@ -11,6 +14,18 @@ if (!Math) {
 const _sfc_main = {
   __name: "activitydetail",
   setup(__props) {
+    let id = common_vendor.ref();
+    const disable = common_vendor.ref(true);
+    const EventStore = store_Event.useEventstore();
+    const UserStore = store_Info.useInfoStore();
+    common_vendor.onLoad(async (option) => {
+      console.log("option:", option);
+      id = decodeURIComponent(option.id);
+      disable.value = option.disable === "true";
+      console.log("接收到的ID：", id);
+      console.log("按钮是否禁用：", disable.value);
+      await EventStore.geteventdetail(id);
+    });
     const bannerImages = common_vendor.ref([
       "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
       // 替换为实际的图片路径
@@ -30,6 +45,26 @@ const _sfc_main = {
       common_vendor.index.navigateBack();
     }
     const handleRegister = () => {
+      if (disable.value) {
+        return;
+      }
+      if (!UserStore.signal) {
+        common_vendor.index.showModal({
+          title: "提示",
+          content: "请先登录后再进行报名",
+          showCancel: true,
+          cancelText: "取消",
+          confirmText: "去登录",
+          success: (res) => {
+            if (res.confirm) {
+              common_vendor.index.switchTab({
+                url: "../mymessage/mymessage"
+              });
+            }
+          }
+        });
+        return;
+      }
       common_vendor.index.showToast({
         title: "跳转到报名页面",
         icon: "none"
@@ -52,14 +87,16 @@ const _sfc_main = {
             b: index
           };
         }),
-        d: common_vendor.t(eventInfo.title),
-        e: common_vendor.t(eventInfo.location),
-        f: common_vendor.t(eventInfo.date),
-        g: common_vendor.t(eventInfo.fee),
+        d: common_vendor.t(common_vendor.unref(EventStore).eventdetail.title),
+        e: common_vendor.t(common_vendor.unref(EventStore).eventdetail.event_address),
+        f: common_vendor.t(common_vendor.unref(utils_data.formatEventDate)(common_vendor.unref(EventStore).eventdetail.event_start_time, common_vendor.unref(EventStore).eventdetail.event_end_time)),
+        g: common_vendor.t(common_vendor.unref(EventStore).eventdetail.registration_fee),
         h: common_vendor.t(eventInfo.description),
         i: common_vendor.t(eventInfo.attendeeInfo),
-        j: common_vendor.o(handleRegister),
-        k: common_vendor.t(eventInfo.deadline)
+        j: disable.value ? 1 : "",
+        k: common_vendor.o(handleRegister),
+        l: disable.value,
+        m: common_vendor.t(common_vendor.unref(utils_data.Dataformat)(common_vendor.unref(EventStore).eventdetail.registration_end_time))
       };
     };
   }

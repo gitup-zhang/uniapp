@@ -30,6 +30,10 @@ function request(url, method, data = {}, header = {}) {
       success: (res) => {
         if (res.statusCode === 200) {
           resolve(res.data);
+        } else if (res.statusCode === 401) {
+          common_vendor.index.removeStorageSync("token");
+          common_vendor.index.redirectTo({ url: "/pages/mymessage/mymessage" });
+          reject(new Error("未登录或登录已过期"));
         } else {
           reject(res);
         }

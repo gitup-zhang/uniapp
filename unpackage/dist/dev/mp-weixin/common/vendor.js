@@ -7724,6 +7724,12 @@ const createSubpackageApp = initCreateSubpackageApp();
   wx.createPluginApp = global.createPluginApp = createPluginApp;
   wx.createSubpackageApp = global.createSubpackageApp = createSubpackageApp;
 }
+const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
+  !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
+};
+const onShow = /* @__PURE__ */ createHook(ON_SHOW);
+const onLaunch = /* @__PURE__ */ createHook(ON_LAUNCH);
+const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
 var isVue2 = false;
 function set(target, key, val) {
   if (Array.isArray(target)) {
@@ -8493,6 +8499,9 @@ const Pinia = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   storeToRefs
 }, Symbol.toStringTag, { value: "Module" }));
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
+function getDefaultExportFromCjs(x) {
+  return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
+}
 var dayjs_min = { exports: {} };
 (function(module2, exports2) {
   !function(t2, e2) {
@@ -8783,16 +8792,14 @@ var dayjs_min = { exports: {} };
     }, O.en = D[g], O.Ls = D, O.p = {}, O;
   });
 })(dayjs_min);
-const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
-  !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
-};
-const onShow = /* @__PURE__ */ createHook(ON_SHOW);
-const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
+var dayjs_minExports = dayjs_min.exports;
+const dayjs = /* @__PURE__ */ getDefaultExportFromCjs(dayjs_minExports);
 exports.Pinia = Pinia;
 exports._export_sfc = _export_sfc;
 exports.computed = computed;
 exports.createPinia = createPinia;
 exports.createSSRApp = createSSRApp;
+exports.dayjs = dayjs;
 exports.defineStore = defineStore;
 exports.e = e;
 exports.f = f;
@@ -8801,6 +8808,7 @@ exports.initVueI18n = initVueI18n;
 exports.n = n;
 exports.nextTick$1 = nextTick$1;
 exports.o = o;
+exports.onLaunch = onLaunch;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;
 exports.onShow = onShow;

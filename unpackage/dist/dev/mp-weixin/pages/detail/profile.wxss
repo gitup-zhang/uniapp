@@ -184,6 +184,32 @@
   font-weight: 700;
   color: #fff;
   margin-bottom: 8rpx;
+  /* 新增：可点击姓名样式 */
+}
+.avatar-section .username.clickable-name.data-v-7b181482 {
+  cursor: pointer;
+  position: relative;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  transition: all 0.3s ease;
+  /* 添加编辑图标提示 */
+}
+.avatar-section .username.clickable-name.data-v-7b181482:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.avatar-section .username.clickable-name.data-v-7b181482:active {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(0.98);
+}
+.avatar-section .username.clickable-name.data-v-7b181482::after {
+  content: "";
+  display: inline-block;
+  width: 24rpx;
+  height: 24rpx;
+  background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTExLjc0MiAyLjAxNUM2LjQxIDMuNzUgMS41IDUuNDE1IDEuNSA3LjVDMS41IDkuNTg1IDYuNDEgMTEuMjUgMTEuNzQyIDEyLjk4NUMxMi4wMzQgMTMuMDk3IDEyLjM1OSAxMy4wOTcgMTIuNjUxIDEyLjk4NUMxNy45ODMgMTEuMjUgMjIuOTAzIDkuNTg1IDIyLjkwMyA3LjVDMjIuOTAzIDUuNDE1IDE3Ljk4MyAzLjc1IDEyLjY1MSAyLjAxNUMxMi4zNTkgMS45MDMgMTIuMDM0IDEuOTAzIDExLjc0MiAyLjAxNVoiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuNyIvPgo8L3N2Zz4K") no-repeat center;
+  background-size: contain;
+  margin-left: 8rpx;
+  opacity: 0.7;
 }
 .avatar-section .user-id.data-v-7b181482 {
   display: block;
@@ -527,7 +553,7 @@
 .edit-modal .modal-form .form-group .gender-options .gender-item.active .gender-label.data-v-7b181482 {
   color: #fff;
 }
-.edit-modal .modal-form .form-group .date-picker.data-v-7b181482, .edit-modal .modal-form .form-group .industry-picker.data-v-7b181482 {
+.edit-modal .modal-form .form-group .date-picker.data-v-7b181482, .edit-modal .modal-form .form-group .industry-picker.data-v-7b181482, .edit-modal .modal-form .form-group .position-picker.data-v-7b181482 {
   height: 96rpx;
   padding: 0 32rpx;
   border: 2rpx solid #e8e8e8;
@@ -539,10 +565,10 @@
   transition: border-color 0.3s ease;
   box-sizing: border-box;
 }
-.edit-modal .modal-form .form-group .date-picker.data-v-7b181482:active, .edit-modal .modal-form .form-group .industry-picker.data-v-7b181482:active {
+.edit-modal .modal-form .form-group .date-picker.data-v-7b181482:active, .edit-modal .modal-form .form-group .industry-picker.data-v-7b181482:active, .edit-modal .modal-form .form-group .position-picker.data-v-7b181482:active {
   border-color: #ff4757;
 }
-.edit-modal .modal-form .form-group .date-picker .picker-text.data-v-7b181482, .edit-modal .modal-form .form-group .industry-picker .picker-text.data-v-7b181482 {
+.edit-modal .modal-form .form-group .date-picker .picker-text.data-v-7b181482, .edit-modal .modal-form .form-group .industry-picker .picker-text.data-v-7b181482, .edit-modal .modal-form .form-group .position-picker .picker-text.data-v-7b181482 {
   font-size: 32rpx;
   color: #333;
   flex: 1;
@@ -667,15 +693,15 @@
 .edit-modal .phone-verify .verify-input.data-v-7b181482::placeholder {
     color: #999;
 }
-.edit-modal .form-input.data-v-7b181482, .edit-modal .form-textarea.data-v-7b181482, .edit-modal .date-picker.data-v-7b181482, .edit-modal .industry-picker.data-v-7b181482 {
+.edit-modal .form-input.data-v-7b181482, .edit-modal .form-textarea.data-v-7b181482, .edit-modal .date-picker.data-v-7b181482, .edit-modal .industry-picker.data-v-7b181482, .edit-modal .position-picker.data-v-7b181482 {
     background: #3d3d3d;
     border-color: #4d4d4d;
     color: #fff;
 }
-.edit-modal .form-input.data-v-7b181482::-webkit-input-placeholder, .edit-modal .form-textarea.data-v-7b181482::-webkit-input-placeholder, .edit-modal .date-picker.data-v-7b181482::-webkit-input-placeholder, .edit-modal .industry-picker.data-v-7b181482::-webkit-input-placeholder {
+.edit-modal .form-input.data-v-7b181482::-webkit-input-placeholder, .edit-modal .form-textarea.data-v-7b181482::-webkit-input-placeholder, .edit-modal .date-picker.data-v-7b181482::-webkit-input-placeholder, .edit-modal .industry-picker.data-v-7b181482::-webkit-input-placeholder, .edit-modal .position-picker.data-v-7b181482::-webkit-input-placeholder {
     color: #999;
 }
-.edit-modal .form-input.data-v-7b181482::placeholder, .edit-modal .form-textarea.data-v-7b181482::placeholder, .edit-modal .date-picker.data-v-7b181482::placeholder, .edit-modal .industry-picker.data-v-7b181482::placeholder {
+.edit-modal .form-input.data-v-7b181482::placeholder, .edit-modal .form-textarea.data-v-7b181482::placeholder, .edit-modal .date-picker.data-v-7b181482::placeholder, .edit-modal .industry-picker.data-v-7b181482::placeholder, .edit-modal .position-picker.data-v-7b181482::placeholder {
     color: #999;
 }
 .edit-modal .gender-item.data-v-7b181482 {

@@ -30,28 +30,31 @@ const _sfc_main = {
     isJoined: {
       type: Boolean,
       default: false
+    },
+    fee: {
+      type: Number,
+      required: true
     }
   },
   setup(__props) {
     return (_ctx, _cache) => {
       return {
         a: __props.imgSrc,
-        b: common_vendor.t(__props.isJoined ? "已报名" : "未报名"),
-        c: common_vendor.n(__props.isJoined ? "joined" : "not-joined"),
-        d: common_vendor.t(__props.title),
-        e: __props.title,
-        f: common_vendor.p({
+        b: common_vendor.t(__props.title),
+        c: __props.title,
+        d: common_vendor.p({
           type: "calendar",
           size: "16",
           color: "#999"
         }),
-        g: common_vendor.t(__props.date),
-        h: common_vendor.p({
+        e: common_vendor.t(__props.date),
+        f: common_vendor.p({
           type: "location",
           size: "16",
           color: "#999"
         }),
-        i: common_vendor.t(__props.location)
+        g: common_vendor.t(__props.location),
+        h: common_vendor.t(__props.fee)
       };
     };
   }

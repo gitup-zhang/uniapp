@@ -29,6 +29,7 @@ const _sfc_main = {
       "公务员",
       "其他"
     ];
+    const isEditing = common_vendor.ref(false);
     const formData = common_vendor.reactive({
       name: "尹慧",
       phone: "18520658976",
@@ -51,6 +52,29 @@ const _sfc_main = {
       const today = /* @__PURE__ */ new Date();
       return today.toISOString().split("T")[0];
     });
+    const handleEdit = () => {
+      if (!isEditing.value) {
+        common_vendor.index.showModal({
+          title: "编辑提示",
+          content: "表单编辑的内容会同步改变个人信息，是否继续编辑？",
+          confirmText: "确认",
+          cancelText: "取消",
+          success: (res) => {
+            if (res.confirm) {
+              isEditing.value = true;
+            }
+          }
+        });
+      } else {
+        if (validateFormData()) {
+          isEditing.value = false;
+          common_vendor.index.showToast({
+            title: "保存成功",
+            icon: "success"
+          });
+        }
+      }
+    };
     const sendVerifyCode = () => {
       if (!formData.phone) {
         common_vendor.index.showToast({
@@ -87,6 +111,29 @@ const _sfc_main = {
     function onBack() {
       common_vendor.index.navigateBack();
     }
+    const validateFormData = () => {
+      if (!formData.name.trim()) {
+        common_vendor.index.showToast({ title: "请输入姓名", icon: "none" });
+        return false;
+      }
+      if (!formData.phone) {
+        common_vendor.index.showToast({ title: "请输入手机号码", icon: "none" });
+        return false;
+      }
+      if (!/^1[3-9]\d{9}$/.test(formData.phone)) {
+        common_vendor.index.showToast({ title: "请输入正确的手机号码", icon: "none" });
+        return false;
+      }
+      if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        common_vendor.index.showToast({ title: "请输入正确的邮箱格式", icon: "none" });
+        return false;
+      }
+      if (formData.idCard && !/^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/.test(formData.idCard)) {
+        common_vendor.index.showToast({ title: "请输入正确的身份证号码", icon: "none" });
+        return false;
+      }
+      return true;
+    };
     const validateForm = () => {
       if (!formData.name.trim()) {
         common_vendor.index.showToast({ title: "请输入姓名", icon: "none" });
@@ -136,6 +183,13 @@ const _sfc_main = {
       return true;
     };
     const handleSubmit = () => {
+      if (isEditing.value) {
+        common_vendor.index.showToast({
+          title: "请先保存编辑的内容",
+          icon: "none"
+        });
+        return;
+      }
       if (!validateForm())
         return;
       common_vendor.index.showLoading({ title: "提交中..." });
@@ -151,7 +205,7 @@ const _sfc_main = {
       }, 2e3);
     };
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: common_vendor.o(onBack),
         b: common_vendor.p({
           statusBar: "true",
@@ -160,37 +214,66 @@ const _sfc_main = {
           border: false,
           leftIcon: "left"
         }),
-        c: formData.name,
-        d: common_vendor.o(($event) => formData.name = $event.detail.value),
-        e: formData.phone,
-        f: common_vendor.o(($event) => formData.phone = $event.detail.value),
-        g: common_vendor.t(countDownText.value),
-        h: common_vendor.o(sendVerifyCode),
-        i: isCountingDown.value,
-        j: formData.verifyCode,
-        k: common_vendor.o(($event) => formData.verifyCode = $event.detail.value),
-        l: formData.email,
-        m: common_vendor.o(($event) => formData.email = $event.detail.value),
-        n: formData.unit,
-        o: common_vendor.o(($event) => formData.unit = $event.detail.value),
-        p: formData.sectoral,
-        q: common_vendor.o(($event) => formData.sectoral = $event.detail.value),
-        r: formData.office,
-        s: common_vendor.o(($event) => formData.office = $event.detail.value),
-        t: common_vendor.t(formData.careerIndex === -1 ? "请选择职业" : careerOptions[formData.careerIndex]),
-        v: formData.careerIndex === -1 ? 1 : "",
-        w: careerOptions,
-        x: formData.careerIndex,
-        y: common_vendor.o(onCareerChange),
-        z: common_vendor.t(formData.birthDate || "请选择出生日期"),
-        A: !formData.birthDate ? 1 : "",
-        B: formData.birthDate,
-        C: common_vendor.o(onDateChange),
-        D: maxDate.value,
-        E: formData.idCard,
-        F: common_vendor.o(($event) => formData.idCard = $event.detail.value),
-        G: common_vendor.o(handleSubmit)
-      };
+        c: common_vendor.t(isEditing.value ? "保存" : "编辑"),
+        d: common_vendor.o(handleEdit),
+        e: isEditing.value ? 1 : "",
+        f: !isEditing.value,
+        g: !isEditing.value ? 1 : "",
+        h: formData.name,
+        i: common_vendor.o(($event) => formData.name = $event.detail.value),
+        j: !isEditing.value,
+        k: !isEditing.value ? 1 : "",
+        l: formData.phone,
+        m: common_vendor.o(($event) => formData.phone = $event.detail.value),
+        n: common_vendor.t(countDownText.value),
+        o: common_vendor.o(sendVerifyCode),
+        p: isCountingDown.value,
+        q: !isEditing.value ? 1 : "",
+        r: !isEditing.value ? 1 : "",
+        s: formData.verifyCode,
+        t: common_vendor.o(($event) => formData.verifyCode = $event.detail.value),
+        v: !isEditing.value,
+        w: !isEditing.value ? 1 : "",
+        x: formData.email,
+        y: common_vendor.o(($event) => formData.email = $event.detail.value),
+        z: !isEditing.value,
+        A: !isEditing.value ? 1 : "",
+        B: formData.unit,
+        C: common_vendor.o(($event) => formData.unit = $event.detail.value),
+        D: !isEditing.value,
+        E: !isEditing.value ? 1 : "",
+        F: formData.sectoral,
+        G: common_vendor.o(($event) => formData.sectoral = $event.detail.value),
+        H: !isEditing.value,
+        I: !isEditing.value ? 1 : "",
+        J: formData.office,
+        K: common_vendor.o(($event) => formData.office = $event.detail.value),
+        L: common_vendor.t(formData.careerIndex === -1 ? "请选择职业" : careerOptions[formData.careerIndex]),
+        M: formData.careerIndex === -1 ? 1 : "",
+        N: isEditing.value
+      }, isEditing.value ? {} : {}, {
+        O: !isEditing.value ? 1 : "",
+        P: careerOptions,
+        Q: formData.careerIndex,
+        R: common_vendor.o(onCareerChange),
+        S: !isEditing.value,
+        T: common_vendor.t(formData.birthDate || "请选择出生日期"),
+        U: !formData.birthDate ? 1 : "",
+        V: isEditing.value
+      }, isEditing.value ? {} : {}, {
+        W: !isEditing.value ? 1 : "",
+        X: formData.birthDate,
+        Y: common_vendor.o(onDateChange),
+        Z: maxDate.value,
+        aa: !isEditing.value,
+        ab: !isEditing.value,
+        ac: !isEditing.value ? 1 : "",
+        ad: formData.idCard,
+        ae: common_vendor.o(($event) => formData.idCard = $event.detail.value),
+        af: common_vendor.o(handleSubmit),
+        ag: isEditing.value,
+        ah: isEditing.value ? 1 : ""
+      });
     };
   }
 };

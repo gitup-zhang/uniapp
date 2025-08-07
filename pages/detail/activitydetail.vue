@@ -27,27 +27,27 @@
     <!-- 活动信息卡片 -->
     <view class="content-card">
       <!-- 标题 -->
-      <view class="title">{{ eventInfo.title }}</view>
+      <view class="title">{{ EventStore.eventdetail.title }}</view>
       
       <!-- 基本信息 -->
       <view class="info-row">
         <view class="info-item">
           <text class="info-icon">📍</text>
-          <text class="info-text">{{ eventInfo.location }}</text>
+          <text class="info-text">{{ EventStore.eventdetail.event_address }}</text>
         </view>
       </view>
       
       <view class="info-row">
         <view class="info-item">
           <text class="info-icon">📅</text>
-          <text class="info-text">{{ eventInfo.date }}</text>
+          <text class="info-text">{{ formatEventDate(EventStore.eventdetail.event_start_time,EventStore.eventdetail.event_end_time)}}</text>
         </view>
       </view>
       
       <view class="info-row">
         <view class="info-item">
           <text class="info-icon">💰</text>
-          <text class="info-text">{{ eventInfo.fee }}</text>
+          <text class="info-text">{{EventStore.eventdetail.registration_fee}}</text>
         </view>
       </view>
 
@@ -56,25 +56,53 @@
       
       <!-- 活动描述 -->
       <view class="description">
-        {{ eventInfo.description }}
+{{ eventInfo.description}}
       </view>
       
       <!-- 参会说明 -->
-      <view class="attendee-info">
+     <view class="attendee-info">
         {{ eventInfo.attendeeInfo }}
       </view>
 
       <!-- 报名按钮 -->
       <view class="register-section">
-        <button class="register-btn" @click="handleRegister">去报名</button>
-        <view class="deadline">报名截止 {{ eventInfo.deadline }}</view>
+        <button 
+          class="register-btn" 
+          :class="{ 'register-btn-disabled': disable }"
+          @click="handleRegister" 
+          :disabled="disable"
+        >
+          去报名
+        </button>
+        <view class="deadline">报名截止 {{ Dataformat(EventStore.eventdetail.registration_end_time) }}</view>
       </view>
     </view>
   </view>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+
+import { onLoad } from '@dcloudio/uni-app'
+import {ref,onMounted,reactive} from 'vue'
+import {useEventstore} from '@/store/Event.js'
+import {useInfoStore} from '@/store/Info.js' // 假设用户store在这个路径
+import {formatEventDate,Dataformat} from '@/utils/data.js'
+
+let id=ref()
+const disable=ref(true)
+// 初始化pinia
+const EventStore=useEventstore()
+const UserStore=useInfoStore() // 初始化用户store
+
+onLoad(async(option) => {
+	console.log("option:",option)
+ id = decodeURIComponent(option.id)
+  disable.value = option.disable === 'true' // 转换为布尔值
+ 
+ 	console.log("接收到的ID：", id)
+ 	console.log("按钮是否禁用：", disable.value)
+  await EventStore.geteventdetail(id)
+})
 
 // 轮播图数据
 const bannerImages = ref([
@@ -93,26 +121,53 @@ const eventInfo = reactive({
   attendeeInfo: '大会邀请清华大学、北京大学等高校的AI领军学者，以及来自百度、阿里、字节跳动等企业的技术负责人，分享大模型研发的最新突破与行业实践，活动荣获得主或国家奖得主担任[拟邀请]将发表主旨演讲，探讨AI未来的伦理与方向。',
   deadline: '04/10 12:00'
 })
+
 // 返回函数
 function onBack() {
   uni.navigateBack();
 }
+
 // 报名处理函数
 const handleRegister = () => {
-  // 处理报名逻辑
+  // 如果按钮被禁用，直接返回
+  if (disable.value) {
+    return;
+  }
+  
+  // 检查用户是否登录
+  if (!UserStore.signal) { // 假设你的登录状态字段名为 isLoggedIn
+    uni.showModal({
+      title: '提示',
+      content: '请先登录后再进行报名',
+      showCancel: true,
+      cancelText: '取消',
+      confirmText: '去登录',
+      success: (res) => {
+        if (res.confirm) {
+          // 用户点击确定，跳转到登录页面
+          uni.switchTab({
+          	url: '../mymessage/mymessage'
+          });
+        }
+      }
+    })
+    return;
+  }
+  
+  // 用户已登录，处理报名逻辑
   uni.showToast({
     title: '跳转到报名页面',
     icon: 'none'
   })
-  // 这里可以添加跳转到报名页面的逻辑
+  // 跳转到报名页面
   uni.navigateTo({ url: '/pages/detail/applydetail' })
 }
 </script>
 
 <style lang="scss" scoped>
 @import "../../style/detail.css";
+
 .container {
-  min-height: 100vh;
   background-color: #f5f5f5;
 }
 
@@ -206,9 +261,21 @@ const handleRegister = () => {
     align-items: center;
     justify-content: center;
     margin-bottom: 20rpx;
+    transition: background-color 0.3s ease; // 添加过渡效果
     
-    &:active {
+    &:active:not(.register-btn-disabled) {
       background-color: #c53030;
+    }
+    
+    // 禁用状态样式
+    &.register-btn-disabled {
+      background-color: #cccccc !important;
+      color: #999999 !important;
+      cursor: not-allowed;
+      
+      &:active {
+        background-color: #cccccc !important; // 禁用时不改变颜色
+      }
     }
   }
   

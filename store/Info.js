@@ -11,6 +11,13 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	// 标志位，判断是否登录
 	const signal=ref(false)
 	
+	// 持久化存储个人信息
+	const setToken = (t) => {
+	    token.value = t
+	    signal.value = true
+	    uni.setStorageSync('token', t)
+	}
+	
 	// 获取个人信息
 	const getinfo=async()=>{
 		signal.value=true
@@ -32,10 +39,12 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 			console.log(codes)
 	      // 2. 发送 code 到你自己的后端
 	      const res = await getinfologin({code:codes})
-		  token.value=res.token
+		  
+		  // token.value=res.token
 		  console.log("token:"+token.value)
 			if(res.code===200){
 				signal.value=true
+				setToken(res.token)
 			
 				console.log("登录成功")
 			
@@ -58,8 +67,10 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	  }
 	};
 	function deleteinfo(){
-		signal.value=false
-		info.value={}
+		token.value = ''
+		    signal.value = false
+		    info.value = {}
+		    uni.removeStorageSync('token')
 	}
 	// 上传图片
 	const uploadimage = async (filepath) => {
@@ -130,7 +141,8 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 		loginWithWeChat,
 		getUserProfile,
 		updateinfo,
-		uploadimage
+		uploadimage,
+		setToken
 	}
 	
 })

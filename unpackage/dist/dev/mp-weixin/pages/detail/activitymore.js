@@ -1,5 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const store_Event = require("../../store/Event.js");
+const utils_data = require("../../utils/data.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_grid_item2 = common_vendor.resolveComponent("uni-grid-item");
@@ -16,6 +18,7 @@ const ActivityCard = () => "../../components/ActivityCard/ActivityCard.js";
 const _sfc_main = {
   __name: "activitymore",
   setup(__props) {
+    const EventStore = store_Event.useEventstore();
     function change(e) {
       const clickedIndex = e.detail.index;
       console.log("点击了第", clickedIndex + 1, "个宫格");
@@ -26,6 +29,9 @@ const _sfc_main = {
     function onBack() {
       common_vendor.index.navigateBack();
     }
+    common_vendor.onLoad(() => {
+      EventStore.getlisting(10);
+    });
     return (_ctx, _cache) => {
       return {
         a: common_vendor.o(onBack),
@@ -36,25 +42,26 @@ const _sfc_main = {
           border: false,
           leftIcon: "left"
         }),
-        c: common_vendor.f(10, (item, index, i0) => {
+        c: common_vendor.f(common_vendor.unref(EventStore).eventing, (item, k0, i0) => {
           return {
             a: "9df2c92a-3-" + i0 + "," + ("9df2c92a-2-" + i0),
-            b: index,
-            c: "9df2c92a-2-" + i0 + ",9df2c92a-1",
-            d: common_vendor.p({
-              index
+            b: common_vendor.p({
+              imgSrc: item.cover_image_url,
+              title: item.title,
+              date: common_vendor.unref(utils_data.formatEventDate)(item.event_start_time, item.event_end_time),
+              location: item.event_address,
+              isJoined: false,
+              fee: item.registration_fee
+            }),
+            c: item.id,
+            d: "9df2c92a-2-" + i0 + ",9df2c92a-1",
+            e: common_vendor.p({
+              index: item.id
             })
           };
         }),
-        d: common_vendor.p({
-          imgSrc: "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
-          title: "深圳市插画协会、英国插画师协会联合展览",
-          date: "3月17日 - 3月30日",
-          location: "深圳",
-          isJoined: true
-        }),
-        e: common_vendor.o(change),
-        f: common_vendor.p({
+        d: common_vendor.o(change),
+        e: common_vendor.p({
           column: 2,
           highlight: false,
           ["show-border"]: false,
