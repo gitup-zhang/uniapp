@@ -162,7 +162,7 @@
               </view>
               <view class="item-content">
                 <text class="item-label">手机号码</text>
-                <text class="item-value">{{ formatPhoneNumber(userInfo.info.phone) }}</text>
+                <text class="item-value">{{ formatPhoneNumber(userInfo.info.phone_number) }}</text>
               </view>
               <view class="item-arrow">
                 <uni-icons type="right" size="14" color="#ccc"/>

@@ -514,7 +514,7 @@ const _sfc_main = {
           size: "16",
           color: "#666"
         }),
-        L: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
+        L: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone_number)),
         M: common_vendor.p({
           type: "right",
           size: "14",

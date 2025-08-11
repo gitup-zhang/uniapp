@@ -5,6 +5,7 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
   let info = common_vendor.ref({});
   const token = common_vendor.ref("");
   const signal = common_vendor.ref(false);
+  const isapply = common_vendor.ref(false);
   const setToken = (t) => {
     token.value = t;
     signal.value = true;
@@ -16,7 +17,9 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
     info.value = res.data;
   };
   const updateinfo = async (params) => {
-    await newApis_info.updateprofile(params);
+    const res = await newApis_info.updateprofile(params);
+    await getinfo();
+    return res;
   };
   const loginWithWeChat = async () => {
     try {
@@ -48,6 +51,10 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
         url: "http://47.113.194.28:8080/api/file/upload",
         filePath: filepath,
         name: "file",
+        formData: {
+          biz_type: "AVATAR"
+          // 添加额外字段
+        },
         header: {
           "Content-Type": "multipart/form-data",
           Authorization: token.value ? `Bearer ${token.value}` : ""
@@ -92,6 +99,21 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
       }
     });
   };
+  const IsRegistered = async (id) => {
+    try {
+      const res = await newApis_info.IsUserRegistered(id);
+      console.log("报名信息：", res);
+      if (res.data.is_registered === "N") {
+        console.log("没有报名");
+        isapply.value = false;
+      } else {
+        console.log("已经报名");
+        isapply.value = true;
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
   return {
     info,
     token,
@@ -102,7 +124,9 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
     getUserProfile,
     updateinfo,
     uploadimage,
-    setToken
+    setToken,
+    IsRegistered,
+    isapply
   };
 });
 exports.useInfoStore = useInfoStore;

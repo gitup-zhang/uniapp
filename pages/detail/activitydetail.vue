@@ -82,27 +82,49 @@
 
 <script setup>
 
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad,onShow,onReady } from '@dcloudio/uni-app'
 import {ref,onMounted,reactive} from 'vue'
 import {useEventstore} from '@/store/Event.js'
-import {useInfoStore} from '@/store/Info.js' // 假设用户store在这个路径
+import {useInfoStore} from '@/store/Info.js' 
 import {formatEventDate,Dataformat} from '@/utils/data.js'
+
 
 let id=ref()
 const disable=ref(true)
+// 标志位，判断是否活动过期，false为无过期，true为过期
+const signal=ref(false)
 // 初始化pinia
 const EventStore=useEventstore()
-const UserStore=useInfoStore() // 初始化用户store
+// 初始化用户store
+const UserStore=useInfoStore()
+// 按钮名称
+
 
 onLoad(async(option) => {
 	console.log("option:",option)
  id = decodeURIComponent(option.id)
   disable.value = option.disable === 'true' // 转换为布尔值
- 
- 	console.log("接收到的ID：", id)
+	signal.value=disable.value
+	  EventStore.geteventdetail(id)
+ 	console.log("接收到的ID：", typeof(id))
  	console.log("按钮是否禁用：", disable.value)
-  await EventStore.geteventdetail(id)
+ 
 })
+onShow(async()=>{
+	await UserStore.IsRegistered(id)
+	console.log("是否已经报名",UserStore.isapply)
+	
+	if(!UserStore.isapply &&  !signal.value){
+		console.log("申请界面没有报名")
+		disable.value=false
+	}else{
+		console.log("申请界面已经报名")
+		disable.value=true
+	}
+	
+})
+
+
 
 // 轮播图数据
 const bannerImages = ref([
@@ -160,7 +182,8 @@ const handleRegister = () => {
     icon: 'none'
   })
   // 跳转到报名页面
-  uni.navigateTo({ url: '/pages/detail/applydetail' })
+  console.log("跳转的id:",id)
+  uni.navigateTo({ url: `/pages/detail/applydetail?id=${id}` })
 }
 </script>
 

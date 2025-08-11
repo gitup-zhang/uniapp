@@ -21,7 +21,7 @@
 	  :date="formatEventDate(item.event_start_time,item.event_end_time)"
 	  :location="item.event_address"
 	  status="已结束"
-	@click="handleCardClick()"
+	@click="handleCardClick(item.id)"
 	/>
 	
 	
@@ -38,8 +38,9 @@ const EventStore=useEventstore()
 	// 活动点击逻辑
 function handleCardClick(eventData) {
   console.log("点击了卡片:", eventData);
-	uni.navigateTo({
-	url: `/pages/detail/activitydetail` // 举例，传递 title 作为参数
+  const disable = true
+  	uni.navigateTo({
+  	url: `/pages/detail/activitydetail?id=${eventData}&disable=${disable}` // 举例，传递 title 作为参数
   });
 }
 // 返回函数

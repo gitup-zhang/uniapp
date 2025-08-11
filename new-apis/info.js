@@ -16,5 +16,15 @@ export function getinfoprofile(){
 
 // 更新用户信息
 export function updateprofile(params){
-	return http.post('/user/update',params)
+	return http.put('/user/update',params)
+}
+
+// 头像上传
+export function uploadimage(params){
+	return http.post('file/upload',params)
+}
+
+// 查询活动是否报名
+export function IsUserRegistered(params){
+	return http.get(`/event/isUserRegistered/${params}`)
 }

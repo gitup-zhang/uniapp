@@ -28,11 +28,12 @@ const _sfc_main = {
         infoStore.token = localToken;
         infoStore.signal = true;
         try {
-          await infoStore.getUserInfo();
+          await infoStore.getinfo();
           console.log("登录状态恢复成功");
         } catch (e) {
+          console.log(e);
           console.log("用户信息拉取失败，清除登录状态");
-          infoStore.logout();
+          infoStore.deleteinfo();
         }
       } else {
         console.log("本地无登录状态");

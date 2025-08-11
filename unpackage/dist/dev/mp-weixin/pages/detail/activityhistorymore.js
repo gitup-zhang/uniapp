@@ -18,8 +18,9 @@ const _sfc_main = {
     const EventStore = store_Event.useEventstore();
     function handleCardClick(eventData) {
       console.log("点击了卡片:", eventData);
+      const disable = true;
       common_vendor.index.navigateTo({
-        url: `/pages/detail/activitydetail`
+        url: `/pages/detail/activitydetail?id=${eventData}&disable=${disable}`
         // 举例，传递 title 作为参数
       });
     }
@@ -41,8 +42,9 @@ const _sfc_main = {
         }),
         c: common_vendor.f(common_vendor.unref(EventStore).eventoutdate, (item, k0, i0) => {
           return {
-            a: "d008db7a-1-" + i0,
-            b: common_vendor.p({
+            a: common_vendor.o(($event) => handleCardClick(item.id)),
+            b: "d008db7a-1-" + i0,
+            c: common_vendor.p({
               imgSrc: item.cover_image_url,
               title: item.title,
               date: common_vendor.unref(utils_data.formatEventDate)(item.event_start_time, item.event_end_time),
@@ -50,8 +52,7 @@ const _sfc_main = {
               status: "已结束"
             })
           };
-        }),
-        d: common_vendor.o(($event) => handleCardClick())
+        })
       };
     };
   }

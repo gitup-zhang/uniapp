@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getinfologin,getinfoprofile,updateprofile } from '@/new-apis/info.js'
+import { getinfologin,getinfoprofile,updateprofile,IsUserRegistered } from '@/new-apis/info.js'
 
 
 export const useInfoStore=defineStore('peopleinfo',()=>{
@@ -10,6 +10,8 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	const token =ref("")
 	// 标志位，判断是否登录
 	const signal=ref(false)
+	// 是否报名的标志位
+	const isapply=ref(false)
 	
 	// 持久化存储个人信息
 	const setToken = (t) => {
@@ -24,10 +26,13 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 		
 		const res=await getinfoprofile()
 		info.value=res.data
+		
 	}
 	// 更新个人信息
 	const updateinfo=async(params)=>{
-		await updateprofile(params)
+		const res = await updateprofile(params)
+		 await getinfo()
+		return res
 	}
 	const loginWithWeChat = async () => {
 	  try {
@@ -79,6 +84,9 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	      url: 'http://47.113.194.28:8080/api/file/upload',
 	      filePath: filepath,
 	      name: 'file',
+		  formData: {
+			biz_type: 'AVATAR' // 添加额外字段
+		        },
 	      header: {
 	        'Content-Type': 'multipart/form-data',
 	        Authorization: token.value ? `Bearer ${token.value}` : '',
@@ -129,6 +137,26 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	    },
 	  });
 	};
+	// 查询是否已经报名
+	
+	const IsRegistered=async(id)=>{
+		try{
+			
+			const res= await IsUserRegistered(id)
+			console.log("报名信息：",res)
+			if(res.data.is_registered==="N"){
+				console.log("没有报名")
+				isapply.value=false
+			}else{
+				console.log("已经报名")
+				isapply.value=true
+				
+			}
+		}catch(e){
+			console.log(e)
+		}
+		
+	}
 
 	
 	
@@ -142,7 +170,9 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 		getUserProfile,
 		updateinfo,
 		uploadimage,
-		setToken
+		setToken,
+		IsRegistered,
+		isapply
 	}
 	
 })

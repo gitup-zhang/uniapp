@@ -16,15 +16,28 @@ const _sfc_main = {
   setup(__props) {
     let id = common_vendor.ref();
     const disable = common_vendor.ref(true);
+    const signal = common_vendor.ref(false);
     const EventStore = store_Event.useEventstore();
     const UserStore = store_Info.useInfoStore();
     common_vendor.onLoad(async (option) => {
       console.log("option:", option);
       id = decodeURIComponent(option.id);
       disable.value = option.disable === "true";
-      console.log("接收到的ID：", id);
+      signal.value = disable.value;
+      EventStore.geteventdetail(id);
+      console.log("接收到的ID：", typeof id);
       console.log("按钮是否禁用：", disable.value);
-      await EventStore.geteventdetail(id);
+    });
+    common_vendor.onShow(async () => {
+      await UserStore.IsRegistered(id);
+      console.log("是否已经报名", UserStore.isapply);
+      if (!UserStore.isapply && !signal.value) {
+        console.log("申请界面没有报名");
+        disable.value = false;
+      } else {
+        console.log("申请界面已经报名");
+        disable.value = true;
+      }
     });
     const bannerImages = common_vendor.ref([
       "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
@@ -69,7 +82,8 @@ const _sfc_main = {
         title: "跳转到报名页面",
         icon: "none"
       });
-      common_vendor.index.navigateTo({ url: "/pages/detail/applydetail" });
+      console.log("跳转的id:", id);
+      common_vendor.index.navigateTo({ url: `/pages/detail/applydetail?id=${id}` });
     };
     return (_ctx, _cache) => {
       return {

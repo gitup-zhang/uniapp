@@ -7,8 +7,12 @@ function getinfoprofile() {
   return utils_request.http.get("/user/info");
 }
 function updateprofile(params) {
-  return utils_request.http.post("/user/update", params);
+  return utils_request.http.put("/user/update", params);
 }
+function IsUserRegistered(params) {
+  return utils_request.http.get(`/event/isUserRegistered/${params}`);
+}
+exports.IsUserRegistered = IsUserRegistered;
 exports.getinfologin = getinfologin;
 exports.getinfoprofile = getinfoprofile;
 exports.updateprofile = updateprofile;

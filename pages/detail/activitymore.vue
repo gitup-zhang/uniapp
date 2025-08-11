@@ -44,9 +44,10 @@ const EventStore=useEventstore()
 
 function change(e){
 	const clickedIndex = e.detail.index
-	console.log('点击了第', clickedIndex+1, '个宫格')
+	console.log('点击了第', clickedIndex, '个宫格')
+	const disable = false
 	uni.navigateTo({
-	  url: `/pages/detail/activitydetail`
+	  url: `/pages/detail/activitydetail?id=${clickedIndex}&disable=${disable}`
 	})
 }
 // 返回函数
