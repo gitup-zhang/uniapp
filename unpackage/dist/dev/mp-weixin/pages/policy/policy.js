@@ -25,11 +25,12 @@ const _sfc_main = {
     const searchbar = common_vendor.ref("");
     const currentDropdown = common_vendor.ref(null);
     const isselected = common_vendor.ref(0);
-    const selectedDomain = common_vendor.ref({ field_id: 0, field_name: "全部" });
+    const selectedDomain = common_vendor.ref({ field_id: 0, field_code: "", field_name: "全部" });
     const selectedTime = common_vendor.ref("发布时间");
     const timeList = ["全部", "最近一周", "最近一月", "最近一年"];
     const Params = {
-      field_id: 0,
+      // field_id: 0,
+      field_type: "",
       page: 0,
       is_selection: 0,
       article_title: "",
@@ -69,14 +70,16 @@ const _sfc_main = {
     function selectOption(type, value) {
       if (type === "domain") {
         if (value === null) {
-          selectedDomain.value = { field_id: 0, field_name: "全部" };
+          selectedDomain.value = { field_id: 0, field_code: "", field_name: "全部" };
           Params.page = 1;
-          Params.field_id = selectedDomain.value.field_id;
+          Params.field_type = selectedDomain.value.field_code;
           listarticles.getlistpolicy(Params);
         } else {
+          console.log("value值：", value);
           selectedDomain.value = value;
           Params.page = 1;
-          Params.field_id = selectedDomain.value.field_id;
+          Params.field_type = selectedDomain.value.field_code;
+          console.log("params:", Params);
           listarticles.getlistpolicy(Params);
         }
       }

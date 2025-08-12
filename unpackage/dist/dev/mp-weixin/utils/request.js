@@ -32,9 +32,6 @@ function request(url, method, data = {}, header = {}) {
           resolve(res.data);
         } else if (res.statusCode === 401) {
           common_vendor.index.removeStorageSync("token");
-          common_vendor.index.switchTab({
-            url: "../mymessage/mymessage"
-          });
           reject(new Error("未登录或登录已过期"));
         } else {
           reject(res);
@@ -50,6 +47,7 @@ function request(url, method, data = {}, header = {}) {
 const http = {
   get: (url, data, header) => request(url, "GET", data, header),
   post: (url, data, header) => request(url, "POST", data, header),
-  put: (url, data, header) => request(url, "PUT", data, header)
+  put: (url, data, header) => request(url, "PUT", data, header),
+  delete: (url, data, header) => request(url, "DELETE", data, header)
 };
 exports.http = http;

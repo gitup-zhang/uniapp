@@ -1,11 +1,13 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
 const newApis_info = require("../new-apis/info.js");
+const newApis_events = require("../new-apis/events.js");
 const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
   let info = common_vendor.ref({});
   const token = common_vendor.ref("");
   const signal = common_vendor.ref(false);
   const isapply = common_vendor.ref(false);
+  const applyactivity = common_vendor.ref([]);
   const setToken = (t) => {
     token.value = t;
     signal.value = true;
@@ -114,6 +116,15 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
       console.log(e);
     }
   };
+  const userapply = async () => {
+    try {
+      const res = await newApis_events.userRegisteredEvents();
+      applyactivity.value = Array.isArray(res.data) ? res.data : [];
+      console.log("已经报名的活动有", res);
+    } catch (e) {
+      console.log(e);
+    }
+  };
   return {
     info,
     token,
@@ -126,7 +137,9 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
     uploadimage,
     setToken,
     IsRegistered,
-    isapply
+    isapply,
+    userapply,
+    applyactivity
   };
 });
 exports.useInfoStore = useInfoStore;

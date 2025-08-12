@@ -4,77 +4,176 @@
     <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
     <!-- 导航栏 -->
     <view class="nav-bar">
-      
       <text class="nav-title">个人信息</text>
       <view class="nav-right"></view>
     </view>
-    <!-- 未登录状态 - 优化后的登录界面 -->
+    
+    <!-- 未登录状态 - 简约登录界面 -->
     <view v-if="!userInfo.signal" class="login-container">
-      <view class="login-background">
-        <!-- 动态背景装饰 -->
-        <view class="animated-bg">
-          <view class="floating-circle circle-1"></view>
-          <view class="floating-circle circle-2"></view>
-          <view class="floating-circle circle-3"></view>
-          <view class="floating-circle circle-4"></view>
-          <view class="floating-circle circle-5"></view>
+      <view class="login-card">
+        <!-- Logo区域 -->
+        <view class="logo-section">
+          <image class="logo-image" src="/static/icon/logo.png" mode="aspectFit"/>
+          <text class="app-title">智慧平台</text>
+          <text class="app-slogan">欢迎登录</text>
         </view>
         
-        <!-- 登录卡片 -->
-        <view class="login-card">
-          <!-- Logo区域 -->
-          <view class="logo-section">
-            <view class="logo-wrapper">
-              <image class="logo-image" src="/static/icon/logo.png" mode="aspectFit"/>
-              <view class="logo-shine"></view>
+        <!-- 登录方式切换 -->
+        <view class="login-tabs">
+          <view 
+            class="tab-item" 
+            :class="{ active: loginType === 'account' }"
+            @click="switchLoginType('account')"
+          >
+            账号登录
+          </view>
+          <view 
+            class="tab-item" 
+            :class="{ active: loginType === 'sms' }"
+            @click="switchLoginType('sms')"
+          >
+            短信登录
+          </view>
+          <view 
+            class="tab-item" 
+            :class="{ active: loginType === 'wechat' }"
+            @click="switchLoginType('wechat')"
+          >
+            微信登录
+          </view>
+        </view>
+        
+        <!-- 账号密码登录 -->
+        <view v-if="loginType === 'account'" class="login-form">
+          <view class="form-item">
+            <view class="input-wrapper" :class="{ 'error': accountForm.usernameError }">
+              <uni-icons type="person" size="20" color="#999"/>
+              <input 
+                class="form-input" 
+                placeholder="请输入账号/手机号" 
+                v-model="accountForm.username"
+                :disabled="isLogging"
+                @blur="validateUsername"
+                @input="clearUsernameError"
+              />
             </view>
-            <text class="app-title">智慧平台</text>
-            <text class="app-slogan">连接智慧，创造未来</text>
+            <text v-if="accountForm.usernameError" class="error-tip">{{ accountForm.usernameError }}</text>
           </view>
           
-          <!-- 特性展示 -->
-          <view class="features-showcase">
-            <view class="feature-card" v-for="(feature, index) in loginFeatures" :key="index">
-              <view class="feature-icon" :class="feature.iconClass">
-                <uni-icons :type="feature.icon" size="24" :color="feature.color"/>
-              </view>
-              <view class="feature-content">
-                <text class="feature-title">{{ feature.title }}</text>
-                <text class="feature-desc">{{ feature.desc }}</text>
-              </view>
+          <view class="form-item">
+            <view class="input-wrapper" :class="{ 'error': accountForm.passwordError }">
+              <uni-icons type="locked" size="20" color="#999"/>
+              <input 
+                class="form-input" 
+                placeholder="请输入密码" 
+                password
+                v-model="accountForm.password"
+                :disabled="isLogging"
+                @blur="validatePassword"
+                @input="clearPasswordError"
+              />
+              <text class="forgot-password" @click="handleForgotPassword">忘记密码？</text>
             </view>
+            <text v-if="accountForm.passwordError" class="error-tip">{{ accountForm.passwordError }}</text>
           </view>
           
-          <!-- 登录按钮区域 -->
-          <view class="login-section">
-            <button 
-              class="modern-login-btn" 
-              open-type="getPhoneNumber" 
-              @getphonenumber="handlePhoneAuth"
-              :disabled="isLogging"
-            >
-              <view class="btn-content">
-                <view class="btn-icon" v-if="!isLogging">
-                  <uni-icons type="phone-filled" size="20" color="#fff"/>
-                </view>
-                <uni-load-more v-if="isLogging" status="loading" color="#fff" :content-text="{ contentnomore: '' }"/>
-                <text class="btn-text">{{ isLogging ? '正在登录...' : '手机号快速登录' }}</text>
-              </view>
-              <view class="btn-shine"></view>
-            </button>
-            
-            <view class="privacy-notice">
-              <text class="notice-text">登录即表示同意</text>
-              <text class="notice-link" @click="showUserAgreement">《用户协议》</text>
-              <text class="notice-text">和</text>
-              <text class="notice-link" @click="showPrivacyPolicy">《隐私政策》</text>
+          <button 
+            class="login-btn" 
+            @click="handleAccountLogin"
+            :disabled="isLogging"
+          >
+            <uni-load-more v-if="isLogging" status="loading" color="#fff" :content-text="{ contentnomore: '' }"/>
+            <text v-else>登录</text>
+          </button>
+        </view>
+        
+        <!-- 短信验证码登录 -->
+        <view v-if="loginType === 'sms'" class="login-form">
+          <view class="form-item">
+            <view class="input-wrapper" :class="{ 'error': smsForm.phoneError }">
+              <uni-icons type="phone" size="20" color="#999"/>
+              <input 
+                class="form-input" 
+                placeholder="请输入手机号" 
+                type="number"
+                maxlength="11"
+                v-model="smsForm.phone"
+                :disabled="isLogging"
+                @blur="validatePhone"
+                @input="clearPhoneError"
+              />
             </view>
+            <text v-if="smsForm.phoneError" class="error-tip">{{ smsForm.phoneError }}</text>
           </view>
+          
+          <view class="form-item">
+            <view class="input-wrapper" :class="{ 'error': smsForm.codeError }">
+              <uni-icons type="chatboxes" size="20" color="#999"/>
+              <input 
+                class="form-input" 
+                placeholder="请输入验证码" 
+                type="number"
+                maxlength="6"
+                v-model="smsForm.code"
+                :disabled="isLogging"
+                @blur="validateSmsCode"
+                @input="clearCodeError"
+              />
+              <button 
+                class="sms-btn" 
+                @click="sendSmsCode"
+                :disabled="!isValidPhone || smsCountdown > 0"
+              >
+                {{ smsCountdown > 0 ? `${smsCountdown}s` : '获取验证码' }}
+              </button>
+            </view>
+            <text v-if="smsForm.codeError" class="error-tip">{{ smsForm.codeError }}</text>
+          </view>
+          
+          <button 
+            class="login-btn" 
+            @click="handleSmsLogin"
+            :disabled="isLogging"
+          >
+            <uni-load-more v-if="isLogging" status="loading" color="#fff" :content-text="{ contentnomore: '' }"/>
+            <text v-else>登录</text>
+          </button>
+        </view>
+        
+        <!-- 微信登录 -->
+        <view v-if="loginType === 'wechat'" class="login-form">
+          <view class="wechat-info">
+            <uni-icons type="weixin" size="60" color="#1aad19"/>
+            <text class="wechat-text">使用微信授权登录</text>
+            <text class="wechat-desc">安全快捷，一键登录</text>
+          </view>
+          
+          <button 
+            class="login-btn wechat-btn" 
+            open-type="getPhoneNumber" 
+            @getphonenumber="handlePhoneAuth"
+            :disabled="isLogging"
+			@click="wechatlogin"
+          >
+            <uni-load-more v-if="isLogging" status="loading" color="#fff" :content-text="{ contentnomore: '' }"/>
+            <view v-else class="btn-content">
+              <uni-icons type="weixin" size="20" color="#fff"/>
+              <text>微信授权登录</text>
+            </view>
+          </button>
+        </view>
+        
+        <!-- 隐私协议 -->
+        <view class="privacy-notice">
+          <text class="notice-text">登录即表示同意</text>
+          <text class="notice-link" @click="showUserAgreement">《用户协议》</text>
+          <text class="notice-text">和</text>
+          <text class="notice-link" @click="showPrivacyPolicy">《隐私政策》</text>
         </view>
       </view>
     </view>
 
-    <!-- 已登录状态 - 优化后的主界面 -->
+    <!-- 已登录状态 - 保持原有样式 -->
     <view v-else class="main-container">
       <!-- 简洁的头部区域 -->
       <view class="header">
@@ -84,7 +183,7 @@
             <view class="avatar-section">
               <image 
                 class="user-avatar" 
-                :src="userInfo.info.Image || '/static/icon/empty.png'" 
+                :src="userInfo.info.avatar_url || '/static/icon/empty.png'" 
                 mode="aspectFill"
               />
               <view class="online-indicator">
@@ -93,9 +192,9 @@
             </view>
             
             <view class="user-details">
-              <text class="user-name">{{ userInfo.info.username || '用户' }}</text>
+              <text class="user-name">{{ userInfo.info.nickname || '用户' }}</text>
               <text class="user-phone">{{ formatPhoneNumber(userInfo.info.phone) }}</text>
-              <text class="user-signature">{{ userInfo.info.slogan || '点击设置个人签名' }}</text>
+              <!-- <text class="user-signature">{{ userInfo.info.slogan || '点击设置个人签名' }}</text> -->
             </view>
             
             <view class="profile-enter">
@@ -119,9 +218,9 @@
             <view class="stats-icon-wrapper">
               <image class="stats-icon" src="/static/icon/fire.png" mode="aspectFit"/>
             </view>
-            <view class="stats-info">
+           <view class="stats-info">
               <text class="stats-title">我的数据统计</text>
-              <text class="stats-subtitle">累计在线 {{ userInfo.info.daysOnline || 0 }} 天</text>
+              <!-- <text class="stats-subtitle">累计在线 {{ userInfo.info.daysOnline || 0 }} 天</text> -->
             </view>
           </view>
           
@@ -129,10 +228,10 @@
             <view class="stat-item">
               <text class="stat-number">{{ userInfo.info.newsViews || 0 }}</text>
               <text class="stat-label">新闻阅读</text>
-              <view class="stat-trend">
+<!--              <view class="stat-trend">
                 <uni-icons type="up" size="12" color="#2ed573"/>
                 <text class="trend-value">+12</text>
-              </view>
+              </view> -->
             </view>
             
             <view class="stat-divider"></view>
@@ -140,10 +239,10 @@
             <view class="stat-item">
               <text class="stat-number">{{ userInfo.info.policyViews || 0 }}</text>
               <text class="stat-label">政策查看</text>
-              <view class="stat-trend">
+             <!-- <view class="stat-trend">
                 <uni-icons type="up" size="12" color="#2ed573"/>
                 <text class="trend-value">+5</text>
-              </view>
+              </view> -->
             </view>
             
             <view class="stat-divider"></view>
@@ -151,15 +250,12 @@
             <view class="stat-item">
               <text class="stat-number">{{ userInfo.info.field || 3 }}</text>
               <text class="stat-label">关注领域</text>
-              <view class="stat-trend">
+              <!-- <view class="stat-trend">
                 <uni-icons type="minus" size="12" color="#ffa726"/>
                 <text class="trend-value">0</text>
-              </view>
+              </view> -->
             </view>
           </view>
-		  
-		 
-		  
         </view>
 
         <!-- 活动区域 -->
@@ -172,28 +268,12 @@
             </view>
           </view>
           
-          <ActivityTicket 
-            :activityData="myActivityData" 
-            @check-activity="onCheck"
-            @join-group="onJoin"
-            @status-action="onStatus"
+          <ActivityTicket
+           :activityData="myActivityData"
+            @action="onAction"
+            @cancel="onCancel"
           />
         </view>
-
-        <!-- 快捷功能 -->
-        <!-- <view class="quick-actions">
-          <view class="section-header">
-            <text class="section-title">快捷功能</text>
-          </view>
-          <view class="actions-grid">
-            <view class="action-item" v-for="(action, index) in quickActions" :key="index" @click="handleQuickAction(action)">
-              <view class="action-icon" :style="{ background: action.bgColor }">
-                <uni-icons :type="action.icon" size="20" :color="action.iconColor"/>
-              </view>
-              <text class="action-text">{{ action.text }}</text>
-            </view>
-          </view>
-        </view> -->
       </view>
     </view>
 
@@ -223,62 +303,31 @@ const loadingPopup = ref(null)
 const isLogging = ref(false)
 const loadingText = ref({ more: '加载中...' })
 
-// 登录页面特性展示
-const loginFeatures = ref([
-  {
-    icon: 'locked',
-    color: '#2ed573',
-    iconClass: 'security-icon',
-    title: '安全保障',
-    desc: '银行级数据加密保护'
-  },
-  {
-    icon: 'heart',
-    color: '#ff4757',
-    iconClass: 'personal-icon',
-    title: '个性推荐',
-    desc: '智能内容个性化推送'
-  },
-  {
-    icon: 'cloud',
-    color: '#3742fa',
-    iconClass: 'sync-icon',
-    title: '云端同步',
-    desc: '多设备无缝数据同步'
-  }
-])
+// 登录类型
+const loginType = ref('account') // account, sms, wechat
 
-// 快捷功能
-const quickActions = ref([
-  {
-    icon: 'gear',
-    text: '账户设置',
-    bgColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    iconColor: '#fff',
-    action: 'settings'
-  },
-  {
-    icon: 'heart',
-    text: '我的收藏',
-    bgColor: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
-    iconColor: '#fff',
-    action: 'favorites'
-  },
-  {
-    icon: 'chatbubble',
-    text: '消息中心',
-    bgColor: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-    iconColor: '#fff',
-    action: 'messages'
-  },
-  {
-    icon: 'help',
-    text: '帮助中心',
-    bgColor: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-    iconColor: '#fff',
-    action: 'help'
-  }
-])
+// 表单数据
+const accountForm = reactive({
+  username: '',
+  password: '',
+  usernameError: '',
+  passwordError: ''
+})
+
+const smsForm = reactive({
+  phone: '',
+  code: '',
+  phoneError: '',
+  codeError: ''
+})
+
+// 短信验证码倒计时
+const smsCountdown = ref(0)
+
+// 计算属性
+const isValidPhone = computed(() => {
+  return /^1[3-9]\d{9}$/.test(smsForm.phone)
+})
 
 // 活动数据
 const myActivityData = ref({
@@ -290,13 +339,6 @@ const myActivityData = ref({
   statusText: '点击签到'
 })
 
-// 用户授权状态
-const authState = ref({
-  phoneAuthCode: '',
-  encryptedData: '',
-  iv: ''
-})
-
 // 页面挂载
 onMounted(() => {
   initPage()
@@ -305,7 +347,7 @@ onMounted(() => {
 // 初始化页面
 const initPage = async () => {
   try {
-    await userInfo.checkLoginStatus()
+    // await userInfo.checkLoginStatus()
     if (userInfo.signal) {
       await refreshUserData()
     }
@@ -317,7 +359,8 @@ const initPage = async () => {
 // 刷新用户数据
 const refreshUserData = async () => {
   try {
-    await userInfo.getUserInfo()
+    await userInfo.getinfo()
+	await userInfo.userapply()
   } catch (error) {
     console.error('获取用户信息失败:', error)
   }
@@ -329,61 +372,113 @@ const formatPhoneNumber = (phone) => {
   return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
 }
 
-// 处理手机号授权
-const handlePhoneAuth = async (e) => {
-  console.log('手机号授权回调:', e)
+// 切换登录方式
+const switchLoginType = (type) => {
+  loginType.value = type
+  // 清空表单数据和错误信息
+  accountForm.username = ''
+  accountForm.password = ''
+  accountForm.usernameError = ''
+  accountForm.passwordError = ''
+  smsForm.phone = ''
+  smsForm.code = ''
+  smsForm.phoneError = ''
+  smsForm.codeError = ''
+}
+
+// 表单验证方法
+const validateUsername = () => {
+  if (!accountForm.username.trim()) {
+    accountForm.usernameError = '请输入账号或手机号'
+    return false
+  }
+  accountForm.usernameError = ''
+  return true
+}
+
+const validatePassword = () => {
+  if (!accountForm.password.trim()) {
+    accountForm.passwordError = '请输入密码'
+    return false
+  }
+  if (accountForm.password.length < 6) {
+    accountForm.passwordError = '密码长度不能少于6位'
+    return false
+  }
+  accountForm.passwordError = ''
+  return true
+}
+
+const validatePhone = () => {
+  if (!smsForm.phone.trim()) {
+    smsForm.phoneError = '请输入手机号'
+    return false
+  }
+  if (!isValidPhone.value) {
+    smsForm.phoneError = '请输入正确的手机号格式'
+    return false
+  }
+  smsForm.phoneError = ''
+  return true
+}
+
+const validateSmsCode = () => {
+  if (!smsForm.code.trim()) {
+    smsForm.codeError = '请输入验证码'
+    return false
+  }
+  if (smsForm.code.length !== 6) {
+    smsForm.codeError = '验证码为6位数字'
+    return false
+  }
+  smsForm.codeError = ''
+  return true
+}
+
+// 清除错误信息的方法
+const clearUsernameError = () => {
+  if (accountForm.usernameError) {
+    accountForm.usernameError = ''
+  }
+}
+
+const clearPasswordError = () => {
+  if (accountForm.passwordError) {
+    accountForm.passwordError = ''
+  }
+}
+
+const clearPhoneError = () => {
+  if (smsForm.phoneError) {
+    smsForm.phoneError = ''
+  }
+}
+
+const clearCodeError = () => {
+  if (smsForm.codeError) {
+    smsForm.codeError = ''
+  }
+}
+
+// 账号密码登录
+const handleAccountLogin = async () => {
+  // 验证表单
+  const isUsernameValid = validateUsername()
+  const isPasswordValid = validatePassword()
   
-  if (e.detail.errMsg !== 'getPhoneNumber:ok') {
-    uni.showToast({
-      title: '授权失败，请重试',
-      icon: 'error'
-    })
+  if (!isUsernameValid || !isPasswordValid) {
     return
   }
 
   try {
     isLogging.value = true
     
-    authState.value = {
-      phoneAuthCode: e.detail.code,
-      encryptedData: e.detail.encryptedData,
-      iv: e.detail.iv
-    }
-
-    await performLogin()
-    
-  } catch (error) {
-    console.error('登录失败:', error)
-    uni.showToast({
-      title: '登录失败，请重试',
-      icon: 'error'
-    })
-  } finally {
-    isLogging.value = false
-  }
-}
-
-// 执行登录逻辑
-const performLogin = async () => {
-  try {
-    const loginRes = await uni.login({
-      provider: 'weixin'
+    // 调用账号登录API
+    const loginResult = await callAccountLoginAPI({
+      username: accountForm.username,
+      password: accountForm.password
     })
     
-    if (loginRes[1].errMsg !== 'login:ok') {
-      throw new Error('获取登录凭证失败')
-    }
-
-    const loginCode = loginRes[1].code
-    
-    const loginData = {
-      code: loginCode,
-      phoneCode: authState.value.phoneAuthCode,
-      encryptedData: authState.value.encryptedData,
-      iv: authState.value.iv
-    }
-
-    const loginResult = await callLoginAPI(loginData)
     await userInfo.saveLoginInfo(loginResult)
     await refreshUserData()
     
@@ -393,18 +488,228 @@ const performLogin = async () => {
     })
 
   } catch (error) {
-    console.error('登录过程出错:', error)
-    throw error
+    console.error('账号登录失败:', error)
+    uni.showToast({
+      title: error.message || '登录失败，请重试',
+      icon: 'error'
+    })
+  } finally {
+    isLogging.value = false
   }
 }
 
-// 调用登录API
-const callLoginAPI = async (loginData) => {
+// 发送短信验证码
+const sendSmsCode = async () => {
+  // 验证手机号
+  if (!validatePhone()) {
+    return
+  }
+
+  try {
+    // 调用发送短信API
+    // await callSendSmsAPI({ phone: smsForm.phone })
+    
+    // 开始倒计时
+    smsCountdown.value = 60
+    const timer = setInterval(() => {
+      smsCountdown.value--
+      if (smsCountdown.value <= 0) {
+        clearInterval(timer)
+      }
+    }, 1000)
+    
+    uni.showToast({
+      title: '验证码已发送',
+      icon: 'success'
+    })
+
+  } catch (error) {
+    console.error('发送验证码失败:', error)
+    uni.showToast({
+      title: error.message || '发送失败，请重试',
+      icon: 'error'
+    })
+  }
+}
+
+// 短信验证码登录
+const handleSmsLogin = async () => {
+  // 验证表单
+  const isPhoneValid = validatePhone()
+  const isCodeValid = validateSmsCode()
+  
+  if (!isPhoneValid || !isCodeValid) {
+    return
+  }
+
+  try {
+    isLogging.value = true
+    
+    // 调用短信登录API
+    const loginResult = await callSmsLoginAPI({
+      phone: smsForm.phone,
+      code: smsForm.code
+    })
+    
+    await userInfo.saveLoginInfo(loginResult)
+    await refreshUserData()
+    
+    uni.showToast({
+      title: '登录成功',
+      icon: 'success'
+    })
+
+  } catch (error) {
+    console.error('短信登录失败:', error)
+    uni.showToast({
+      title: error.message || '登录失败，请重试',
+      icon: 'error'
+    })
+  } finally {
+    isLogging.value = false
+  }
+}
+const wechatlogin=async()=>{
+	
+	
+	try{
+		await userInfo.loginWithWeChat()
+		initPage()
+	}catch(e){
+		console.log(e)
+	}
+	
+	
+}
+
+// 处理微信手机号授权
+// const handlePhoneAuth = async (e) => {
+	
+	
+// 	// 微信手机号授权逻辑
+//   // console.log('手机号授权回调:', e)
+  
+//   // if (e.detail.errMsg !== 'getPhoneNumber:ok') {
+//   //   uni.showToast({
+//   //     title: '授权失败，请重试',
+//   //     icon: 'error'
+//   //   })
+//   //   return
+//   // }
+
+//   try {
+//     isLogging.value = true
+    
+//     const loginRes = await uni.login({
+//       provider: 'weixin'
+//     })
+    
+//     if (loginRes[1].errMsg !== 'login:ok') {
+//       throw new Error('获取登录凭证失败')
+//     }
+// 	console.log(loginRes)
+
+//   //   const loginData = {
+//   //     code: loginRes[1].code,
+//   //     phoneCode: e.detail.code,
+//   //     encryptedData: e.detail.encryptedData,
+//   //     iv: e.detail.iv
+//   //   }
+
+//   //   const loginResult = await callWechatLoginAPI(loginData)
+//   //   await userInfo.saveLoginInfo(loginResult)
+//   //   await refreshUserData()
+    
+//     uni.showToast({
+//       title: '登录成功',
+//       icon: 'success'
+//     })
+
+//   } catch (error) {
+//     console.error('微信登录失败:', error)
+//     uni.showToast({
+//       title: '登录失败，请重试',
+//       icon: 'error'
+//     })
+//   } finally {
+//     isLogging.value = false
+//   }
+// }
+
+// 忘记密码
+const handleForgotPassword = () => {
+  uni.navigateTo({
+    url: '/pages/auth/forgot-password'
+  })
+}
+
+// API调用函数
+const callAccountLoginAPI = async (data) => {
   return new Promise((resolve, reject) => {
     uni.request({
-      url: 'https://your-api-domain.com/api/login',
+      url: 'https://your-api-domain.com/api/account-login',
       method: 'POST',
-      data: loginData,
+      data,
+      success: (res) => {
+        if (res.data.success) {
+          resolve(res.data.data)
+        } else {
+          reject(new Error(res.data.message || '登录失败'))
+        }
+      },
+      fail: (error) => {
+        reject(error)
+      }
+    })
+  })
+}
+
+const callSendSmsAPI = async (data) => {
+  return new Promise((resolve, reject) => {
+    uni.request({
+      url: 'https://your-api-domain.com/api/send-sms',
+      method: 'POST',
+      data,
+      success: (res) => {
+        if (res.data.success) {
+          resolve(res.data.data)
+        } else {
+          reject(new Error(res.data.message || '发送失败'))
+        }
+      },
+      fail: (error) => {
+        reject(error)
+      }
+    })
+  })
+}
+
+const callSmsLoginAPI = async (data) => {
+  return new Promise((resolve, reject) => {
+    uni.request({
+      url: 'https://your-api-domain.com/api/sms-login',
+      method: 'POST',
+      data,
+      success: (res) => {
+        if (res.data.success) {
+          resolve(res.data.data)
+        } else {
+          reject(new Error(res.data.message || '登录失败'))
+        }
+      },
+      fail: (error) => {
+        reject(error)
+      }
+    })
+  })
+}
+
+const callWechatLoginAPI = async (data) => {
+  return new Promise((resolve, reject) => {
+    uni.request({
+      url: 'https://your-api-domain.com/api/wechat-login',
+      method: 'POST',
+      data,
       success: (res) => {
         if (res.data.success) {
           resolve(res.data.data)
@@ -424,32 +729,6 @@ const goToProfile = () => {
   uni.navigateTo({
     url: '/pages/detail/profile'
   })
-}
-
-// 快捷功能处理
-const handleQuickAction = (action) => {
-  switch (action.action) {
-    case 'settings':
-      uni.navigateTo({
-        url: '/pages/settings/index'
-      })
-      break
-    case 'favorites':
-      uni.navigateTo({
-        url: '/pages/favorites/index'
-      })
-      break
-    case 'messages':
-      uni.navigateTo({
-        url: '/pages/messages/index'
-      })
-      break
-    case 'help':
-      uni.navigateTo({
-        url: '/pages/help/index'
-      })
-      break
-  }
 }
 
 // 显示用户协议
@@ -532,6 +811,7 @@ const viewAllActivities = () => {
   min-height: 100vh;
   background: linear-gradient(180deg, #ff4757 0%, #ff6b7a 100%);
 }
+
 .nav-bar {
   height: 88rpx;
   display: flex;
@@ -540,17 +820,6 @@ const viewAllActivities = () => {
   padding: 0 32rpx;
   position: relative;
   z-index: 10;
-
-  .nav-back {
-    width: 64rpx;
-    height: 64rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    backdrop-filter: blur(10rpx);
-  }
 
   .nav-title {
     font-size: 36rpx;
@@ -567,152 +836,39 @@ const viewAllActivities = () => {
   background: transparent;
 }
 
-// 优化后的登录界面样式
+// 简约登录界面样式
 .login-container {
-  min-height: 100vh;
+  min-height: calc(100vh - 200rpx);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.login-background {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.animated-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-
-  .floating-circle {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    animation: float 6s ease-in-out infinite;
-
-    &.circle-1 {
-      width: 80rpx;
-      height: 80rpx;
-      top: 20%;
-      left: 10%;
-      animation-delay: 0s;
-    }
-
-    &.circle-2 {
-      width: 120rpx;
-      height: 120rpx;
-      top: 60%;
-      right: 15%;
-      animation-delay: 1s;
-    }
-
-    &.circle-3 {
-      width: 60rpx;
-      height: 60rpx;
-      top: 30%;
-      right: 20%;
-      animation-delay: 2s;
-    }
-
-    &.circle-4 {
-      width: 100rpx;
-      height: 100rpx;
-      bottom: 30%;
-      left: 20%;
-      animation-delay: 3s;
-    }
-
-    &.circle-5 {
-      width: 40rpx;
-      height: 40rpx;
-      bottom: 20%;
-      right: 30%;
-      animation-delay: 4s;
-    }
-  }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(180deg); }
+  padding: 40rpx;
 }
 
 .login-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 32rpx;
-  padding: 60rpx 40rpx;
-  margin: 0 40rpx;
-  backdrop-filter: blur(20rpx);
-  box-shadow: 0 32rpx 80rpx rgba(0, 0, 0, 0.15);
-  position: relative;
-  z-index: 1;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4rpx;
-    background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-  }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx 40rpx;
+  width: 100%;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.1);
 }
 
 .logo-section {
   text-align: center;
   margin-bottom: 60rpx;
 
-  .logo-wrapper {
-    position: relative;
-    display: inline-block;
-    margin-bottom: 32rpx;
-
-    .logo-image {
-      width: 120rpx;
-      height: 120rpx;
-      border-radius: 24rpx;
-    }
-
-    .logo-shine {
-      position: absolute;
-      top: -4rpx;
-      left: -4rpx;
-      right: -4rpx;
-      bottom: -4rpx;
-      background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.5) 50%, transparent 70%);
-      border-radius: 28rpx;
-      animation: shine 3s infinite;
-      pointer-events: none;
-    }
+  .logo-image {
+    width: 120rpx;
+    height: 120rpx;
+    border-radius: 24rpx;
+    margin-bottom: 24rpx;
   }
 
   .app-title {
     display: block;
     font-size: 48rpx;
     font-weight: 700;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
+    color: #333;
     margin-bottom: 12rpx;
   }
 
@@ -720,145 +876,170 @@ const viewAllActivities = () => {
     display: block;
     font-size: 28rpx;
     color: #666;
-    font-weight: 400;
   }
 }
 
-@keyframes shine {
-  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+.login-tabs {
+  display: flex;
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  padding: 8rpx;
+  margin-bottom: 40rpx;
+
+  .tab-item {
+    flex: 1;
+    text-align: center;
+    padding: 20rpx 16rpx;
+    font-size: 28rpx;
+    color: #666;
+    border-radius: 12rpx;
+    transition: all 0.3s ease;
+    font-weight: 500;
+
+    &.active {
+      background: #fff;
+      color: #667eea;
+      box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.15);
+      font-weight: 600;
+    }
+  }
 }
 
-.features-showcase {
-  margin-bottom: 60rpx;
+.login-form {
+  .form-item {
+    margin-bottom: 32rpx;
 
-  .feature-card {
-    display: flex;
-    align-items: center;
-    padding: 24rpx 0;
-    border-bottom: 1rpx solid #f0f0f0;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    .feature-icon {
-      width: 80rpx;
-      height: 80rpx;
-      border-radius: 50%;
+    .input-wrapper {
       display: flex;
       align-items: center;
-      justify-content: center;
-      margin-right: 24rpx;
+      background: #f8f9fa;
+      border-radius: 16rpx;
+      padding: 0 24rpx;
+      position: relative;
+      border: 2rpx solid transparent;
+      transition: all 0.3s ease;
 
-      &.security-icon {
-        background: linear-gradient(135deg, #2ed573, #7bed9f);
+      &.error {
+        border-color: #ff4757;
+        background: rgba(255, 71, 87, 0.05);
       }
 
-      &.personal-icon {
-        background: linear-gradient(135deg, #ff4757, #ff6b7a);
+      .form-input {
+        flex: 1;
+        height: 88rpx;
+        font-size: 30rpx;
+        color: #333;
+        margin-left: 16rpx;
       }
 
-      &.sync-icon {
-        background: linear-gradient(135deg, #3742fa, #5352ed);
+      .forgot-password {
+        font-size: 26rpx;
+        color: #667eea;
+        position: absolute;
+        right: 24rpx;
+      }
+
+      .sms-btn {
+        background: #667eea;
+        color: #fff;
+        border: none;
+        border-radius: 12rpx;
+        padding: 16rpx 24rpx;
+        font-size: 24rpx;
+        margin-left: 16rpx;
+        
+        &:disabled {
+          background: #ccc;
+        }
+
+        &::after {
+          border: none;
+        }
       }
     }
 
-    .feature-content {
-      flex: 1;
-
-      .feature-title {
-        display: block;
-        font-size: 30rpx;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 6rpx;
-      }
-
-      .feature-desc {
-        display: block;
-        font-size: 24rpx;
-        color: #666;
-        line-height: 1.4;
-      }
+    .error-tip {
+      display: block;
+      color: #ff4757;
+      font-size: 24rpx;
+      margin-top: 12rpx;
+      margin-left: 24rpx;
+      animation: shake 0.5s ease-in-out;
     }
   }
-}
 
-.login-section {
-  .modern-login-btn {
+  .wechat-info {
+    text-align: center;
+    padding: 60rpx 0;
+
+    .wechat-text {
+      display: block;
+      font-size: 32rpx;
+      color: #333;
+      margin: 24rpx 0 12rpx;
+      font-weight: 600;
+    }
+
+    .wechat-desc {
+      display: block;
+      font-size: 26rpx;
+      color: #666;
+    }
+  }
+
+  .login-btn {
     width: 100%;
     height: 88rpx;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
-    border-radius: 44rpx;
-    position: relative;
-    overflow: hidden;
+    border-radius: 16rpx;
+    color: #fff;
+    font-size: 32rpx;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin-bottom: 32rpx;
-    box-shadow: 0 12rpx 32rpx rgba(102, 126, 234, 0.4);
-
-    &:active {
-      transform: translateY(2rpx);
-    }
 
     &:disabled {
-      opacity: 0.7;
+      opacity: 0.6;
     }
 
     &::after {
       border: none;
     }
 
-    .btn-content {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
+    &.wechat-btn {
+      background: linear-gradient(135deg, #1aad19 0%, #259b24 100%);
 
-      .btn-icon {
-        margin-right: 12rpx;
+      .btn-content {
+        display: flex;
+        align-items: center;
+        
+        text {
+          margin-left: 12rpx;
+        }
       }
-
-      .btn-text {
-        font-size: 32rpx;
-        font-weight: 600;
-        color: #fff;
-      }
-    }
-
-    .btn-shine {
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.6s;
-    }
-
-    &:active .btn-shine {
-      left: 100%;
-    }
-  }
-
-  .privacy-notice {
-    text-align: center;
-
-    .notice-text, .notice-link {
-      font-size: 24rpx;
-      color: #999;
-    }
-    
-    .notice-link {
-      color: #667eea;
-      font-weight: 500;
     }
   }
 }
 
-// 优化后的已登录主界面
+.privacy-notice {
+  text-align: center;
+  margin-top: 40rpx;
+
+  .notice-text, .notice-link {
+    font-size: 24rpx;
+    color: #999;
+  }
+  
+  .notice-link {
+    color: #667eea;
+    font-weight: 500;
+  }
+}
+
+// 已登录状态样式保持原有
 .main-container {
   min-height: 80vh;
   background: linear-gradient(180deg, #ff4757 0%, #ff6b7a 100%);
@@ -994,20 +1175,19 @@ const viewAllActivities = () => {
   50% { opacity: 0.5; }
 }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5rpx); }
+  75% { transform: translateX(5rpx); }
+}
+
 .main-content {
-  // background: #f8f9fa;
-  // border-radius: 32rpx 32rpx 0 0;
-  // min-height: calc(100vh - 400rpx);
-  // padding: 32rpx;
-  // margin-top: -16rpx;
-  // position: relative;
-  // z-index: 1;
   background: #f8f9fa;
-    border-radius: 32rpx 32rpx 0 0;
-    padding: 32rpx;
-    margin-top: -16rpx;
-    position: relative;
-    z-index: 1;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 32rpx;
+  margin-top: -16rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .stats-overview {
@@ -1137,61 +1317,6 @@ const viewAllActivities = () => {
   }
 }
 
-.quick-actions {
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24rpx;
-
-    .section-title {
-      font-size: 32rpx;
-      font-weight: 700;
-      color: #333;
-    }
-  }
-
-  .actions-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24rpx;
-
-    .action-item {
-      background: #fff;
-      border-radius: 20rpx;
-      padding: 32rpx 16rpx;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
-      transition: all 0.3s ease;
-
-      &:active {
-        transform: scale(0.95);
-        box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.12);
-      }
-
-      .action-icon {
-        width: 80rpx;
-        height: 80rpx;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 16rpx;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      }
-
-      .action-text {
-        font-size: 26rpx;
-        color: #666;
-        font-weight: 500;
-        text-align: center;
-      }
-    }
-  }
-}
-
 // 加载提示样式
 .loading-container {
   background: rgba(0, 0, 0, 0.8);
@@ -1216,10 +1341,6 @@ const viewAllActivities = () => {
   
   .main-content {
     padding: 24rpx;
-  }
-  
-  .actions-grid {
-    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -1247,14 +1368,6 @@ const viewAllActivities = () => {
   
   .section-title {
     color: #fff;
-  }
-  
-  .action-item {
-    background: #2d2d2d;
-    
-    .action-text {
-      color: #ccc;
-    }
   }
 }
 </style>

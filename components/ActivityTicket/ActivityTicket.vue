@@ -8,11 +8,11 @@
         <view class="info-list">
           <view class="info-item">
             <text class="icon">📍</text>
-            <text class="text">{{ props.activityData.location }}</text>
+            <text class="text">{{ props.activityData.event_address }}</text>
           </view>
           <view class="info-item">
             <text class="icon">📅</text>
-            <text class="text">{{ props.activityData.date }}</text>
+            <text class="text">{{ formatEventDate(props.activityData.event_start_time,props.activityData.event_end_time)}}</text>
           </view>
         </view>
       </view>
@@ -27,7 +27,10 @@
       <!-- 按钮区 -->
       <view class="ticket-bottom">
         <button class="action-btn" @click="handleAction">
-          {{ props.activityData.statusText }}
+          签到
+        </button>
+        <button class="cancel-btn" @click="handleCancel">
+          取消报名
         </button>
       </view>
     </view>
@@ -35,25 +38,32 @@
 </template>
 
 <script setup>
+import {formatEventDate} from '@/utils/data.js'
 // Props
 const props = defineProps({
   activityData: {
     type: Object,
     default: () => ({
-      title: '中国大模型大会',
-      location: '深圳华侨城创意文化园北区 C2 展厅',
-      date: '3月15日-4月10日',
-      statusText: '位置签到'
+		id: 0,
+      title: '',
+      event_address: '',
+      event_end_time: "",
+      event_start_time: "",
+      
     })
   }
 })
 
 // Emits
-const emit = defineEmits(['action'])
+const emit = defineEmits(['action', 'cancel'])
 
 // 方法
 const handleAction = () => {
   emit('action', props.activityData)
+}
+
+const handleCancel = () => {
+  emit('cancel', props.activityData)
 }
 </script>
 
@@ -147,6 +157,9 @@ const handleAction = () => {
 /* 按钮区 */
 .ticket-bottom {
   padding: 30rpx 32rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
 }
 
 .action-btn {
@@ -168,5 +181,27 @@ const handleAction = () => {
 .action-btn:active {
   transform: translateY(2rpx);
   box-shadow: 0 4rpx 15rpx rgba(255, 65, 108, 0.4);
+}
+
+.cancel-btn {
+  width: 100%;
+  height: 80rpx;
+  background: #fff;
+  color: #999;
+  border: 2rpx solid #e5e5e5;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:active {
+  transform: translateY(2rpx);
+  background: #f8f8f8;
+  border-color: #ddd;
+  color: #666;
 }
 </style>

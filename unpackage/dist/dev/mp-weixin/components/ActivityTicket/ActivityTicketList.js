@@ -2,7 +2,7 @@
 const common_vendor = require("../../common/vendor.js");
 const utils_data = require("../../utils/data.js");
 const _sfc_main = {
-  __name: "ActivityTicket",
+  __name: "ActivityTicketList",
   props: {
     activityData: {
       type: Object,
@@ -36,5 +36,5 @@ const _sfc_main = {
     };
   }
 };
-const Component = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-cc16e5a8"]]);
+const Component = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-a433b5db"]]);
 wx.createComponent(Component);

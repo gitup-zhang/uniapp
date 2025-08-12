@@ -102,9 +102,9 @@ function request(url, method, data = {}, header = {}) {
         } else if (res.statusCode === 401) {
     // 登录失效，自动跳转登录
     uni.removeStorageSync('token');
-   uni.switchTab({
-   	url: '../mymessage/mymessage'
-   });
+   // uni.switchTab({
+   // 	url: '../mymessage/mymessage'
+   // });
     reject(new Error('未登录或登录已过期'));
 			} 
 		else {
@@ -123,4 +123,5 @@ export default {
   get: (url, data, header) => request(url, 'GET', data, header),
   post: (url, data, header) => request(url, 'POST', data, header),
 put: (url, data, header) => request(url, 'PUT', data, header), 
+delete: (url, data, header) => request(url, 'DELETE', data, header) ,
 };

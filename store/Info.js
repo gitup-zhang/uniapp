@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getinfologin,getinfoprofile,updateprofile,IsUserRegistered } from '@/new-apis/info.js'
-
+import {userRegisteredEvents} from '@/new-apis/events.js'
 
 export const useInfoStore=defineStore('peopleinfo',()=>{
 	// 个人信息
@@ -12,6 +12,8 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	const signal=ref(false)
 	// 是否报名的标志位
 	const isapply=ref(false)
+	// 已经报名的活动
+	const applyactivity=ref([])
 	
 	// 持久化存储个人信息
 	const setToken = (t) => {
@@ -157,6 +159,17 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 		}
 		
 	}
+	// 查询已经报名的活动
+	const userapply=async()=>{
+		try{
+			const res=await userRegisteredEvents()
+			applyactivity.value = Array.isArray(res.data) ? res.data : [];
+			
+			console.log("已经报名的活动有",res)
+		}catch(e){
+			console.log(e)
+		}
+	}
 
 	
 	
@@ -172,7 +185,9 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 		uploadimage,
 		setToken,
 		IsRegistered,
-		isapply
+		isapply,
+		userapply,
+		applyactivity
 	}
 	
 })

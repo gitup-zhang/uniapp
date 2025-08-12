@@ -78,6 +78,9 @@
 /* 按钮区 */
 .ticket-bottom.data-v-cc16e5a8 {
   padding: 30rpx 32rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
 }
 .action-btn.data-v-cc16e5a8 {
   width: 100%;
@@ -97,4 +100,24 @@
 .action-btn.data-v-cc16e5a8:active {
   transform: translateY(2rpx);
   box-shadow: 0 4rpx 15rpx rgba(255, 65, 108, 0.4);
+}
+.cancel-btn.data-v-cc16e5a8 {
+  width: 100%;
+  height: 80rpx;
+  background: #fff;
+  color: #999;
+  border: 2rpx solid #e5e5e5;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.cancel-btn.data-v-cc16e5a8:active {
+  transform: translateY(2rpx);
+  background: #f8f8f8;
+  border-color: #ddd;
+  color: #666;
 }

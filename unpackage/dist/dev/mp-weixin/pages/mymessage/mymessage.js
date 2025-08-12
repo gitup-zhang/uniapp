@@ -2,6 +2,7 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const store_Info = require("../../store/Info.js");
+const newApis_events = require("../../new-apis/events.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
@@ -41,15 +42,15 @@ const _sfc_main = {
     const isValidPhone = common_vendor.computed(() => {
       return /^1[3-9]\d{9}$/.test(smsForm.phone);
     });
-    const myActivityData = common_vendor.ref({
-      title: "AI前沿研讨会",
-      location: "北京中关村科技园",
-      date: "8月10日-8月12日",
-      checkText: "查看须知",
-      joinText: "加入群聊",
-      statusText: "点击签到"
+    const myActivityData = common_vendor.ref(null);
+    const hasActivities = common_vendor.computed(() => {
+      return myActivityData.value && Object.keys(myActivityData.value).length > 0;
     });
     common_vendor.onMounted(() => {
+      initPage();
+    });
+    common_vendor.onShow(async () => {
+      console.log("已加载");
       initPage();
     });
     const initPage = async () => {
@@ -64,8 +65,19 @@ const _sfc_main = {
     const refreshUserData = async () => {
       try {
         await userInfo.getinfo();
+        await userInfo.userapply();
+        await loadUserActivities();
       } catch (error) {
         console.error("获取用户信息失败:", error);
+      }
+    };
+    const loadUserActivities = async () => {
+      var _a;
+      try {
+        myActivityData.value = ((_a = userInfo.applyactivity) == null ? void 0 : _a.length) > 0 ? userInfo.applyactivity[0] : null;
+      } catch (error) {
+        console.error("获取活动数据失败:", error);
+        myActivityData.value = null;
       }
     };
     const formatPhoneNumber = (phone) => {
@@ -294,50 +306,61 @@ const _sfc_main = {
         url: "/pages/agreement/privacy"
       });
     };
-    const showLoading = (text = "加载中...") => {
-      var _a;
-      loadingText.value.more = text;
-      (_a = loadingPopup.value) == null ? void 0 : _a.open();
-    };
-    const hideLoading = () => {
-      var _a;
-      (_a = loadingPopup.value) == null ? void 0 : _a.close();
-    };
-    const onCheck = (data) => {
-      console.log("查看活动:", data);
-      common_vendor.index.navigateTo({
-        url: "/pages/activity/detail?id=" + data.id
+    const discoverActivities = () => {
+      common_vendor.index.switchTab({
+        url: "../news/news"
       });
     };
-    const onJoin = (data) => {
-      console.log("加入群聊:", data);
-      common_vendor.index.showToast({
-        title: "已加入群聊",
-        icon: "success"
-      });
-    };
-    const onStatus = async (data) => {
-      console.log("状态操作:", data);
+    const refreshActivities = async () => {
       try {
-        showLoading("正在签到...");
-        await performCheckin(data);
+        initPage();
         common_vendor.index.showToast({
-          title: "签到成功",
+          title: "刷新完成",
           icon: "success"
         });
       } catch (error) {
+        console.error("刷新活动失败:", error);
         common_vendor.index.showToast({
-          title: "签到失败",
+          title: "刷新失败",
           icon: "error"
         });
       } finally {
         hideLoading();
       }
     };
-    const performCheckin = async (data) => {
-      return new Promise((resolve) => {
-        setTimeout(resolve, 1500);
+    const hideLoading = () => {
+      var _a;
+      (_a = loadingPopup.value) == null ? void 0 : _a.close();
+    };
+    const onAction = (data) => {
+      console.log("活动操作:", data);
+    };
+    const onCancel = async (data) => {
+      common_vendor.index.showModal({
+        title: "确认取消",
+        content: `确定要取消报名"${data.title}"吗？`,
+        success: (res) => {
+          if (res.confirm) {
+            cancelSignUp(data);
+          }
+        }
       });
+    };
+    const cancelSignUp = async (activityData) => {
+      try {
+        await newApis_events.cancelapply(activityData.id);
+        initPage();
+        common_vendor.index.showToast({
+          title: "取消报名成功",
+          icon: "success"
+        });
+      } catch (error) {
+        console.error("取消报名失败:", error);
+        common_vendor.index.showToast({
+          title: "取消失败",
+          icon: "error"
+        });
+      }
     };
     const viewAllActivities = () => {
       common_vendor.index.navigateTo({
@@ -475,7 +498,7 @@ const _sfc_main = {
       }) : {}, {
         am: common_vendor.o(showUserAgreement),
         an: common_vendor.o(showPrivacyPolicy)
-      }) : {
+      }) : common_vendor.e({
         ao: common_vendor.unref(userInfo).info.avatar_url || "/static/icon/empty.png",
         ap: common_vendor.t(common_vendor.unref(userInfo).info.nickname || "用户"),
         aq: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
@@ -489,27 +512,44 @@ const _sfc_main = {
         av: common_vendor.t(common_vendor.unref(userInfo).info.newsViews || 0),
         aw: common_vendor.t(common_vendor.unref(userInfo).info.policyViews || 0),
         ax: common_vendor.t(common_vendor.unref(userInfo).info.field || 3),
-        ay: common_vendor.p({
+        ay: hasActivities.value
+      }, hasActivities.value ? {
+        az: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        az: common_vendor.o(viewAllActivities),
-        aA: common_vendor.o(onCheck),
-        aB: common_vendor.o(onJoin),
-        aC: common_vendor.o(onStatus),
-        aD: common_vendor.p({
+        aA: common_vendor.o(viewAllActivities)
+      } : {}, {
+        aB: hasActivities.value
+      }, hasActivities.value ? {
+        aC: common_vendor.o(onAction),
+        aD: common_vendor.o(onCancel),
+        aE: common_vendor.p({
           activityData: myActivityData.value
         })
-      }, {
-        aE: common_vendor.p({
+      } : {
+        aF: common_vendor.p({
+          type: "search",
+          size: "16",
+          color: "#fff"
+        }),
+        aG: common_vendor.o(discoverActivities),
+        aH: common_vendor.p({
+          type: "refresh",
+          size: "16",
+          color: "#667eea"
+        }),
+        aI: common_vendor.o(refreshActivities)
+      }), {
+        aJ: common_vendor.p({
           status: "loading",
           ["content-text"]: loadingText.value
         }),
-        aF: common_vendor.sr(loadingPopup, "a5a8e0a1-12", {
+        aK: common_vendor.sr(loadingPopup, "a5a8e0a1-14", {
           "k": "loadingPopup"
         }),
-        aG: common_vendor.p({
+        aL: common_vendor.p({
           type: "center"
         })
       });

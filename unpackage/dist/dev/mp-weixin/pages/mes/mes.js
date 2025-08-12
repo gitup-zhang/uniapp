@@ -1,11 +1,10 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const store_Info = require("../../store/Info.js");
-if (!Array) {
-  const _component_recycle_item = common_vendor.resolveComponent("recycle-item");
-  const _component_recycle_view = common_vendor.resolveComponent("recycle-view");
-  (_component_recycle_item + _component_recycle_view)();
+if (!Math) {
+  MessageCard();
 }
+const MessageCard = () => "../../components/MessageCard/MessageCard.js";
 const _sfc_main = {
   __name: "mes",
   setup(__props) {
@@ -71,7 +70,7 @@ const _sfc_main = {
       {
         id: 6,
         type: "group",
-        title: "前端开发技术分享会报名开始报名开始宿舍还是",
+        title: "前端开发技术分享会报名开始",
         brief: "本次分享会将围绕Vue3最新特性、性能优化技巧以及实战案例进行深入讲解，适合有一定基础的前端开发者参与...",
         avatar: "/static/group1.png",
         groupName: "技术交流",
@@ -95,7 +94,7 @@ const _sfc_main = {
       {
         id: 8,
         type: "group",
-        title: "新项目技术方案讨论会议通知新建西安报名手速还使其Iis",
+        title: "新项目技术方案讨论会议通知",
         brief: "关于下一个项目的技术栈选择和架构设计，将在明天上午10点召开讨论会议，请相关同事准时参加...",
         avatar: "/static/group3.png",
         groupName: "工作协作",
@@ -156,25 +155,17 @@ const _sfc_main = {
         });
       }
     };
-    const messageItemClass = (msg) => {
-      const classes = [];
-      if (msg.type === "system")
-        classes.push("system-message");
-      if (msg.type === "group")
-        classes.push("group-message");
-      if (!msg.isRead)
-        classes.push("unread");
-      return classes.join(" ");
-    };
     const switchTab = (tab) => {
       activeTab.value = tab;
     };
-    const handleMessageTap = (msg, index) => {
+    const handleMessageTap = (msg) => {
       if (!isLoggedIn.value)
         return;
       if (!msg.isRead) {
         const messageIndex = messages.value.findIndex((m) => m.id === msg.id);
-        messages.value[messageIndex].isRead = true;
+        if (messageIndex !== -1) {
+          messages.value[messageIndex].isRead = true;
+        }
       }
       if (msg.type === "system") {
         common_vendor.index.navigateTo({
@@ -186,42 +177,13 @@ const _sfc_main = {
         });
       }
     };
-    const toggleRead = (msg, index) => {
+    const toggleRead = (msg) => {
       if (!isLoggedIn.value)
         return;
       const messageIndex = messages.value.findIndex((m) => m.id === msg.id);
-      messages.value[messageIndex].isRead = !msg.isRead;
-    };
-    const timeCache = /* @__PURE__ */ new Map();
-    const formatTime = (time) => {
-      if (timeCache.has(time)) {
-        return timeCache.get(time);
+      if (messageIndex !== -1) {
+        messages.value[messageIndex].isRead = !msg.isRead;
       }
-      const now = /* @__PURE__ */ new Date();
-      const msgTime = new Date(time);
-      const diff = now - msgTime;
-      const days = Math.floor(diff / (1e3 * 60 * 60 * 24));
-      let result;
-      if (days === 0) {
-        const hours = Math.floor(diff / (1e3 * 60 * 60));
-        if (hours === 0) {
-          const minutes = Math.floor(diff / (1e3 * 60));
-          result = minutes <= 0 ? "刚刚" : `${minutes}分钟前`;
-        } else {
-          result = `${hours}小时前`;
-        }
-      } else if (days === 1) {
-        result = "昨天";
-      } else if (days <= 7) {
-        result = `${days}天前`;
-      } else {
-        result = time.split(" ")[0];
-      }
-      timeCache.set(time, result);
-      return result;
-    };
-    const handleAvatarError = () => {
-      console.log("头像加载失败");
     };
     const getEmptyTitle = () => {
       const titles = {
@@ -286,49 +248,23 @@ const _sfc_main = {
         q: common_vendor.o(markAllAsRead)
       } : {}, {
         r: statusBarHeight.value + 44 + "px",
-        s: common_vendor.f(filteredMessages.value, (msg, index, i0) => {
-          return common_vendor.e({
-            a: common_vendor.n(msg.type),
-            b: msg.type === "group"
-          }, msg.type === "group" ? {
-            c: msg.avatar,
-            d: common_vendor.o(handleAvatarError, `msg-${msg.id}`)
-          } : {}, {
-            e: !msg.isRead
-          }, !msg.isRead ? {} : {}, {
-            f: common_vendor.t(msg.title),
-            g: msg.priority === "high"
-          }, msg.priority === "high" ? {} : {}, {
-            h: common_vendor.t(msg.brief),
-            i: common_vendor.t(formatTime(msg.time)),
-            j: msg.type === "group"
-          }, msg.type === "group" ? {
-            k: common_vendor.t(msg.memberCount)
-          } : {}, {
-            l: msg.type === "system"
-          }, msg.type === "system" ? {} : {
-            m: common_vendor.t(msg.groupName)
-          }, {
-            n: common_vendor.t(msg.isRead ? "📖" : "👁️"),
-            o: common_vendor.o(($event) => toggleRead(msg), `msg-${msg.id}`),
-            p: common_vendor.n(messageItemClass(msg)),
-            q: common_vendor.o(($event) => handleMessageTap(msg), `msg-${msg.id}`),
-            r: `msg-${msg.id}`,
-            s: "bb2249ad-1-" + i0 + ",bb2249ad-0"
-          });
+        s: common_vendor.f(filteredMessages.value, (msg, k0, i0) => {
+          return {
+            a: `msg-${msg.id}`,
+            b: common_vendor.o(handleMessageTap, `msg-${msg.id}`),
+            c: common_vendor.o(toggleRead, `msg-${msg.id}`),
+            d: "bb2249ad-0-" + i0,
+            e: common_vendor.p({
+              message: msg
+            })
+          };
         }),
         t: filteredMessages.value.length === 0
       }, filteredMessages.value.length === 0 ? {
         v: common_vendor.t(getEmptyTitle()),
         w: common_vendor.t(getEmptyDesc())
       } : {}, {
-        x: statusBarHeight.value + 44 + 68 + "px",
-        y: common_vendor.p({
-          ["enable-back-to-top"]: true,
-          bounces: false,
-          batch: "8",
-          cache: "4"
-        })
+        x: statusBarHeight.value + 44 + 68 + "px"
       }));
     };
   }

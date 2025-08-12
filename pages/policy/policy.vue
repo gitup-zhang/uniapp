@@ -178,7 +178,7 @@ const currentDropdown = ref(null)
 const isselected=ref(0)
 
 // 初始值设为"全部"
-const selectedDomain = ref({ field_id: 0, field_name: '全部' })
+const selectedDomain = ref({ field_id: 0,field_code: "", field_name: '全部' })
 const selectedTime = ref('发布时间')
 
 // 时间列表
@@ -186,7 +186,8 @@ const timeList = ['全部', '最近一周', '最近一月', '最近一年']
 
 // 定义参数查询的结构体
 const Params = { 
-  field_id: 0,
+  // field_id: 0,
+  field_type: "",
   page: 0,
   is_selection: 0,
   article_title: "",
@@ -238,14 +239,18 @@ function toggleDropdown(type) {
 function selectOption(type, value) {
   if (type === 'domain') {
     if (value === null) {
-      selectedDomain.value = { field_id: 0, field_name: '全部' }
+      selectedDomain.value = { field_id: 0,field_code: "", field_name: '全部' }
 	  Params.page=1
-	  Params.field_id=selectedDomain.value.field_id
+	  // Params.field_id=selectedDomain.value.field_id
+	  Params.field_type=selectedDomain.value.field_code
       listarticles.getlistpolicy(Params)
     } else {
+		console.log("value值：",value)
       selectedDomain.value = value
 	  Params.page=1
-	  Params.field_id=selectedDomain.value.field_id
+	  // Params.field_id=selectedDomain.value.field_id
+	  Params.field_type=selectedDomain.value.field_code
+	  console.log("params:",Params)
       listarticles.getlistpolicy(Params)
     }
   }

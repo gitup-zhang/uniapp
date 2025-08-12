@@ -173,7 +173,7 @@
       </view>
     </view>
 
-    <!-- 已登录状态 - 保持原有样式 -->
+    <!-- 已登录状态 -->
     <view v-else class="main-container">
       <!-- 简洁的头部区域 -->
       <view class="header">
@@ -194,7 +194,6 @@
             <view class="user-details">
               <text class="user-name">{{ userInfo.info.nickname || '用户' }}</text>
               <text class="user-phone">{{ formatPhoneNumber(userInfo.info.phone) }}</text>
-              <!-- <text class="user-signature">{{ userInfo.info.slogan || '点击设置个人签名' }}</text> -->
             </view>
             
             <view class="profile-enter">
@@ -220,7 +219,6 @@
             </view>
            <view class="stats-info">
               <text class="stats-title">我的数据统计</text>
-              <!-- <text class="stats-subtitle">累计在线 {{ userInfo.info.daysOnline || 0 }} 天</text> -->
             </view>
           </view>
           
@@ -228,10 +226,6 @@
             <view class="stat-item">
               <text class="stat-number">{{ userInfo.info.newsViews || 0 }}</text>
               <text class="stat-label">新闻阅读</text>
-<!--              <view class="stat-trend">
-                <uni-icons type="up" size="12" color="#2ed573"/>
-                <text class="trend-value">+12</text>
-              </view> -->
             </view>
             
             <view class="stat-divider"></view>
@@ -239,10 +233,6 @@
             <view class="stat-item">
               <text class="stat-number">{{ userInfo.info.policyViews || 0 }}</text>
               <text class="stat-label">政策查看</text>
-             <!-- <view class="stat-trend">
-                <uni-icons type="up" size="12" color="#2ed573"/>
-                <text class="trend-value">+5</text>
-              </view> -->
             </view>
             
             <view class="stat-divider"></view>
@@ -250,30 +240,62 @@
             <view class="stat-item">
               <text class="stat-number">{{ userInfo.info.field || 3 }}</text>
               <text class="stat-label">关注领域</text>
-              <!-- <view class="stat-trend">
-                <uni-icons type="minus" size="12" color="#ffa726"/>
-                <text class="trend-value">0</text>
-              </view> -->
             </view>
           </view>
         </view>
 
-        <!-- 活动区域 -->
+        <!-- 活动区域 - 新增空状态处理 -->
         <view class="activity-section">
           <view class="section-header">
             <text class="section-title">我的活动</text>
-            <view class="section-more" @click="viewAllActivities">
+            <view class="section-more" @click="viewAllActivities" v-if="hasActivities">
               <text class="more-text">查看全部</text>
               <uni-icons type="right" size="14" color="#999"/>
             </view>
           </view>
           
-          <ActivityTicket 
-            :activityData="myActivityData" 
-            @check-activity="onCheck"
-            @join-group="onJoin"
-            @status-action="onStatus"
+          <!-- 有活动时显示活动卡片 -->
+          <ActivityTicket
+            v-if="hasActivities"
+            :activityData="myActivityData"
+            @action="onAction"
+            @cancel="onCancel"
           />
+          
+          <!-- 没有活动时显示空状态 -->
+          <view v-else class="empty-activity">
+            <view class="empty-card">
+              <!-- 空状态图标 -->
+              <!-- <view class="empty-icon">
+                <image class="empty-image" src="/static/icon/empty-activity.png" mode="aspectFit"/>
+              </view> -->
+              
+              <!-- 空状态文案 -->
+              <view class="empty-content">
+                <text class="empty-title">暂无活动</text>
+                <text class="empty-desc">您还没有参加任何活动，快去发现精彩活动吧！</text>
+              </view>
+              
+              <!-- 操作按钮 -->
+              <view class="empty-actions">
+                <button class="discover-btn" @click="discoverActivities">
+                  <uni-icons type="search" size="16" color="#fff"/>
+                  <text>发现活动</text>
+                </button>
+                <button class="refresh-btn" @click="refreshActivities">
+                  <uni-icons type="refresh" size="16" color="#667eea"/>
+                  <text>刷新</text>
+                </button>
+              </view>
+              
+              <!-- 装饰元素 -->
+              <view class="empty-decoration">
+                <view class="deco-dot deco-1"></view>
+                <view class="deco-dot deco-2"></view>
+                <view class="deco-dot deco-3"></view>
+              </view>
+            </view>
+          </view>
         </view>
       </view>
     </view>
@@ -289,8 +311,10 @@
 
 <script setup>
 import { ref, computed, onMounted, reactive, watch } from 'vue'
+import { onLoad,onShow } from '@dcloudio/uni-app'
 import { useInfoStore } from '@/store/Info.js'
 import ActivityTicket from '../../components/ActivityTicket/ActivityTicket.vue'
+import {cancelapply} from '@/new-apis/events.js'
 
 // Store 和基础数据
 const userInfo = useInfoStore()
@@ -330,25 +354,27 @@ const isValidPhone = computed(() => {
   return /^1[3-9]\d{9}$/.test(smsForm.phone)
 })
 
-// 活动数据
-const myActivityData = ref({
-  title: 'AI前沿研讨会',
-  location: '北京中关村科技园',
-  date: '8月10日-8月12日',
-  checkText: '查看须知',
-  joinText: '加入群聊',
-  statusText: '点击签到'
+// 活动数据和状态
+const myActivityData = ref(null) // 改为 null 表示没有活动
+
+const hasActivities = computed(() => {
+  return myActivityData.value && Object.keys(myActivityData.value).length > 0
 })
+
+
 
 // 页面挂载
 onMounted(() => {
   initPage()
 })
+onShow(async()=>{
+	console.log("已加载")
+	initPage()
+})
 
 // 初始化页面
 const initPage = async () => {
   try {
-    // await userInfo.checkLoginStatus()
     if (userInfo.signal) {
       await refreshUserData()
     }
@@ -361,8 +387,28 @@ const initPage = async () => {
 const refreshUserData = async () => {
   try {
     await userInfo.getinfo()
+	await userInfo.userapply()
+    // 这里可以添加获取活动数据的逻辑
+    await loadUserActivities()
   } catch (error) {
     console.error('获取用户信息失败:', error)
+  }
+}
+
+// 加载用户活动数据
+const loadUserActivities = async () => {
+  try {
+    // 这里模拟从API获取活动数据
+    // const activities = await fetchUserActivities()
+    // myActivityData.value = userInfo.applyactivity.length > 0 ? userInfo.applyactivity[0] : null
+	myActivityData.value = (userInfo.applyactivity?.length > 0) 
+	  ? userInfo.applyactivity[0] 
+	  : null;
+
+    
+  } catch (error) {
+    console.error('获取活动数据失败:', error)
+    myActivityData.value = null
   }
 }
 
@@ -462,7 +508,6 @@ const clearCodeError = () => {
 
 // 账号密码登录
 const handleAccountLogin = async () => {
-  // 验证表单
   const isUsernameValid = validateUsername()
   const isPasswordValid = validatePassword()
   
@@ -473,7 +518,6 @@ const handleAccountLogin = async () => {
   try {
     isLogging.value = true
     
-    // 调用账号登录API
     const loginResult = await callAccountLoginAPI({
       username: accountForm.username,
       password: accountForm.password
@@ -500,16 +544,11 @@ const handleAccountLogin = async () => {
 
 // 发送短信验证码
 const sendSmsCode = async () => {
-  // 验证手机号
   if (!validatePhone()) {
     return
   }
 
   try {
-    // 调用发送短信API
-    // await callSendSmsAPI({ phone: smsForm.phone })
-    
-    // 开始倒计时
     smsCountdown.value = 60
     const timer = setInterval(() => {
       smsCountdown.value--
@@ -534,7 +573,6 @@ const sendSmsCode = async () => {
 
 // 短信验证码登录
 const handleSmsLogin = async () => {
-  // 验证表单
   const isPhoneValid = validatePhone()
   const isCodeValid = validateSmsCode()
   
@@ -545,7 +583,6 @@ const handleSmsLogin = async () => {
   try {
     isLogging.value = true
     
-    // 调用短信登录API
     const loginResult = await callSmsLoginAPI({
       phone: smsForm.phone,
       code: smsForm.code
@@ -569,72 +606,15 @@ const handleSmsLogin = async () => {
     isLogging.value = false
   }
 }
-const wechatlogin=async()=>{
-	
-	
-	try{
-		await userInfo.loginWithWeChat()
-		initPage()
-	}catch(e){
-		console.log(e)
-	}
-	
-	
+
+const wechatlogin = async () => {
+  try{
+    await userInfo.loginWithWeChat()
+    initPage()
+  } catch(e) {
+    console.log(e)
+  }
 }
-
-// 处理微信手机号授权
-// const handlePhoneAuth = async (e) => {
-	
-	
-// 	// 微信手机号授权逻辑
-//   // console.log('手机号授权回调:', e)
-  
-//   // if (e.detail.errMsg !== 'getPhoneNumber:ok') {
-//   //   uni.showToast({
-//   //     title: '授权失败，请重试',
-//   //     icon: 'error'
-//   //   })
-//   //   return
-//   // }
-
-//   try {
-//     isLogging.value = true
-    
-//     const loginRes = await uni.login({
-//       provider: 'weixin'
-//     })
-    
-//     if (loginRes[1].errMsg !== 'login:ok') {
-//       throw new Error('获取登录凭证失败')
-//     }
-// 	console.log(loginRes)
-
-//   //   const loginData = {
-//   //     code: loginRes[1].code,
-//   //     phoneCode: e.detail.code,
-//   //     encryptedData: e.detail.encryptedData,
-//   //     iv: e.detail.iv
-//   //   }
-
-//   //   const loginResult = await callWechatLoginAPI(loginData)
-//   //   await userInfo.saveLoginInfo(loginResult)
-//   //   await refreshUserData()
-    
-//     uni.showToast({
-//       title: '登录成功',
-//       icon: 'success'
-//     })
-
-//   } catch (error) {
-//     console.error('微信登录失败:', error)
-//     uni.showToast({
-//       title: '登录失败，请重试',
-//       icon: 'error'
-//     })
-//   } finally {
-//     isLogging.value = false
-//   }
-// }
 
 // 忘记密码
 const handleForgotPassword = () => {
@@ -704,26 +684,6 @@ const callSmsLoginAPI = async (data) => {
   })
 }
 
-const callWechatLoginAPI = async (data) => {
-  return new Promise((resolve, reject) => {
-    uni.request({
-      url: 'https://your-api-domain.com/api/wechat-login',
-      method: 'POST',
-      data,
-      success: (res) => {
-        if (res.data.success) {
-          resolve(res.data.data)
-        } else {
-          reject(new Error(res.data.message || '登录失败'))
-        }
-      },
-      fail: (error) => {
-        reject(error)
-      }
-    })
-  })
-}
-
 // 跳转到个人资料页面
 const goToProfile = () => {
   uni.navigateTo({
@@ -745,6 +705,33 @@ const showPrivacyPolicy = () => {
   })
 }
 
+// 空状态相关方法
+const discoverActivities = () => {
+ uni.switchTab({
+ 	url: '../news/news'
+ });
+}
+
+const refreshActivities = async () => {
+  try {
+    // showLoading('刷新中...')
+    initPage()
+    
+    uni.showToast({
+      title: '刷新完成',
+      icon: 'success'
+    })
+  } catch (error) {
+    console.error('刷新活动失败:', error)
+    uni.showToast({
+      title: '刷新失败',
+      icon: 'error'
+    })
+  } finally {
+    hideLoading()
+  }
+}
+
 // 显示加载提示
 const showLoading = (text = '加载中...') => {
   loadingText.value.more = text
@@ -757,47 +744,41 @@ const hideLoading = () => {
 }
 
 // 活动相关事件处理
-const onCheck = (data) => {
-  console.log('查看活动:', data)
-  uni.navigateTo({
-    url: '/pages/activity/detail?id=' + data.id
-  })
+const onAction = (data) => {
+  console.log('活动操作:', data)
 }
 
-const onJoin = (data) => {
-  console.log('加入群聊:', data)
-  uni.showToast({
-    title: '已加入群聊',
-    icon: 'success'
-  })
+const onCancel = async(data) => {
+	
+	uni.showModal({
+	  title: '确认取消',
+	  content: `确定要取消报名"${data.title}"吗？`,
+	  success: (res) => {
+	    if (res.confirm) {
+			cancelSignUp(data)
+	    }
+	  }
+	})
 }
-
-const onStatus = async (data) => {
-  console.log('状态操作:', data)
-  
+// 取消报名的具体实现
+const cancelSignUp = async (activityData) => {
   try {
-    showLoading('正在签到...')
-    await performCheckin(data)
+    await cancelapply(activityData.id)
+    initPage()
+    
     uni.showToast({
-      title: '签到成功',
+      title: '取消报名成功',
       icon: 'success'
     })
   } catch (error) {
+    console.error('取消报名失败:', error)
     uni.showToast({
-      title: '签到失败',
+      title: '取消失败',
       icon: 'error'
     })
-  } finally {
-    hideLoading()
   }
 }
 
-// 执行签到
-const performCheckin = async (data) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, 1500)
-  })
-}
 
 const viewAllActivities = () => {
   uni.navigateTo({
@@ -1317,6 +1298,148 @@ const viewAllActivities = () => {
   }
 }
 
+// 空状态样式
+.empty-activity {
+  .empty-card {
+    background: #fff;
+    border-radius: 24rpx;
+    padding: 60rpx 40rpx;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8rpx 32rpx rgba(255, 71, 87, 0.1);
+
+    .empty-icon {
+      margin-bottom: 32rpx;
+
+      .empty-image {
+        width: 200rpx;
+        height: 160rpx;
+        opacity: 0.8;
+      }
+    }
+
+    .empty-content {
+      margin-bottom: 40rpx;
+
+      .empty-title {
+        display: block;
+        font-size: 36rpx;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 16rpx;
+      }
+
+      .empty-desc {
+        display: block;
+        font-size: 28rpx;
+        color: #666;
+        line-height: 1.5;
+        max-width: 480rpx;
+        margin: 0 auto;
+      }
+    }
+
+    .empty-actions {
+      display: flex;
+      justify-content: center;
+      gap: 24rpx;
+
+      .discover-btn, .refresh-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24rpx 32rpx;
+        border-radius: 16rpx;
+        font-size: 28rpx;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s ease;
+
+        &::after {
+          border: none;
+        }
+
+        text {
+          margin-left: 8rpx;
+        }
+
+        &:active {
+          transform: scale(0.95);
+        }
+      }
+
+      .discover-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+      }
+
+      .refresh-btn {
+        background: #f8f9fa;
+        color: #667eea;
+        border: 2rpx solid #667eea;
+
+        &:active {
+          background: rgba(102, 126, 234, 0.1);
+        }
+      }
+    }
+
+    .empty-decoration {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+
+      .deco-dot {
+        position: absolute;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        animation: float 6s ease-in-out infinite;
+
+        &.deco-1 {
+          width: 80rpx;
+          height: 80rpx;
+          top: 40rpx;
+          right: 60rpx;
+          animation-delay: -2s;
+        }
+
+        &.deco-2 {
+          width: 60rpx;
+          height: 60rpx;
+          bottom: 80rpx;
+          left: 40rpx;
+          animation-delay: -4s;
+        }
+
+        &.deco-3 {
+          width: 40rpx;
+          height: 40rpx;
+          top: 50%;
+          left: 80rpx;
+          animation-delay: -1s;
+        }
+      }
+    }
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-20rpx) rotate(180deg);
+    opacity: 0.6;
+  }
+}
+
 // 加载提示样式
 .loading-container {
   background: rgba(0, 0, 0, 0.8);
@@ -1341,6 +1464,19 @@ const viewAllActivities = () => {
   
   .main-content {
     padding: 24rpx;
+  }
+
+  .empty-card {
+    padding: 40rpx 24rpx;
+
+    .empty-actions {
+      flex-direction: column;
+      gap: 16rpx;
+
+      .discover-btn, .refresh-btn {
+        width: 100%;
+      }
+    }
   }
 }
 
@@ -1368,6 +1504,24 @@ const viewAllActivities = () => {
   
   .section-title {
     color: #fff;
+  }
+
+  .empty-card {
+    background: #2d2d2d;
+
+    .empty-title {
+      color: #fff;
+    }
+
+    .empty-desc {
+      color: #ccc;
+    }
+
+    .refresh-btn {
+      background: #3d3d3d;
+      color: #667eea;
+      border-color: #667eea;
+    }
   }
 }
 </style>

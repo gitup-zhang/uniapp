@@ -19,12 +19,6 @@
         <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
         <view class="nav-content">
           <text class="nav-title">消息</text>
-          <!-- 可选：添加登出按钮 -->
-          <!-- <view class="nav-right">
-            <view class="logout-btn" @tap="handleLogout">
-              <text class="logout-text">登出</text>
-            </view>
-          </view> -->
         </view>
       </view>
       
@@ -37,7 +31,7 @@
             @tap="switchTab('all')"
           >
             全部
-             <view class="tab-badge" v-if="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</view>
+            <view class="tab-badge" v-if="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</view>
           </view>
           <view 
             class="filter-tab" 
@@ -45,7 +39,7 @@
             @tap="switchTab('system')"
           >
             系统消息
-              <view class="tab-badge" v-if="systemUnreadCount > 0">{{ systemUnreadCount }}</view>
+            <view class="tab-badge" v-if="systemUnreadCount > 0">{{ systemUnreadCount }}</view>
           </view>
           <view 
             class="filter-tab" 
@@ -53,7 +47,7 @@
             @tap="switchTab('group')"
           >
             群组消息
-             <view class="tab-badge" v-if="groupUnreadCount > 0">{{ groupUnreadCount }}</view>
+            <view class="tab-badge" v-if="groupUnreadCount > 0">{{ groupUnreadCount }}</view>
           </view>
         </view>
         
@@ -68,91 +62,39 @@
         </view>
       </view>
       
-      <!-- 消息列表 - 使用recycle-view优化长列表性能 -->
-      <recycle-view
+      <!-- 消息列表 - 使用新的MessageCard组件 -->
+      <scroll-view
         class="message-list"
         :style="{ marginTop: statusBarHeight + 44 + 68 + 'px' }"
-        :enable-back-to-top="true"
+        scroll-y="true"
+        enable-back-to-top="true"
         :bounces="false"
-        batch="8"
-        cache="4"
       >
-        <recycle-item 
-          v-for="(msg, index) in filteredMessages" 
-          :key="`msg-${msg.id}`"
-          class="message-item-wrapper"
-        >
-          <view 
-            class="message-item" 
-            :class="messageItemClass(msg)"
-            @tap="handleMessageTap(msg, index)"
-          >
-            <!-- 消息类型指示器 - 简化 -->
-            <view class="message-indicator">
-              <view class="indicator-dot" :class="msg.type"></view>
-            </view>
-            
-            <!-- 头像/图标 - 优化图片加载 -->
-            <view class="avatar-container">
-              <image 
-                v-if="msg.type === 'group'" 
-                :src="msg.avatar" 
-                class="avatar group-avatar"
-                mode="aspectFill"
-                :lazy-load="true"
-                :fade-show="false"
-                @error="handleAvatarError"
-              />
-              <view v-else class="system-icon">
-                <text class="icon">📢</text>
-              </view>
-              <!-- 简化未读小红点 -->
-              <view v-if="!msg.isRead" class="unread-badge"></view>
-            </view>
-            
-            <!-- 消息内容 - 优化布局 -->
-            <view class="msg-content">
-              <!-- 标题行 - 单独一行确保不被遮挡 -->
-              <view class="msg-title-row">
-                <text class="msg-title">{{ msg.title }}</text>
-                <view class="msg-priority" v-if="msg.priority === 'high'">
-                  
-                </view>
-              </view>
-              
-              <!-- 消息简介 -->
-              <text class="msg-brief">{{ msg.brief }}</text>
-              
-              <!-- 底部信息行 -->
-              <view class="msg-footer">
-                <view class="msg-meta">
-                  <text class="msg-time">{{ formatTime(msg.time) }}</text>
-                  <text v-if="msg.type === 'group'" class="member-count">{{ msg.memberCount }}人</text>
-                </view>
-                <view class="msg-source">
-                  <text v-if="msg.type === 'system'" class="tag system-tag">系统消息</text>
-                  <text v-else class="tag group-tag">{{ msg.groupName }}</text>
-                </view>
+        <view class="message-list-content">
+          <!-- 使用MessageCard组件 -->
+          <MessageCard
+            v-for="msg in filteredMessages"
+            :key="`msg-${msg.id}`"
+            :message="msg"
+            @tap="handleMessageTap"
+            @toggleRead="toggleRead"
+          />
+          
+          <!-- 空状态 -->
+          <view v-if="filteredMessages.length === 0" class="empty-state">
+            <view class="empty-animation">
+              <view class="empty-icon">💬</view>
+              <view class="empty-waves">
+                <view class="wave wave1"></view>
+                <view class="wave wave2"></view>
+                <view class="wave wave3"></view>
               </view>
             </view>
-            
-            <!-- 右侧操作 - 简化 -->
-            <view class="msg-actions">
-              <view class="action-btn" @tap.stop="toggleRead(msg, index)">
-                <text class="action-icon">{{ msg.isRead ? '📖' : '👁️' }}</text>
-              </view>
-              <text class="chevron-icon">›</text>
-            </view>
+            <text class="empty-title">{{ getEmptyTitle() }}</text>
+            <text class="empty-desc">{{ getEmptyDesc() }}</text>
           </view>
-        </recycle-item>
-        
-        <!-- 空状态 -->
-        <view v-if="filteredMessages.length === 0" class="empty">
-          <view class="empty-icon">💬</view>
-          <text class="empty-title">{{ getEmptyTitle() }}</text>
-          <text class="empty-desc">{{ getEmptyDesc() }}</text>
         </view>
-      </recycle-view>
+      </scroll-view>
     </view>
   </view>
 </template>
@@ -160,6 +102,8 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useInfoStore } from '@/store/Info.js' // 请根据你的实际路径调整
+
+import MessageCard  from '@/components/MessageCard/MessageCard.vue' // 引入消息卡片组件
 
 // 获取用户状态管理
 const userStore = useInfoStore()
@@ -229,7 +173,7 @@ const messages = ref([
   {
     id: 6,
     type: 'group',
-    title: '前端开发技术分享会报名开始报名开始宿舍还是',
+    title: '前端开发技术分享会报名开始',
     brief: '本次分享会将围绕Vue3最新特性、性能优化技巧以及实战案例进行深入讲解，适合有一定基础的前端开发者参与...',
     avatar: '/static/group1.png',
     groupName: '技术交流',
@@ -253,7 +197,7 @@ const messages = ref([
   {
     id: 8,
     type: 'group',
-    title: '新项目技术方案讨论会议通知新建西安报名手速还使其Iis',
+    title: '新项目技术方案讨论会议通知',
     brief: '关于下一个项目的技术栈选择和架构设计，将在明天上午10点召开讨论会议，请相关同事准时参加...',
     avatar: '/static/group3.png',
     groupName: '工作协作',
@@ -292,54 +236,44 @@ const groupUnreadCount = computed(() => {
 onMounted(() => {
   const sysInfo = uni.getSystemInfoSync()
   statusBarHeight.value = sysInfo.statusBarHeight
-  
-  // 检查登录状态，如果未登录可以选择自动跳转到登录页
-  // if (!isLoggedIn.value) {
-  //   console.log('用户未登录，显示登录提示')
-  // }
 })
 
 // 监听登录状态变化
 watch(isLoggedIn, (newVal) => {
   if (newVal) {
     console.log('用户已登录，加载消息数据')
-    // 这里可以调用API获取用户的消息数据
     loadUserMessages()
   } else {
     console.log('用户已登出，清空消息数据')
-    // 可以选择清空敏感数据
   }
 })
 
 // 登录相关方法
 const goToLogin = () => {
   uni.switchTab({
-  	url: '../mymessage/mymessage'
+    url: '../mymessage/mymessage'
   });
 }
 
-const handleLogout = () => {
-  uni.showModal({
-    title: '确认登出',
-    content: '确定要退出登录吗？',
-    success: (res) => {
-      if (res.confirm) {
-        userStore.logout() // 假设你的store有logout方法
-        uni.showToast({
-          title: '已退出登录',
-          icon: 'success'
-        })
-      }
-    }
-  })
-}
+// const handleLogout = () => {
+//   uni.showModal({
+//     title: '确认登出',
+//     content: '确定要退出登录吗？',
+//     success: (res) => {
+//       if (res.confirm) {
+//         userStore.logout()
+//         uni.showToast({
+//           title: '已退出登录',
+//           icon: 'success'
+//         })
+//       }
+//     }
+//   })
+// }
 
 // 加载用户消息数据的方法
 const loadUserMessages = async () => {
   try {
-    // 这里应该调用实际的API获取用户消息
-    // const response = await api.getUserMessages()
-    // messages.value = response.data
     console.log('加载用户消息数据')
   } catch (error) {
     console.error('加载消息失败:', error)
@@ -350,26 +284,20 @@ const loadUserMessages = async () => {
   }
 }
 
-// 原有方法保持不变
-const messageItemClass = (msg) => {
-  const classes = []
-  if (msg.type === 'system') classes.push('system-message')
-  if (msg.type === 'group') classes.push('group-message')
-  if (!msg.isRead) classes.push('unread')
-  return classes.join(' ')
-}
-
 const switchTab = (tab) => {
   activeTab.value = tab
 }
 
-const handleMessageTap = (msg, index) => {
+// 处理消息卡片点击事件
+const handleMessageTap = (msg) => {
   if (!isLoggedIn.value) return
   
   // 标记为已读
   if (!msg.isRead) {
     const messageIndex = messages.value.findIndex(m => m.id === msg.id)
-    messages.value[messageIndex].isRead = true
+    if (messageIndex !== -1) {
+      messages.value[messageIndex].isRead = true
+    }
   }
   
   // 跳转到详情页面
@@ -384,48 +312,14 @@ const handleMessageTap = (msg, index) => {
   }
 }
 
-const toggleRead = (msg, index) => {
+// 切换已读状态
+const toggleRead = (msg) => {
   if (!isLoggedIn.value) return
   
   const messageIndex = messages.value.findIndex(m => m.id === msg.id)
-  messages.value[messageIndex].isRead = !msg.isRead
-}
-
-// 优化时间格式化 - 缓存结果
-const timeCache = new Map()
-const formatTime = (time) => {
-  if (timeCache.has(time)) {
-    return timeCache.get(time)
+  if (messageIndex !== -1) {
+    messages.value[messageIndex].isRead = !msg.isRead
   }
-  
-  const now = new Date()
-  const msgTime = new Date(time)
-  const diff = now - msgTime
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  
-  let result
-  if (days === 0) {
-    const hours = Math.floor(diff / (1000 * 60 * 60))
-    if (hours === 0) {
-      const minutes = Math.floor(diff / (1000 * 60))
-      result = minutes <= 0 ? '刚刚' : `${minutes}分钟前`
-    } else {
-      result = `${hours}小时前`
-    }
-  } else if (days === 1) {
-    result = '昨天'
-  } else if (days <= 7) {
-    result = `${days}天前`
-  } else {
-    result = time.split(' ')[0]
-  }
-  
-  timeCache.set(time, result)
-  return result
-}
-
-const handleAvatarError = () => {
-  console.log('头像加载失败')
 }
 
 const getEmptyTitle = () => {
@@ -462,7 +356,6 @@ const markAllAsRead = () => {
     }
   })
   
-  // 显示成功提示
   uni.showToast({
     title: `已标记${unreadMessages.length || '所有'}条消息为已读`,
     icon: 'success',
@@ -476,7 +369,7 @@ const markAllAsRead = () => {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f5f6fa;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 /* 登录提示样式 */
@@ -485,58 +378,65 @@ const markAllAsRead = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40rpx;
+  padding: 80rpx;
   background: linear-gradient(135deg, #ff4757 0%, #ff6b7a 100%);
 }
 
 .login-card {
   background: white;
-  border-radius: 24rpx;
-  padding: 60rpx 40rpx;
+  border-radius: 32rpx;
+  padding: 80rpx 60rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.1);
+  box-shadow: 0 32rpx 80rpx rgba(0, 0, 0, 0.15);
   width: 100%;
-  max-width: 600rpx;
+  max-width: 640rpx;
+  backdrop-filter: blur(20rpx);
 }
 
 .login-icon {
-  font-size: 80rpx;
-  margin-bottom: 20rpx;
+  font-size: 120rpx;
+  margin-bottom: 32rpx;
   opacity: 0.8;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10rpx); }
 }
 
 .login-title {
-  font-size: 36rpx;
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 16rpx;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 20rpx;
 }
 
 .login-desc {
   font-size: 28rpx;
   color: #718096;
-  margin-bottom: 40rpx;
-  line-height: 1.5;
+  margin-bottom: 60rpx;
+  line-height: 1.6;
 }
 
 .login-btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 50rpx;
-  padding: 24rpx 60rpx;
+  border-radius: 60rpx;
+  padding: 32rpx 80rpx;
   font-size: 32rpx;
   font-weight: 600;
-  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.3);
+  box-shadow: 0 16rpx 40rpx rgba(102, 126, 234, 0.3);
   transition: all 0.3s ease;
 }
 
 .login-btn:active {
-  transform: translateY(2rpx);
-  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.4);
+  transform: translateY(4rpx);
+  box-shadow: 0 8rpx 20rpx rgba(102, 126, 234, 0.4);
 }
 
 .login-btn-text {
@@ -548,17 +448,19 @@ const markAllAsRead = () => {
   flex: 1;
   display: flex;
   flex-direction: column;
+  background: #f8fafc;
 }
 
 /* 自定义导航栏 */
 .custom-navbar {
-  background-color: #ff4757;
+  background: linear-gradient(135deg, #ff4757 0%, #ff6b7a 100%);
   color: white;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 999;
+  box-shadow: 0 4rpx 20rpx rgba(102, 126, 234, 0.3);
 }
 
 .status-bar {
@@ -569,462 +471,178 @@ const markAllAsRead = () => {
   height: 44px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
+  justify-content: center;
+  padding: 0 32rpx;
 }
 
 .nav-title {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 36rpx;
+  font-weight: 700;
+  letter-spacing: 1rpx;
 }
 
-.nav-right {
-  display: flex;
-  align-items: center;
-}
-
-.logout-btn {
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.logout-text {
-  color: white;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* 固定筛选标签 - 重新布局 */
+/* 固定筛选标签 */
 .filter-tabs-fixed {
   position: fixed;
   left: 0;
   width: 100%;
   z-index: 998;
-  background: #f5f6fa;
-  padding: 12px 16px;
+  background: #f8fafc;
+  padding: 24rpx 32rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 2rpx solid rgba(0,0,0,0.05);
+  backdrop-filter: blur(20rpx);
 }
 
 .tabs-container {
   display: flex;
-  gap: 8px;
+  gap: 16rpx;
 }
 
 .filter-tab {
-  padding: 8px 16px;
+  padding: 16rpx 32rpx;
   background: white;
-  border-radius: 20px;
-  font-size: 14px;
-  color: #666;
-  border: 2px solid transparent;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 32rpx;
+  font-size: 28rpx;
+  color: #4a5568;
+  border: 3rpx solid transparent;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.08);
   position: relative;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .filter-tab.active {
-  background: #903749;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  box-shadow: 0 4px 12px rgba(144, 55, 73, 0.3);
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.4);
+  transform: translateY(-2rpx);
 }
 
 .tab-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #ff4757;
+  top: -12rpx;
+  right: -12rpx;
+  background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%);
   color: white;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 10px;
-  min-width: 16px;
-  height: 16px;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  min-width: 32rpx;
+  height: 32rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  border: 2px solid white;
+  font-weight: 700;
+  border: 4rpx solid white;
+  box-shadow: 0 4rpx 12rpx rgba(255, 71, 87, 0.4);
 }
 
 /* 一键已读按钮 */
 .mark-all-read-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 8px 12px;
+  gap: 8rpx;
+  padding: 16rpx 24rpx;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  border-radius: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(16, 185, 129, 0.3);
   color: white;
-  font-size: 13px;
+  font-size: 26rpx;
   font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .mark-all-read-btn:active {
   transform: scale(0.95);
-  box-shadow: 0 1px 4px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 2rpx 8rpx rgba(16, 185, 129, 0.4);
 }
 
 .mark-all-icon {
-  font-size: 14px;
+  font-size: 28rpx;
   font-weight: bold;
 }
 
 .mark-all-text {
-  font-size: 12px;
+  font-size: 24rpx;
 }
 
-/* 消息列表 - 使用recycle-view优化 */
+/* 消息列表 */
 .message-list {
   flex: 1;
-  background: #f5f6fa;
-  padding: 0 16px;
-  padding-bottom: 20px;
+  background: #f8fafc;
 }
 
-.message-item-wrapper {
-  margin-bottom: 12px;
+.message-list-content {
+  padding: 32rpx;
+  padding-bottom: 40rpx;
 }
 
-/* 消息项 - 现代卡片设计 */
-.message-item {
-  background: white;
-  border-radius: 16px;
-  padding: 18px;
+/* 空状态样式 */
+.empty-state {
   display: flex;
-  align-items: flex-start;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-  border: 1px solid #f0f2f5;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 40rpx;
+  text-align: center;
+}
+
+.empty-animation {
   position: relative;
-  overflow: hidden;
+  margin-bottom: 40rpx;
 }
 
-.message-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: linear-gradient(180deg, #e9ecef 0%, #dee2e6 100%);
+.empty-icon {
+  font-size: 120rpx;
+  opacity: 0.3;
+  animation: float 3s ease-in-out infinite;
 }
 
-.message-item.system-message {
-  background: linear-gradient(135deg, rgba(255, 107, 107, 0.03) 0%, rgba(238, 90, 36, 0.02) 100%);
-  border-color: rgba(255, 107, 107, 0.08);
-}
-
-.message-item.system-message::before {
-  background: linear-gradient(180deg, #ff6b6b 0%, #ee5a24 100%);
-  box-shadow: 0 0 8px rgba(255, 107, 107, 0.3);
-}
-
-.message-item.group-message {
-  background: linear-gradient(135deg, rgba(72, 52, 212, 0.03) 0%, rgba(102, 126, 234, 0.02) 100%);
-  border-color: rgba(72, 52, 212, 0.08);
-}
-
-.message-item.group-message::before {
-  background: linear-gradient(180deg, #4834d4 0%, #667eea 100%);
-  box-shadow: 0 0 8px rgba(72, 52, 212, 0.3);
-}
-
-.message-item.unread {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(34, 197, 94, 0.02) 100%);
-  border-color: rgba(16, 185, 129, 0.12);
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.08);
-}
-
-.message-item.unread::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 0;
-  height: 0;
-  border-left: 20px solid transparent;
-  border-top: 20px solid #10b981;
-  opacity: 0.1;
-}
-
-/* 消息指示器 - 现代化设计 */
-.message-indicator {
-  margin-right: 14px;
-  padding-top: 6px;
-}
-
-.indicator-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #e9ecef;
-  position: relative;
-}
-
-.indicator-dot::after {
-  content: '';
+.empty-waves {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: white;
+  width: 200rpx;
+  height: 200rpx;
 }
 
-.indicator-dot.system {
-  background: linear-gradient(45deg, #ff6b6b 0%, #ee5a24 100%);
-  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
-}
-
-.indicator-dot.group {
-  background: linear-gradient(45deg, #4834d4 0%, #667eea 100%);
-  box-shadow: 0 2px 8px rgba(72, 52, 212, 0.3);
-}
-
-/* 头像容器 - 优化设计 */
-.avatar-container {
-  position: relative;
-  margin-right: 14px;
-}
-
-.avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  border: 2px solid #f8f9fa;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.group-avatar {
-  border-color: rgba(72, 52, 212, 0.15);
-}
-
-.system-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.25);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-.system-icon .icon {
-  font-size: 20px;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-}
-
-/* 显眼的未读小红点 */
-.unread-badge {
+.wave {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 16px;
-  height: 16px;
-  background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%);
+  border: 4rpx solid rgba(102, 126, 234, 0.1);
   border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
+  width: 100%;
+  height: 100%;
+  animation: wave-pulse 2s ease-out infinite;
 }
 
-.unread-badge::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
+.wave1 { animation-delay: 0s; }
+.wave2 { animation-delay: 0.5s; }
+.wave3 { animation-delay: 1s; }
 
-@keyframes pulse {
+@keyframes wave-pulse {
   0% {
-    transform: scale(1);
+    transform: scale(0.8);
     opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.7;
   }
   100% {
-    transform: scale(1);
-    opacity: 1;
+    transform: scale(1.4);
+    opacity: 0;
   }
-}
-
-/* 消息内容 - 重新布局 */
-.msg-content {
-  flex: 1;
-  min-width: 0;
-}
-
-/* 标题行 - 独立一行 */
-.msg-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-  gap: 12px;
-}
-
-.msg-title {
-  font-weight: 600;
-  font-size: 16px;
-  color: #1a202c;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  line-height: 1.3;
-}
-
-.msg-priority {
-  flex-shrink: 0;
-}
-
-.msg-brief {
-  color: #4a5568;
-  font-size: 14px;
-  line-height: 1.4;
-  margin-bottom: 8px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* 底部信息行 */
-.msg-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.msg-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-}
-
-.msg-time {
-  color: #718096;
-  font-weight: 500;
-}
-
-.member-count {
-  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-  color: #4a5568;
-  padding: 2px 8px;
-  border-radius: 8px;
-  font-weight: 500;
-  border: 1px solid #e2e8f0;
-}
-
-.msg-source {
-  flex-shrink: 0;
-}
-
-.tag {
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 12px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  line-height: 1;
-}
-
-.system-tag {
-  background: linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(238, 90, 36, 0.1) 100%);
-  color: #dc2626;
-  border: 1px solid rgba(255, 107, 107, 0.2);
-}
-
-.group-tag {
-  background: linear-gradient(135deg, rgba(72, 52, 212, 0.15) 0%, rgba(102, 126, 234, 0.1) 100%);
-  color: #4338ca;
-  border: 1px solid rgba(72, 52, 212, 0.2);
-}
-
-.priority-tag {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%);
-  color: #d97706;
-  border: 1px solid rgba(245, 158, 11, 0.2);
-}
-
-/* 右侧操作 - 现代化操作区 */
-.msg-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: 12px;
-}
-
-.action-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.action-btn:active {
-  transform: scale(0.95);
-  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
-}
-
-.action-icon {
-  font-size: 14px;
-}
-
-.chevron-icon {
-  font-size: 20px;
-  color: #a0aec0;
-  font-weight: bold;
-  opacity: 0.6;
-}
-
-/* 空状态 */
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 60px 20px;
-  text-align: center;
-}
-
-.empty-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
-  opacity: 0.3;
 }
 
 .empty-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: #495057;
-  margin-bottom: 6px;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #4a5568;
+  margin-bottom: 16rpx;
 }
 
 .empty-desc {
-  font-size: 13px;
-  color: #adb5bd;
+  font-size: 26rpx;
+  color: #9ca3af;
+  line-height: 1.5;
 }
 </style>
