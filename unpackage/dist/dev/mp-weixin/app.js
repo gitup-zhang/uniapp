@@ -17,6 +17,8 @@ if (!Math) {
   "./pages/detail/profile.js";
   "./pages/detail/activityjoined.js";
   "./pages/detail/noticedetail.js";
+  "./pages/detail/ChatGroup.js";
+  "./pages/detail/ChatSystem.js";
 }
 const _sfc_main = {
   __name: "App",

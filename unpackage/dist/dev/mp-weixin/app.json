@@ -13,7 +13,9 @@
     "pages/detail/activityhistorymore",
     "pages/detail/profile",
     "pages/detail/activityjoined",
-    "pages/detail/noticedetail"
+    "pages/detail/noticedetail",
+    "pages/detail/ChatGroup",
+    "pages/detail/ChatSystem"
   ],
   "window": {
     "navigationBarTextStyle": "white",

@@ -15,160 +15,85 @@ const _sfc_main = {
     const activeTab = common_vendor.ref("all");
     const isLoading = common_vendor.ref(false);
     const isRefreshing = common_vendor.ref(false);
+    const isLoadingMore = common_vendor.ref(false);
+    const hasLoadedOnce = common_vendor.ref(false);
     const isLoggedIn = common_vendor.computed(() => userStore.signal);
-    const formatTime = (dateStr) => {
-      if (!dateStr)
-        return "";
-      try {
-        let date;
-        if (typeof dateStr === "string") {
-          date = new Date(dateStr);
-        } else if (dateStr instanceof Date) {
-          date = dateStr;
-        } else {
-          return String(dateStr);
-        }
-        if (isNaN(date.getTime())) {
-          console.warn("无效的日期格式:", dateStr);
-          return String(dateStr);
-        }
-        const now = /* @__PURE__ */ new Date();
-        const diff = now - date;
-        if (diff < 60 * 1e3) {
-          return "刚刚";
-        }
-        if (diff < 60 * 60 * 1e3) {
-          return `${Math.floor(diff / (60 * 1e3))}分钟前`;
-        }
-        if (diff < 24 * 60 * 60 * 1e3) {
-          return `${Math.floor(diff / (60 * 60 * 1e3))}小时前`;
-        }
-        if (diff < 7 * 24 * 60 * 60 * 1e3) {
-          return `${Math.floor(diff / (24 * 60 * 60 * 1e3))}天前`;
-        }
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        const hours = String(date.getHours()).padStart(2, "0");
-        const minutes = String(date.getMinutes()).padStart(2, "0");
-        if (date.getFullYear() === now.getFullYear()) {
-          return `${month}-${day} ${hours}:${minutes}`;
-        } else {
-          return `${date.getFullYear()}-${month}-${day} ${hours}:${minutes}`;
-        }
-      } catch (error) {
-        console.error("时间格式化错误:", error, "原始时间:", dateStr);
-        return String(dateStr);
+    const totalUnreadCount = common_vendor.computed(() => mesStore.totalUnreadCount);
+    const systemUnreadCount = common_vendor.computed(() => mesStore.systemUnreadCount);
+    const groupUnreadCount = common_vendor.computed(() => mesStore.groupUnreadCount);
+    const formatMessageData = (rawMessage, type) => {
+      if (!rawMessage)
+        return null;
+      const baseMessage = {
+        id: rawMessage.id || `${type}-${Date.now()}`,
+        type,
+        original_data: rawMessage
+      };
+      if (type === "system") {
+        return {
+          ...baseMessage,
+          group_name: rawMessage.title || rawMessage.group_name || "系统通知",
+          unread_count: rawMessage.unread_count || (rawMessage.is_read === 0 ? 1 : 0),
+          is_read: rawMessage.is_read || 0,
+          latest_content: rawMessage.content || rawMessage.message || rawMessage.latest_content || "系统消息",
+          latest_time: rawMessage.latest_time || rawMessage.created_at || rawMessage.time || (/* @__PURE__ */ new Date()).toISOString(),
+          created_at: rawMessage.created_at,
+          updated_at: rawMessage.updated_at
+        };
+      } else {
+        return {
+          ...baseMessage,
+          group_name: rawMessage.group_name || rawMessage.event_name || rawMessage.title || "群组消息",
+          unread_count: rawMessage.unread_count || (rawMessage.is_read === 0 ? 1 : 0),
+          is_read: rawMessage.is_read || 0,
+          latest_content: rawMessage.latest_message || rawMessage.content || rawMessage.description || rawMessage.latest_content || "群组消息",
+          latest_time: rawMessage.latest_time || rawMessage.last_message_time || rawMessage.updated_at || rawMessage.created_at || (/* @__PURE__ */ new Date()).toISOString(),
+          created_at: rawMessage.created_at,
+          updated_at: rawMessage.updated_at
+        };
       }
     };
-    const formatSystemMessages = (messages) => {
-      if (!Array.isArray(messages))
-        return [];
-      return messages.map((msg) => {
-        if (msg.group_name && msg.latest_content && msg.latest_time) {
-          return {
-            id: msg.id,
-            group_name: msg.group_name,
-            unread_count: msg.unread_count || 0,
-            latest_content: msg.latest_content,
-            latest_time: formatTime(msg.latest_time),
-            raw_time: msg.latest_time,
-            type: "system",
-            original_data: msg
-          };
-        }
-        return {
-          id: msg.id,
-          group_name: msg.title || msg.group_name || "系统通知",
-          unread_count: msg.unread_count || (msg.is_read === 0 ? 1 : 0),
-          latest_content: msg.content || msg.message || msg.latest_content || "",
-          latest_time: formatTime(msg.latest_time || msg.created_at || msg.time),
-          raw_time: msg.latest_time || msg.created_at || msg.time,
-          type: "system",
-          original_data: msg
-        };
-      });
-    };
-    const formatGroupMessages = (messages) => {
-      if (!Array.isArray(messages))
-        return [];
-      return messages.map((msg) => {
-        if (msg.group_name && msg.latest_content && msg.latest_time) {
-          return {
-            id: msg.id,
-            group_name: msg.group_name,
-            unread_count: msg.unread_count || 0,
-            latest_content: msg.latest_content,
-            latest_time: formatTime(msg.latest_time),
-            raw_time: msg.latest_time,
-            type: "group",
-            original_data: msg
-          };
-        }
-        return {
-          id: msg.id,
-          group_name: msg.group_name || msg.event_name || msg.title || "群组消息",
-          unread_count: msg.unread_count || (msg.is_read === 0 ? 1 : 0),
-          latest_content: msg.latest_message || msg.content || msg.description || msg.latest_content || "",
-          latest_time: formatTime(msg.latest_time || msg.last_message_time || msg.updated_at || msg.created_at),
-          raw_time: msg.latest_time || msg.last_message_time || msg.updated_at || msg.created_at,
-          type: "group",
-          original_data: msg
-        };
-      });
-    };
-    const formattedMessages = common_vendor.computed(() => {
-      console.log("原始系统消息数据:", mesStore.systemmes);
-      console.log("原始群组消息数据:", mesStore.groupmes);
-      const systemMessages = formatSystemMessages(mesStore.systemmes || []);
-      const groupMessages = formatGroupMessages(mesStore.groupmes || []);
-      console.log("格式化后的系统消息:", systemMessages);
-      console.log("格式化后的群组消息:", groupMessages);
-      const allMessages = [...systemMessages, ...groupMessages];
-      console.log("所有消息:", allMessages);
-      return allMessages;
+    const allFormattedMessages = common_vendor.computed(() => {
+      const systemMessages = (mesStore.systemmes || []).map((msg) => formatMessageData(msg, "system")).filter(Boolean);
+      const groupMessages = (mesStore.groupmes || []).map((msg) => formatMessageData(msg, "group")).filter(Boolean);
+      return [...systemMessages, ...groupMessages];
     });
     const filteredMessages = common_vendor.computed(() => {
-      if (!isLoggedIn.value || isLoading.value)
+      if (!isLoggedIn.value)
         return [];
       let filtered = [];
       if (activeTab.value === "all") {
-        filtered = formattedMessages.value;
-      } else {
-        filtered = formattedMessages.value.filter((msg) => msg.type === activeTab.value);
+        filtered = allFormattedMessages.value;
+      } else if (activeTab.value === "system") {
+        filtered = allFormattedMessages.value.filter((msg) => msg.type === "system");
+      } else if (activeTab.value === "group") {
+        filtered = allFormattedMessages.value.filter((msg) => msg.type === "group");
       }
       return filtered.sort((a, b) => {
-        if (a.unread_count > 0 && b.unread_count === 0)
+        const aHasUnread = a.unread_count > 0 || a.is_read === 0;
+        const bHasUnread = b.unread_count > 0 || b.is_read === 0;
+        if (aHasUnread && !bHasUnread)
           return -1;
-        if (a.unread_count === 0 && b.unread_count > 0)
+        if (!aHasUnread && bHasUnread)
           return 1;
-        const timeA = new Date(a.raw_time || a.latest_time);
-        const timeB = new Date(b.raw_time || b.latest_time);
+        const timeA = new Date(a.latest_time || a.updated_at || a.created_at || 0);
+        const timeB = new Date(b.latest_time || b.updated_at || b.created_at || 0);
         return timeB - timeA;
       });
     });
-    const unreadCount = common_vendor.computed(() => {
-      if (!isLoggedIn.value)
-        return 0;
-      return formattedMessages.value.reduce((sum, msg) => sum + msg.unread_count, 0);
-    });
-    const systemUnreadCount = common_vendor.computed(() => {
-      if (!isLoggedIn.value)
-        return 0;
-      return formattedMessages.value.filter((msg) => msg.type === "system").reduce((sum, msg) => sum + msg.unread_count, 0);
-    });
-    const groupUnreadCount = common_vendor.computed(() => {
-      if (!isLoggedIn.value)
-        return 0;
-      return formattedMessages.value.filter((msg) => msg.type === "group").reduce((sum, msg) => sum + msg.unread_count, 0);
-    });
     common_vendor.onMounted(async () => {
-      const sysInfo = common_vendor.index.getSystemInfoSync();
-      statusBarHeight.value = sysInfo.statusBarHeight;
+      try {
+        const sysInfo = common_vendor.index.getSystemInfoSync();
+        statusBarHeight.value = sysInfo.statusBarHeight || 0;
+      } catch (error) {
+        console.error("获取系统信息失败:", error);
+        statusBarHeight.value = 20;
+      }
     });
     common_vendor.onShow(async () => {
-      if (!isLoggedIn.value)
-        return;
-      await loadUserMessages();
+      if (isLoggedIn.value) {
+        await loadUserMessages();
+      }
     });
     common_vendor.onLoad(async () => {
       if (isLoggedIn.value) {
@@ -176,10 +101,74 @@ const _sfc_main = {
       }
     });
     common_vendor.onPullDownRefresh(async () => {
-      if (!isLoggedIn.value) {
-        common_vendor.index.stopPullDownRefresh();
-        return;
+      await handleRefresh();
+      common_vendor.index.stopPullDownRefresh();
+    });
+    common_vendor.watch(isLoggedIn, async (newVal) => {
+      if (newVal && !hasLoadedOnce.value) {
+        console.log("用户已登录，加载消息数据");
+        await loadUserMessages();
+      } else if (!newVal) {
+        console.log("用户已登出，清空消息数据");
+        mesStore.clearAllMessages();
+        hasLoadedOnce.value = false;
       }
+    });
+    const getMessageKey = (msg) => {
+      return `${msg.type}-${msg.id || msg.group_name || Date.now()}`;
+    };
+    const getCurrentUnreadCount = () => {
+      if (activeTab.value === "all") {
+        return totalUnreadCount.value;
+      } else if (activeTab.value === "system") {
+        return systemUnreadCount.value;
+      } else if (activeTab.value === "group") {
+        return groupUnreadCount.value;
+      }
+      return 0;
+    };
+    const goToLogin = () => {
+      common_vendor.index.switchTab({
+        url: "../mymessage/mymessage"
+      });
+    };
+    const loadUserMessages = async (isRefresh = false) => {
+      if (!isLoggedIn.value)
+        return;
+      if (isRefresh) {
+        isRefreshing.value = true;
+      } else if (!hasLoadedOnce.value) {
+        isLoading.value = true;
+      }
+      try {
+        console.log("开始加载用户消息数据...");
+        const result = await mesStore.getsystem(isRefresh);
+        if (result && result.success) {
+          console.log("消息数据加载成功");
+          hasLoadedOnce.value = true;
+        }
+        await common_vendor.nextTick$1();
+      } catch (error) {
+        console.error("加载消息失败:", error);
+        let errorMsg = "加载消息失败";
+        if (error.message && error.message.includes("网络")) {
+          errorMsg = "网络连接异常，请检查网络设置";
+        } else if (error.message && error.message.includes("登录")) {
+          errorMsg = "登录状态异常，请重新登录";
+        }
+        common_vendor.index.showToast({
+          title: errorMsg,
+          icon: "error",
+          duration: 2e3
+        });
+      } finally {
+        isLoading.value = false;
+        isRefreshing.value = false;
+      }
+    };
+    const handleRefresh = async () => {
+      if (isRefreshing.value)
+        return;
       isRefreshing.value = true;
       try {
         await loadUserMessages(true);
@@ -197,49 +186,23 @@ const _sfc_main = {
         });
       } finally {
         isRefreshing.value = false;
-        common_vendor.index.stopPullDownRefresh();
       }
-    });
-    common_vendor.watch(isLoggedIn, async (newVal) => {
-      if (newVal) {
-        console.log("用户已登录，加载消息数据");
-        await loadUserMessages();
-      } else {
-        console.log("用户已登出，清空消息数据");
-      }
-    });
-    const goToLogin = () => {
-      common_vendor.index.switchTab({
-        url: "../mymessage/mymessage"
-      });
     };
-    const loadUserMessages = async (isRefresh = false) => {
-      if (isRefresh) {
-        isRefreshing.value = true;
-      } else {
-        isLoading.value = true;
-      }
-      try {
-        console.log("开始加载用户消息数据...");
-        await mesStore.getsystem();
-        console.log("消息数据加载完成");
-        await common_vendor.nextTick$1();
-      } catch (error) {
-        console.error("加载消息失败:", error);
-        common_vendor.index.showToast({
-          title: "加载消息失败",
-          icon: "error",
-          duration: 2e3
-        });
-      } finally {
-        isLoading.value = false;
-        isRefreshing.value = false;
-      }
+    const handleRefreshRestore = () => {
+      isRefreshing.value = false;
     };
     const loadMoreMessages = async () => {
-      if (isLoading.value || isRefreshing.value)
+      if (isLoading.value || isRefreshing.value || isLoadingMore.value)
         return;
       console.log("触发加载更多消息");
+      isLoadingMore.value = true;
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 1e3));
+      } catch (error) {
+        console.error("加载更多失败:", error);
+      } finally {
+        isLoadingMore.value = false;
+      }
     };
     const switchTab = (tab) => {
       if (activeTab.value === tab)
@@ -248,35 +211,45 @@ const _sfc_main = {
       console.log("切换到标签页:", tab);
     };
     const handleMessageTap = (msg) => {
-      if (!isLoggedIn.value)
+      if (!isLoggedIn.value || !msg)
         return;
       console.log("点击消息:", msg);
-      if (msg.type === "system") {
-        common_vendor.index.navigateTo({
-          url: `/pages/system-message/index?id=${msg.id}&groupName=${encodeURIComponent(msg.group_name)}`
+      try {
+        if (msg.type === "system") {
+          common_vendor.index.navigateTo({
+            url: `/pages/detail/ChatSystem?id=${msg.id}&groupName=${encodeURIComponent(msg.group_name || "系统消息")}`
+          });
+        } else if (msg.type === "group") {
+          common_vendor.index.navigateTo({
+            url: `/pages/detail/ChatGroup?id=${msg.id}&groupName=${encodeURIComponent(msg.group_name || "群组消息")}`
+          });
+        }
+      } catch (error) {
+        console.error("页面跳转失败:", error);
+        common_vendor.index.showToast({
+          title: "页面跳转失败",
+          icon: "error",
+          duration: 1500
         });
-      } else {
-        common_vendor.index.navigateTo({
-          url: `/pages/group-chat/index?id=${msg.id}&groupName=${encodeURIComponent(msg.group_name)}`
-        });
-      }
-      if (msg.unread_count > 0) {
-        markMessageAsRead(msg);
       }
     };
-    const markMessageAsRead = async (msg) => {
+    const handleMarkAsRead = async (msg) => {
+      if (!msg || !msg.unread_count && msg.is_read === 1)
+        return;
       try {
-        const messages = msg.type === "system" ? mesStore.systemmes : mesStore.groupmes;
-        const index = messages.findIndex((m) => m.id === msg.id);
-        if (index !== -1) {
-          messages[index].is_read = 1;
-          if (messages[index].unread_count) {
-            messages[index].unread_count = 0;
-          }
+        console.log("标记消息已读:", msg.group_name);
+        if (msg.type === "system") {
+          await mesStore.markSystemMessageAsRead(msg.id);
+        } else {
+          await mesStore.markGroupMessageAsRead(msg.id);
         }
-        console.log("消息已标记为已读:", msg.group_name);
       } catch (error) {
         console.error("标记消息已读失败:", error);
+        common_vendor.index.showToast({
+          title: "操作失败",
+          icon: "error",
+          duration: 1500
+        });
       }
     };
     const getEmptyTitle = () => {
@@ -285,7 +258,7 @@ const _sfc_main = {
         system: "暂无系统消息",
         group: "暂无群组消息"
       };
-      return titles[activeTab.value];
+      return titles[activeTab.value] || "暂无消息";
     };
     const getEmptyDesc = () => {
       const descs = {
@@ -293,14 +266,16 @@ const _sfc_main = {
         system: "暂时没有系统通知",
         group: "您还未加入任何群组"
       };
-      return descs[activeTab.value];
+      return descs[activeTab.value] || "暂无内容";
     };
     const markAllAsRead = async () => {
       if (!isLoggedIn.value)
         return;
-      const currentMessages = activeTab.value === "all" ? formattedMessages.value : formattedMessages.value.filter((msg) => msg.type === activeTab.value);
-      const totalUnread = currentMessages.reduce((sum, msg) => sum + msg.unread_count, 0);
-      if (totalUnread === 0) {
+      const currentMessages = filteredMessages.value;
+      const unreadMessages = currentMessages.filter(
+        (msg) => msg.unread_count > 0 || msg.is_read === 0
+      );
+      if (unreadMessages.length === 0) {
         common_vendor.index.showToast({
           title: "已经没有未读消息了",
           icon: "none",
@@ -312,37 +287,35 @@ const _sfc_main = {
         const res = await new Promise((resolve) => {
           common_vendor.index.showModal({
             title: "确认操作",
-            content: `确定要将${totalUnread}条未读消息标记为已读吗？`,
+            content: `确定要将${unreadMessages.length}条未读消息标记为已读吗？`,
             success: resolve
           });
         });
         if (!res.confirm)
           return;
-        currentMessages.forEach((msg) => {
-          if (msg.unread_count > 0) {
-            if (msg.type === "system") {
-              const index = mesStore.systemmes.findIndex((m) => m.id === msg.id);
-              if (index !== -1) {
-                mesStore.systemmes[index].is_read = 1;
-              }
-            } else {
-              const index = mesStore.groupmes.findIndex((m) => m.id === msg.id);
-              if (index !== -1) {
-                mesStore.groupmes[index].is_read = 1;
-                if (mesStore.groupmes[index].unread_count) {
-                  mesStore.groupmes[index].unread_count = 0;
-                }
-              }
-            }
-          }
+        common_vendor.index.showLoading({
+          title: "处理中...",
+          mask: true
         });
+        const systemIds = unreadMessages.filter((msg) => msg.type === "system").map((msg) => msg.id);
+        const groupIds = unreadMessages.filter((msg) => msg.type === "group").map((msg) => msg.id);
+        const promises = [];
+        if (systemIds.length > 0) {
+          promises.push(...systemIds.map((id) => mesStore.markSystemMessageAsRead(id)));
+        }
+        if (groupIds.length > 0) {
+          promises.push(...groupIds.map((id) => mesStore.markGroupMessageAsRead(id)));
+        }
+        await Promise.allSettled(promises);
+        common_vendor.index.hideLoading();
         common_vendor.index.showToast({
-          title: `已标记${totalUnread}条消息为已读`,
+          title: `已标记${unreadMessages.length}条消息为已读`,
           icon: "success",
           duration: 2e3
         });
       } catch (error) {
         console.error("批量标记已读失败:", error);
+        common_vendor.index.hideLoading();
         common_vendor.index.showToast({
           title: "操作失败，请稍后重试",
           icon: "error",
@@ -357,38 +330,40 @@ const _sfc_main = {
         b: common_vendor.o(goToLogin)
       } : common_vendor.e({
         c: statusBarHeight.value + "px",
-        d: unreadCount.value > 0
-      }, unreadCount.value > 0 ? {
-        e: common_vendor.t(unreadCount.value > 99 ? "99+" : unreadCount.value)
+        d: totalUnreadCount.value > 0
+      }, totalUnreadCount.value > 0 ? {
+        e: common_vendor.t(totalUnreadCount.value > 99 ? "99+" : totalUnreadCount.value)
       } : {}, {
         f: activeTab.value === "all" ? 1 : "",
         g: common_vendor.o(($event) => switchTab("all")),
         h: systemUnreadCount.value > 0
       }, systemUnreadCount.value > 0 ? {
-        i: common_vendor.t(systemUnreadCount.value)
+        i: common_vendor.t(systemUnreadCount.value > 99 ? "99+" : systemUnreadCount.value)
       } : {}, {
         j: activeTab.value === "system" ? 1 : "",
         k: common_vendor.o(($event) => switchTab("system")),
         l: groupUnreadCount.value > 0
       }, groupUnreadCount.value > 0 ? {
-        m: common_vendor.t(groupUnreadCount.value)
+        m: common_vendor.t(groupUnreadCount.value > 99 ? "99+" : groupUnreadCount.value)
       } : {}, {
         n: activeTab.value === "group" ? 1 : "",
         o: common_vendor.o(($event) => switchTab("group")),
-        p: unreadCount.value > 0
-      }, unreadCount.value > 0 ? {
+        p: getCurrentUnreadCount() > 0
+      }, getCurrentUnreadCount() > 0 ? {
         q: common_vendor.o(markAllAsRead)
       } : {}, {
         r: statusBarHeight.value + 44 + "px",
-        s: isLoading.value
-      }, isLoading.value ? {} : {}, {
+        s: isLoading.value && filteredMessages.value.length === 0
+      }, isLoading.value && filteredMessages.value.length === 0 ? {} : {}, {
         t: common_vendor.f(filteredMessages.value, (msg, k0, i0) => {
           return {
-            a: `msg-${msg.group_name || msg.title || msg.id}`,
-            b: common_vendor.o(handleMessageTap, `msg-${msg.group_name || msg.title || msg.id}`),
-            c: "bb2249ad-0-" + i0,
-            d: common_vendor.p({
-              message: msg
+            a: getMessageKey(msg),
+            b: common_vendor.o(handleMessageTap, getMessageKey(msg)),
+            c: common_vendor.o(handleMarkAsRead, getMessageKey(msg)),
+            d: "bb2249ad-0-" + i0,
+            e: common_vendor.p({
+              message: msg,
+              loading: isLoading.value
             })
           };
         }),
@@ -397,8 +372,13 @@ const _sfc_main = {
         w: common_vendor.t(getEmptyTitle()),
         x: common_vendor.t(getEmptyDesc())
       } : {}, {
-        y: statusBarHeight.value + 44 + 68 + "px",
-        z: common_vendor.o(loadMoreMessages)
+        y: isLoadingMore.value
+      }, isLoadingMore.value ? {} : {}, {
+        z: statusBarHeight.value + 44 + 68 + "px",
+        A: common_vendor.o(loadMoreMessages),
+        B: isRefreshing.value,
+        C: common_vendor.o(handleRefresh),
+        D: common_vendor.o(handleRefreshRestore)
       }));
     };
   }

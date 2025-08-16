@@ -31,7 +31,7 @@
             @tap="switchTab('all')"
           >
             全部
-            <view class="tab-badge" v-if="unreadCount > 0">{{ unreadCount > 99 ? '99+' : unreadCount }}</view>
+            <view class="tab-badge" v-if="totalUnreadCount > 0">{{ totalUnreadCount > 99 ? '99+' : totalUnreadCount }}</view>
           </view>
           <view 
             class="filter-tab" 
@@ -39,7 +39,7 @@
             @tap="switchTab('system')"
           >
             系统消息
-            <view class="tab-badge" v-if="systemUnreadCount > 0">{{ systemUnreadCount }}</view>
+            <view class="tab-badge" v-if="systemUnreadCount > 0">{{ systemUnreadCount > 99 ? '99+' : systemUnreadCount }}</view>
           </view>
           <view 
             class="filter-tab" 
@@ -47,7 +47,7 @@
             @tap="switchTab('group')"
           >
             群组消息
-            <view class="tab-badge" v-if="groupUnreadCount > 0">{{ groupUnreadCount }}</view>
+            <view class="tab-badge" v-if="groupUnreadCount > 0">{{ groupUnreadCount > 99 ? '99+' : groupUnreadCount }}</view>
           </view>
         </view>
         
@@ -55,14 +55,14 @@
         <view 
           class="mark-all-read-btn" 
           @tap="markAllAsRead"
-          v-if="unreadCount > 0"
+          v-if="getCurrentUnreadCount() > 0"
         >
           <text class="mark-all-icon">✓</text>
           <text class="mark-all-text">全部已读</text>
         </view>
       </view>
       
-      <!-- 消息列表 - 使用新的MessageCard组件 -->
+      <!-- 消息列表 -->
       <scroll-view
         class="message-list"
         :style="{ marginTop: statusBarHeight + 44 + 68 + 'px' }"
@@ -70,10 +70,14 @@
         enable-back-to-top="true"
         :bounces="false"
         @scrolltolower="loadMoreMessages"
+        :refresher-enabled="true"
+        :refresher-triggered="isRefreshing"
+        @refresherrefresh="handleRefresh"
+        @refresherrestore="handleRefreshRestore"
       >
         <view class="message-list-content">
           <!-- 加载状态 -->
-          <view v-if="isLoading" class="loading-state">
+          <view v-if="isLoading && filteredMessages.length === 0" class="loading-state">
             <view class="loading-spinner"></view>
             <text class="loading-text">加载中...</text>
           </view>
@@ -81,9 +85,11 @@
           <!-- 使用MessageCard组件 -->
           <MessageCard
             v-for="msg in filteredMessages"
-            :key="`msg-${msg.group_name || msg.title || msg.id}`"
+            :key="getMessageKey(msg)"
             :message="msg"
+            :loading="isLoading"
             @tap="handleMessageTap"
+            @markAsRead="handleMarkAsRead"
           />
           
           <!-- 空状态 -->
@@ -98,6 +104,12 @@
             </view>
             <text class="empty-title">{{ getEmptyTitle() }}</text>
             <text class="empty-desc">{{ getEmptyDesc() }}</text>
+          </view>
+          
+          <!-- 底部加载更多 -->
+          <view v-if="isLoadingMore" class="load-more">
+            <view class="loading-spinner small"></view>
+            <text class="load-more-text">加载更多...</text>
           </view>
         </view>
       </scroll-view>
@@ -121,206 +133,111 @@ const statusBarHeight = ref(0)
 const activeTab = ref('all')
 const isLoading = ref(false)
 const isRefreshing = ref(false)
+const isLoadingMore = ref(false)
+const hasLoadedOnce = ref(false)
 
 // 登录状态计算属性
 const isLoggedIn = computed(() => userStore.signal)
 
-// 格式化时间函数
-const formatTime = (dateStr) => {
-  if (!dateStr) return ''
-  
-  try {
-    // 处理不同的时间格式
-    let date
-    if (typeof dateStr === 'string') {
-      // 处理 ISO 8601 格式，如 "2025-08-12T03:14:21+08:00"
-      date = new Date(dateStr)
-    } else if (dateStr instanceof Date) {
-      date = dateStr
-    } else {
-      return String(dateStr)
+// 未读数量计算属性
+const totalUnreadCount = computed(() => mesStore.totalUnreadCount)
+const systemUnreadCount = computed(() => mesStore.systemUnreadCount)
+const groupUnreadCount = computed(() => mesStore.groupUnreadCount)
+
+// 格式化消息数据的函数
+const formatMessageData = (rawMessage, type) => {
+  if (!rawMessage) return null
+
+  // 统一的消息数据格式
+  const baseMessage = {
+    id: rawMessage.id || `${type}-${Date.now()}`,
+    type: type,
+    original_data: rawMessage
+  }
+
+  if (type === 'system') {
+    return {
+      ...baseMessage,
+      group_name: rawMessage.title || rawMessage.group_name || '系统通知',
+      unread_count: rawMessage.unread_count || (rawMessage.is_read === 0 ? 1 : 0),
+      is_read: rawMessage.is_read || 0,
+      latest_content: rawMessage.content || rawMessage.message || rawMessage.latest_content || '系统消息',
+      latest_time: rawMessage.latest_time || rawMessage.created_at || rawMessage.time || new Date().toISOString(),
+      created_at: rawMessage.created_at,
+      updated_at: rawMessage.updated_at
     }
-    
-    // 检查日期是否有效
-    if (isNaN(date.getTime())) {
-      console.warn('无效的日期格式:', dateStr)
-      return String(dateStr)
+  } else {
+    return {
+      ...baseMessage,
+      group_name: rawMessage.group_name || rawMessage.event_name || rawMessage.title || '群组消息',
+      unread_count: rawMessage.unread_count || (rawMessage.is_read === 0 ? 1 : 0),
+      is_read: rawMessage.is_read || 0,
+      latest_content: rawMessage.latest_message || rawMessage.content || rawMessage.description || rawMessage.latest_content || '群组消息',
+      latest_time: rawMessage.latest_time || rawMessage.last_message_time || rawMessage.updated_at || rawMessage.created_at || new Date().toISOString(),
+      created_at: rawMessage.created_at,
+      updated_at: rawMessage.updated_at
     }
-    
-    const now = new Date()
-    const diff = now - date
-    
-    // 小于1分钟
-    if (diff < 60 * 1000) {
-      return '刚刚'
-    }
-    // 小于1小时
-    if (diff < 60 * 60 * 1000) {
-      return `${Math.floor(diff / (60 * 1000))}分钟前`
-    }
-    // 小于24小时
-    if (diff < 24 * 60 * 60 * 1000) {
-      return `${Math.floor(diff / (60 * 60 * 1000))}小时前`
-    }
-    // 小于7天
-    if (diff < 7 * 24 * 60 * 60 * 1000) {
-      return `${Math.floor(diff / (24 * 60 * 60 * 1000))}天前`
-    }
-    // 大于7天，显示具体日期和时间
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    
-    // 如果是今年，不显示年份
-    if (date.getFullYear() === now.getFullYear()) {
-      return `${month}-${day} ${hours}:${minutes}`
-    } else {
-      return `${date.getFullYear()}-${month}-${day} ${hours}:${minutes}`
-    }
-  } catch (error) {
-    console.error('时间格式化错误:', error, '原始时间:', dateStr)
-    return String(dateStr)
   }
 }
 
-// 处理系统消息数据格式化
-const formatSystemMessages = (messages) => {
-  if (!Array.isArray(messages)) return []
+// 格式化所有消息
+const allFormattedMessages = computed(() => {
+  const systemMessages = (mesStore.systemmes || [])
+    .map(msg => formatMessageData(msg, 'system'))
+    .filter(Boolean)
   
-  return messages.map(msg => {
-    // 如果数据已经包含所需字段，直接使用
-    if (msg.group_name && msg.latest_content && msg.latest_time) {
-      return {
-        id: msg.id,
-        group_name: msg.group_name,
-        unread_count: msg.unread_count || 0,
-        latest_content: msg.latest_content,
-        latest_time: formatTime(msg.latest_time),
-        raw_time: msg.latest_time,
-        type: 'system',
-        original_data: msg
-      }
-    }
-    
-    // 否则进行格式化处理
-    return {
-      id: msg.id,
-      group_name: msg.title || msg.group_name || '系统通知',
-      unread_count: msg.unread_count || (msg.is_read === 0 ? 1 : 0),
-      latest_content: msg.content || msg.message || msg.latest_content || '',
-      latest_time: formatTime(msg.latest_time || msg.created_at || msg.time),
-      raw_time: msg.latest_time || msg.created_at || msg.time,
-      type: 'system',
-      original_data: msg
-    }
-  })
-}
-
-// 处理群组消息数据格式化
-const formatGroupMessages = (messages) => {
-  if (!Array.isArray(messages)) return []
+  const groupMessages = (mesStore.groupmes || [])
+    .map(msg => formatMessageData(msg, 'group'))
+    .filter(Boolean)
   
-  return messages.map(msg => {
-    // 如果数据已经包含所需字段，直接使用
-    if (msg.group_name && msg.latest_content && msg.latest_time) {
-      return {
-        id: msg.id,
-        group_name: msg.group_name,
-        unread_count: msg.unread_count || 0,
-        latest_content: msg.latest_content,
-        latest_time: formatTime(msg.latest_time),
-        raw_time: msg.latest_time,
-        type: 'group',
-        original_data: msg
-      }
-    }
-    
-    // 否则进行格式化处理
-    return {
-      id: msg.id,
-      group_name: msg.group_name || msg.event_name || msg.title || '群组消息',
-      unread_count: msg.unread_count || (msg.is_read === 0 ? 1 : 0),
-      latest_content: msg.latest_message || msg.content || msg.description || msg.latest_content || '',
-      latest_time: formatTime(msg.latest_time || msg.last_message_time || msg.updated_at || msg.created_at),
-      raw_time: msg.latest_time || msg.last_message_time || msg.updated_at || msg.created_at,
-      type: 'group',
-      original_data: msg
-    }
-  })
-}
-
-// 格式化后的消息数据计算属性
-const formattedMessages = computed(() => {
-  console.log('原始系统消息数据:', mesStore.systemmes)
-  console.log('原始群组消息数据:', mesStore.groupmes)
-  
-  const systemMessages = formatSystemMessages(mesStore.systemmes || [])
-  const groupMessages = formatGroupMessages(mesStore.groupmes || [])
-  
-  console.log('格式化后的系统消息:', systemMessages)
-  console.log('格式化后的群组消息:', groupMessages)
-  
-  const allMessages = [...systemMessages, ...groupMessages]
-  console.log('所有消息:', allMessages)
-  
-  return allMessages
+  return [...systemMessages, ...groupMessages]
 })
 
 // 筛选后的消息数据
 const filteredMessages = computed(() => {
-  if (!isLoggedIn.value || isLoading.value) return []
+  if (!isLoggedIn.value) return []
   
   let filtered = []
   
   if (activeTab.value === 'all') {
-    filtered = formattedMessages.value
-  } else {
-    filtered = formattedMessages.value.filter(msg => msg.type === activeTab.value)
+    filtered = allFormattedMessages.value
+  } else if (activeTab.value === 'system') {
+    filtered = allFormattedMessages.value.filter(msg => msg.type === 'system')
+  } else if (activeTab.value === 'group') {
+    filtered = allFormattedMessages.value.filter(msg => msg.type === 'group')
   }
   
   // 排序：未读消息在前，然后按时间排序
   return filtered.sort((a, b) => {
-    // 先按未读数量排序
-    if (a.unread_count > 0 && b.unread_count === 0) return -1
-    if (a.unread_count === 0 && b.unread_count > 0) return 1
+    // 先按未读状态排序
+    const aHasUnread = a.unread_count > 0 || a.is_read === 0
+    const bHasUnread = b.unread_count > 0 || b.is_read === 0
     
-    // 再按时间排序
-    const timeA = new Date(a.raw_time || a.latest_time)
-    const timeB = new Date(b.raw_time || b.latest_time)
+    if (aHasUnread && !bHasUnread) return -1
+    if (!aHasUnread && bHasUnread) return 1
+    
+    // 再按时间排序（最新的在前）
+    const timeA = new Date(a.latest_time || a.updated_at || a.created_at || 0)
+    const timeB = new Date(b.latest_time || b.updated_at || b.created_at || 0)
     return timeB - timeA
   })
 })
 
-// 未读消息数量计算
-const unreadCount = computed(() => {
-  if (!isLoggedIn.value) return 0
-  return formattedMessages.value.reduce((sum, msg) => sum + msg.unread_count, 0)
-})
-
-const systemUnreadCount = computed(() => {
-  if (!isLoggedIn.value) return 0
-  return formattedMessages.value
-    .filter(msg => msg.type === 'system')
-    .reduce((sum, msg) => sum + msg.unread_count, 0)
-})
-
-const groupUnreadCount = computed(() => {
-  if (!isLoggedIn.value) return 0
-  return formattedMessages.value
-    .filter(msg => msg.type === 'group')
-    .reduce((sum, msg) => sum + msg.unread_count, 0)
-})
-
 // 生命周期
 onMounted(async () => {
-  const sysInfo = uni.getSystemInfoSync()
-  statusBarHeight.value = sysInfo.statusBarHeight
+  try {
+    const sysInfo = uni.getSystemInfoSync()
+    statusBarHeight.value = sysInfo.statusBarHeight || 0
+  } catch (error) {
+    console.error('获取系统信息失败:', error)
+    statusBarHeight.value = 20
+  }
 })
 
 onShow(async () => {
-  if (!isLoggedIn.value) return
-  await loadUserMessages()
+  if (isLoggedIn.value) {
+    await loadUserMessages()
+  }
 })
 
 onLoad(async () => {
@@ -331,10 +248,91 @@ onLoad(async () => {
 
 // 下拉刷新
 onPullDownRefresh(async () => {
-  if (!isLoggedIn.value) {
-    uni.stopPullDownRefresh()
-    return
+  await handleRefresh()
+  uni.stopPullDownRefresh()
+})
+
+// 监听登录状态变化
+watch(isLoggedIn, async (newVal) => {
+  if (newVal && !hasLoadedOnce.value) {
+    console.log('用户已登录，加载消息数据')
+    await loadUserMessages()
+  } else if (!newVal) {
+    console.log('用户已登出，清空消息数据')
+    mesStore.clearAllMessages()
+    hasLoadedOnce.value = false
   }
+})
+
+// 获取消息唯一键
+const getMessageKey = (msg) => {
+  return `${msg.type}-${msg.id || msg.group_name || Date.now()}`
+}
+
+// 获取当前标签的未读数量
+const getCurrentUnreadCount = () => {
+  if (activeTab.value === 'all') {
+    return totalUnreadCount.value
+  } else if (activeTab.value === 'system') {
+    return systemUnreadCount.value
+  } else if (activeTab.value === 'group') {
+    return groupUnreadCount.value
+  }
+  return 0
+}
+
+// 登录相关方法
+const goToLogin = () => {
+  uni.switchTab({
+    url: '../mymessage/mymessage'
+  })
+}
+
+// 加载用户消息数据
+const loadUserMessages = async (isRefresh = false) => {
+  if (!isLoggedIn.value) return
+  
+  if (isRefresh) {
+    isRefreshing.value = true
+  } else if (!hasLoadedOnce.value) {
+    isLoading.value = true
+  }
+  
+  try {
+    console.log('开始加载用户消息数据...')
+    const result = await mesStore.getsystem(isRefresh)
+    
+    if (result && result.success) {
+      console.log('消息数据加载成功')
+      hasLoadedOnce.value = true
+    }
+    
+    await nextTick()
+  } catch (error) {
+    console.error('加载消息失败:', error)
+    
+    // 根据错误类型显示不同提示
+    let errorMsg = '加载消息失败'
+    if (error.message && error.message.includes('网络')) {
+      errorMsg = '网络连接异常，请检查网络设置'
+    } else if (error.message && error.message.includes('登录')) {
+      errorMsg = '登录状态异常，请重新登录'
+    }
+    
+    uni.showToast({
+      title: errorMsg,
+      icon: 'error',
+      duration: 2000
+    })
+  } finally {
+    isLoading.value = false
+    isRefreshing.value = false
+  }
+}
+
+// 处理刷新
+const handleRefresh = async () => {
+  if (isRefreshing.value) return
   
   isRefreshing.value = true
   try {
@@ -353,62 +351,30 @@ onPullDownRefresh(async () => {
     })
   } finally {
     isRefreshing.value = false
-    uni.stopPullDownRefresh()
   }
-})
-
-// 监听登录状态变化
-watch(isLoggedIn, async (newVal) => {
-  if (newVal) {
-    console.log('用户已登录，加载消息数据')
-    await loadUserMessages()
-  } else {
-    console.log('用户已登出，清空消息数据')
-  }
-})
-
-// 登录相关方法
-const goToLogin = () => {
-  uni.switchTab({
-    url: '../mymessage/mymessage'
-  })
 }
 
-// 加载用户消息数据
-const loadUserMessages = async (isRefresh = false) => {
-  if (isRefresh) {
-    isRefreshing.value = true
-  } else {
-    isLoading.value = true
-  }
-  
-  try {
-    console.log('开始加载用户消息数据...')
-    await mesStore.getsystem()
-    console.log('消息数据加载完成')
-    
-    // 确保数据更新后再停止loading状态
-    await nextTick()
-  } catch (error) {
-    console.error('加载消息失败:', error)
-    uni.showToast({
-      title: '加载消息失败',
-      icon: 'error',
-      duration: 2000
-    })
-  } finally {
-    isLoading.value = false
-    isRefreshing.value = false
-  }
+// 处理刷新恢复
+const handleRefreshRestore = () => {
+  isRefreshing.value = false
 }
 
 // 加载更多消息（上拉加载）
 const loadMoreMessages = async () => {
-  if (isLoading.value || isRefreshing.value) return
+  if (isLoading.value || isRefreshing.value || isLoadingMore.value) return
   
   console.log('触发加载更多消息')
-  // 这里可以实现分页加载逻辑
-  // await loadUserMessages()
+  isLoadingMore.value = true
+  
+  try {
+    // 这里可以实现分页加载逻辑
+    // 暂时只是延迟一下，避免频繁触发
+    await new Promise(resolve => setTimeout(resolve, 1000))
+  } catch (error) {
+    console.error('加载更多失败:', error)
+  } finally {
+    isLoadingMore.value = false
+  }
 }
 
 // 切换标签页
@@ -420,48 +386,52 @@ const switchTab = (tab) => {
 
 // 处理消息卡片点击事件
 const handleMessageTap = (msg) => {
-  if (!isLoggedIn.value) return
+  if (!isLoggedIn.value || !msg) return
   
   console.log('点击消息:', msg)
   
-  // 跳转到相应的详情页面
-  if (msg.type === 'system') {
-    // 系统消息详情页
-    uni.navigateTo({
-      url: `/pages/system-message/index?id=${msg.id}&groupName=${encodeURIComponent(msg.group_name)}`
+  try {
+    // 根据消息类型跳转到相应的详情页面
+    if (msg.type === 'system') {
+      // 系统消息详情页
+      uni.navigateTo({
+        url: `/pages/detail/ChatSystem?id=${msg.id}&groupName=${encodeURIComponent(msg.group_name || '系统消息')}`
+      })
+    } else if (msg.type === 'group') {
+      // 群组消息详情页
+      uni.navigateTo({
+        url: `/pages/detail/ChatGroup?id=${msg.id}&groupName=${encodeURIComponent(msg.group_name || '群组消息')}`
+      })
+    }
+  } catch (error) {
+    console.error('页面跳转失败:', error)
+    uni.showToast({
+      title: '页面跳转失败',
+      icon: 'error',
+      duration: 1500
     })
-  } else {
-    // 群组消息详情页
-    uni.navigateTo({
-      url: `/pages/group-chat/index?id=${msg.id}&groupName=${encodeURIComponent(msg.group_name)}`
-    })
-  }
-  
-  // 如果消息未读，标记为已读
-  if (msg.unread_count > 0) {
-    markMessageAsRead(msg)
   }
 }
 
-// 标记单个消息为已读
-const markMessageAsRead = async (msg) => {
+// 处理单个消息标记已读
+const handleMarkAsRead = async (msg) => {
+  if (!msg || (!msg.unread_count && msg.is_read === 1)) return
+  
   try {
-    // 这里应该调用API标记消息为已读
-    // await api.markMessageAsRead(msg.id)
+    console.log('标记消息已读:', msg.group_name)
     
-    // 临时更新本地状态
-    const messages = msg.type === 'system' ? mesStore.systemmes : mesStore.groupmes
-    const index = messages.findIndex(m => m.id === msg.id)
-    if (index !== -1) {
-      messages[index].is_read = 1
-      if (messages[index].unread_count) {
-        messages[index].unread_count = 0
-      }
+    if (msg.type === 'system') {
+      await mesStore.markSystemMessageAsRead(msg.id)
+    } else {
+      await mesStore.markGroupMessageAsRead(msg.id)
     }
-    
-    console.log('消息已标记为已读:', msg.group_name)
   } catch (error) {
     console.error('标记消息已读失败:', error)
+    uni.showToast({
+      title: '操作失败',
+      icon: 'error',
+      duration: 1500
+    })
   }
 }
 
@@ -472,7 +442,7 @@ const getEmptyTitle = () => {
     system: '暂无系统消息',
     group: '暂无群组消息'
   }
-  return titles[activeTab.value]
+  return titles[activeTab.value] || '暂无消息'
 }
 
 // 获取空状态描述
@@ -482,20 +452,19 @@ const getEmptyDesc = () => {
     system: '暂时没有系统通知',
     group: '您还未加入任何群组'
   }
-  return descs[activeTab.value]
+  return descs[activeTab.value] || '暂无内容'
 }
 
 // 一键标记已读
 const markAllAsRead = async () => {
   if (!isLoggedIn.value) return
   
-  const currentMessages = activeTab.value === 'all' 
-    ? formattedMessages.value 
-    : formattedMessages.value.filter(msg => msg.type === activeTab.value)
+  const currentMessages = filteredMessages.value
+  const unreadMessages = currentMessages.filter(msg => 
+    msg.unread_count > 0 || msg.is_read === 0
+  )
   
-  const totalUnread = currentMessages.reduce((sum, msg) => sum + msg.unread_count, 0)
-  
-  if (totalUnread === 0) {
+  if (unreadMessages.length === 0) {
     uni.showToast({
       title: '已经没有未读消息了',
       icon: 'none',
@@ -509,47 +478,47 @@ const markAllAsRead = async () => {
     const res = await new Promise((resolve) => {
       uni.showModal({
         title: '确认操作',
-        content: `确定要将${totalUnread}条未读消息标记为已读吗？`,
+        content: `确定要将${unreadMessages.length}条未读消息标记为已读吗？`,
         success: resolve
       })
     })
     
     if (!res.confirm) return
     
-    // 这里应该调用API批量标记消息为已读
-    // const messageIds = currentMessages
-    //   .filter(msg => msg.unread_count > 0)
-    //   .map(msg => msg.id)
-    // await api.markMessagesAsRead(messageIds)
-    
-    // 临时更新本地状态
-    currentMessages.forEach(msg => {
-      if (msg.unread_count > 0) {
-        if (msg.type === 'system') {
-          const index = mesStore.systemmes.findIndex(m => m.id === msg.id)
-          if (index !== -1) {
-            mesStore.systemmes[index].is_read = 1
-          }
-        } else {
-          const index = mesStore.groupmes.findIndex(m => m.id === msg.id)
-          if (index !== -1) {
-            mesStore.groupmes[index].is_read = 1
-            if (mesStore.groupmes[index].unread_count) {
-              mesStore.groupmes[index].unread_count = 0
-            }
-          }
-        }
-      }
+    // 显示加载提示
+    uni.showLoading({
+      title: '处理中...',
+      mask: true
     })
     
+    // 按类型分组处理
+    const systemIds = unreadMessages.filter(msg => msg.type === 'system').map(msg => msg.id)
+    const groupIds = unreadMessages.filter(msg => msg.type === 'group').map(msg => msg.id)
+    
+    const promises = []
+    
+    // 批量标记系统消息
+    if (systemIds.length > 0) {
+      promises.push(...systemIds.map(id => mesStore.markSystemMessageAsRead(id)))
+    }
+    
+    // 批量标记群组消息
+    if (groupIds.length > 0) {
+      promises.push(...groupIds.map(id => mesStore.markGroupMessageAsRead(id)))
+    }
+    
+    await Promise.allSettled(promises)
+    
+    uni.hideLoading()
     uni.showToast({
-      title: `已标记${totalUnread}条消息为已读`,
+      title: `已标记${unreadMessages.length}条消息为已读`,
       icon: 'success',
       duration: 2000
     })
     
   } catch (error) {
     console.error('批量标记已读失败:', error)
+    uni.hideLoading()
     uni.showToast({
       title: '操作失败，请稍后重试',
       icon: 'error',
@@ -793,6 +762,13 @@ const markAllAsRead = async () => {
   margin-bottom: 24rpx;
 }
 
+.loading-spinner.small {
+  width: 40rpx;
+  height: 40rpx;
+  border-width: 4rpx;
+  margin-bottom: 16rpx;
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -800,6 +776,19 @@ const markAllAsRead = async () => {
 
 .loading-text {
   font-size: 28rpx;
+  color: #9ca3af;
+}
+
+/* 加载更多 */
+.load-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 20rpx;
+}
+
+.load-more-text {
+  font-size: 24rpx;
   color: #9ca3af;
 }
 

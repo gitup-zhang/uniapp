@@ -1,19 +1,22 @@
 <template>
   <view 
     class="message-card" 
-    :class="{ 'has-unread': message.unread_count > 0 }"
+    :class="{ 
+      'has-unread': hasUnreadMessages,
+      'loading': loading 
+    }"
     @tap="handleCardTap"
   >
     <!-- 头像区域 -->
     <view class="avatar-wrapper">
       <!-- 分组头像 - 使用分组名首字符 -->
-      <view class="group-avatar">
+      <view class="group-avatar" :style="getAvatarStyle()">
         <text class="avatar-text">{{ getAvatarText() }}</text>
       </view>
       
       <!-- 未读消息数量徽章 -->
-      <view v-if="message.unread_count > 0" class="unread-badge">
-        {{ message.unread_count > 99 ? '99+' : message.unread_count }}
+      <view v-if="hasUnreadMessages" class="unread-badge">
+        {{ displayUnreadCount }}
       </view>
     </view>
     
@@ -21,12 +24,12 @@
     <view class="content-wrapper">
       <!-- 分组名和时间行 -->
       <view class="header-row">
-        <text class="group-name">{{ message.group_name }}</text>
-        <text class="time-text">{{ formatTime(message.latest_time) }}</text>
+        <text class="group-name">{{ message.group_name || '未知群组' }}</text>
+        <text class="time-text">{{ formattedTime }}</text>
       </view>
       
       <!-- 最新消息内容 -->
-      <text class="latest-content">{{ message.latest_content }}</text>
+      <text class="latest-content">{{ displayContent }}</text>
     </view>
 
     <!-- 右侧箭头 -->
@@ -37,7 +40,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 // Props定义
 const props = defineProps({
@@ -45,54 +48,146 @@ const props = defineProps({
     type: Object,
     required: true,
     default: () => ({
+      id: '',
       group_name: '',
       unread_count: 0,
+      is_read: 1,
       latest_content: '',
-      latest_time: ''
+      latest_time: '',
+      type: 'group'
     })
+  },
+  loading: {
+    type: Boolean,
+    default: false
   }
 })
 
 // Emits定义
-const emit = defineEmits(['tap'])
+const emit = defineEmits(['tap', 'markAsRead'])
+
+// 计算属性
+const hasUnreadMessages = computed(() => {
+  return props.message.unread_count > 0 || props.message.is_read === 0
+})
+
+const displayUnreadCount = computed(() => {
+  const count = props.message.unread_count || (props.message.is_read === 0 ? 1 : 0)
+  return count > 99 ? '99+' : count.toString()
+})
+
+const displayContent = computed(() => {
+  const content = props.message.latest_content || props.message.content || props.message.message || ''
+  return content || '暂无内容'
+})
+
+const formattedTime = computed(() => {
+  return formatTime(props.message.latest_time || props.message.created_at || props.message.updated_at)
+})
 
 // 获取头像文本（分组名首字符）
 const getAvatarText = () => {
   const name = props.message.group_name || '未知'
-  return name.charAt(0).toUpperCase()
+  // 处理中文、英文和数字
+  const firstChar = name.charAt(0)
+  return firstChar.toUpperCase()
+}
+
+// 获取头像样式（根据群组名生成颜色）
+const getAvatarStyle = () => {
+  const name = props.message.group_name || 'default'
+  // 简单的哈希函数生成颜色
+  let hash = 0
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  
+  const colors = [
+    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+    'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+    'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+    'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)'
+  ]
+  
+  const colorIndex = Math.abs(hash) % colors.length
+  return {
+    background: colors[colorIndex]
+  }
 }
 
 // 处理卡片点击
 const handleCardTap = () => {
+  if (props.loading) return
+  
   emit('tap', props.message)
+  
+  // 如果有未读消息，触发标记已读事件
+  if (hasUnreadMessages.value) {
+    emit('markAsRead', props.message)
+  }
 }
 
 // 时间格式化
 const formatTime = (time) => {
   if (!time) return ''
   
-  const now = new Date()
-  const msgTime = new Date(time)
-  const diff = now - msgTime
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  
-  if (days === 0) {
-    const hours = Math.floor(diff / (1000 * 60 * 60))
-    if (hours === 0) {
-      const minutes = Math.floor(diff / (1000 * 60))
-      return minutes <= 0 ? '刚刚' : `${minutes}分钟前`
+  try {
+    const now = new Date()
+    let msgTime
+    
+    // 处理不同的时间格式
+    if (typeof time === 'string') {
+      // 处理 ISO 8601 格式，如 "2025-08-12T03:14:21+08:00"
+      msgTime = new Date(time)
+    } else if (time instanceof Date) {
+      msgTime = time
+    } else if (typeof time === 'number') {
+      // 时间戳
+      msgTime = new Date(time)
     } else {
-      return `${hours}小时前`
+      return String(time)
     }
-  } else if (days === 1) {
-    return '昨天'
-  } else if (days <= 7) {
-    return `${days}天前`
-  } else {
-    // 返回具体日期
-    const month = msgTime.getMonth() + 1
-    const date = msgTime.getDate()
-    return `${month}月${date}日`
+    
+    // 检查日期是否有效
+    if (isNaN(msgTime.getTime())) {
+      console.warn('无效的日期格式:', time)
+      return String(time)
+    }
+    
+    const diff = now - msgTime
+    const minutes = Math.floor(diff / (1000 * 60))
+    const hours = Math.floor(diff / (1000 * 60 * 60))
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+    
+    if (minutes < 1) {
+      return '刚刚'
+    } else if (minutes < 60) {
+      return `${minutes}分钟前`
+    } else if (hours < 24) {
+      return `${hours}小时前`
+    } else if (days === 1) {
+      return '昨天'
+    } else if (days <= 7) {
+      return `${days}天前`
+    } else {
+      // 返回具体日期
+      const month = msgTime.getMonth() + 1
+      const date = msgTime.getDate()
+      
+      // 如果是今年，不显示年份
+      if (msgTime.getFullYear() === now.getFullYear()) {
+        return `${month}月${date}日`
+      } else {
+        return `${msgTime.getFullYear()}年${month}月${date}日`
+      }
+    }
+  } catch (error) {
+    console.error('时间格式化错误:', error, '原始时间:', time)
+    return String(time)
   }
 }
 </script>
@@ -301,6 +396,32 @@ const formatTime = (time) => {
   color: #1d4ed8;
 }
 
+/* 加载状态 */
+.message-card.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.message-card.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
 /* 深色模式适配 */
 @media (prefers-color-scheme: dark) {
   .message-card {
@@ -342,32 +463,6 @@ const formatTime = (time) => {
   
   .has-unread .arrow-icon {
     color: #60a5fa;
-  }
-}
-
-/* 加载动画 */
-.message-card.loading {
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-.message-card.loading::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  animation: loading-shimmer 1.5s infinite;
-}
-
-@keyframes loading-shimmer {
-  0% {
-    left: -100%;
-  }
-  100% {
-    left: 100%;
   }
 }
 </style>

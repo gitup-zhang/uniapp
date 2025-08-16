@@ -215,6 +215,12 @@
   animation: spin-bb2249ad 1s linear infinite;
   margin-bottom: 24rpx;
 }
+.loading-spinner.small.data-v-bb2249ad {
+  width: 40rpx;
+  height: 40rpx;
+  border-width: 4rpx;
+  margin-bottom: 16rpx;
+}
 @keyframes spin-bb2249ad {
 0% { transform: rotate(0deg);
 }
@@ -223,6 +229,18 @@
 }
 .loading-text.data-v-bb2249ad {
   font-size: 28rpx;
+  color: #9ca3af;
+}
+
+/* 加载更多 */
+.load-more.data-v-bb2249ad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 20rpx;
+}
+.load-more-text.data-v-bb2249ad {
+  font-size: 24rpx;
   color: #9ca3af;
 }
 

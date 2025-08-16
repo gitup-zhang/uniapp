@@ -1,1607 +1,1157 @@
 <template>
-  <view class="profile-container">
-    
-	<uni-nav-bar
-	  statusBar="true"
-	  backgroundColor="#ff4757"
-	  fixed="true"
-	  :border="false"
-	  leftIcon="left"
-	  @clickLeft="goBack"
-	>
-	  <!-- 居中标题插槽 -->
-	  <template v-slot:default>
-	    <view class="navbar-center">
-	      <text class="navbar-title">个人信息</text>
-	    </view>
-	  </template>
-	</uni-nav-bar>
-
-    <!-- 头部背景装饰 -->
-    <view class="header-decoration">
-      <view class="deco-circle deco-1"></view>
-      <view class="deco-circle deco-2"></view>
-      <view class="deco-circle deco-3"></view>
-    </view>
-
-    <!-- 个人信息内容 -->
-    <view class="profile-content">
-      <!-- 头像区域 -->
-      <view class="avatar-section">
-        <view class="avatar-wrapper" @click="changeAvatar">
-          <image 
-            class="profile-avatar" 
-            :src="userInfo.info.avatar_url || '/static/icon/empty.png'" 
-            mode="aspectFill"
-          />
-          <view class="avatar-overlay">
-            <uni-icons type="camera" size="24" color="#fff"/>
-          </view>
-          <view class="online-badge">
-            <view class="badge-dot"></view>
-          </view>
+  <view class="admin-message-container">
+    <!-- 自定义导航栏 -->
+    <view class="custom-navbar">
+      <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
+      <view class="nav-content">
+        <view class="nav-left" @tap="goBack">
+          <text class="back-icon">‹</text>
         </view>
-        <!-- 修改：姓名变为可点击编辑 -->
-        <text class="username clickable-name" @click="editField('name')">
-          {{ userInfo.info.name || '点击设置姓名' }}
-        </text>
-        <text class="user-id">ID: {{ userInfo.info.userId || '123456789' }}</text>
-      </view>
-
-      <!-- 信息卡片列表 -->
-      <view class="info-cards">
-        <!-- 基本信息卡片 -->
-        <view class="info-card">
-          <view class="card-header">
-            <view class="header-icon basic-icon">
-              <uni-icons type="person" size="18" color="#fff"/>
-            </view>
-            <text class="card-title">基本信息</text>
-          </view>
-          <view class="card-content">
-            <view class="info-item clickable" @click="editField('nickname')">
-              <view class="item-icon">
-                <uni-icons type="person-filled" size="16" color="#666"/>
-              </view>
-              <view class="item-content">
-                <text class="item-label">昵称</text>
-                <text class="item-value">{{ userInfo.info.nickname || '点击设置' }}</text>
-              </view>
-              <view class="item-arrow">
-                <uni-icons type="right" size="14" color="#ccc"/>
-              </view>
-            </view>
-            <view class="info-item clickable" @click="editField('gender')">
-              <view class="item-icon">
-                <uni-icons type="flag" size="16" color="#666"/>
-              </view>
-              <view class="item-content">
-                <text class="item-label">性别</text>
-                <text class="item-value">{{ getGenderText(userInfo.info.gender) }}</text>
-              </view>
-              <view class="item-arrow">
-                <uni-icons type="right" size="14" color="#ccc"/>
-              </view>
-            </view>
-          </view>
+        <view class="nav-center">
+          <text class="nav-title">{{ groupName }}</text>
+          <text class="nav-subtitle">管理员通知</text>
         </view>
-
-        <!-- 工作信息卡片 -->
-        <view class="info-card">
-          <view class="card-header">
-            <view class="header-icon work-icon">
-              <uni-icons type="briefcase" size="18" color="#fff"/>
-            </view>
-            <text class="card-title">工作信息</text>
-          </view>
-          <view class="card-content">
-            <view class="info-item clickable" @click="editField('unit')">
-              <view class="item-icon">
-                <uni-icons type="home" size="16" color="#666"/>
-              </view>
-              <view class="item-content">
-                <text class="item-label">单位</text>
-                <text class="item-value">{{ userInfo.info.unit || '点击设置单位' }}</text>
-              </view>
-              <view class="item-arrow">
-                <uni-icons type="right" size="14" color="#ccc"/>
-              </view>
-            </view>
-            <view class="info-item clickable" @click="editField('department')">
-              <view class="item-icon">
-                <uni-icons type="gear" size="16" color="#666"/>
-              </view>
-              <view class="item-content">
-                <text class="item-label">部门</text>
-                <text class="item-value">{{ userInfo.info.department || '点击设置部门' }}</text>
-              </view>
-              <view class="item-arrow">
-                <uni-icons type="right" size="14" color="#ccc"/>
-              </view>
-            </view>
-            <!-- 修改：职位改为选择器 -->
-            <view class="info-item clickable" @click="editField('position')">
-              <view class="item-icon">
-                <uni-icons type="star" size="16" color="#666"/>
-              </view>
-              <view class="item-content">
-                <text class="item-label">职位</text>
-                <text class="item-value">{{ userInfo.info.position || '点击选择职位' }}</text>
-              </view>
-              <view class="item-arrow">
-                <uni-icons type="right" size="14" color="#ccc"/>
-              </view>
-            </view>
-            <view class="info-item clickable" @click="editField('industry')">
-              <view class="item-icon">
-                <uni-icons type="calendar" size="16" color="#666"/>
-              </view>
-              <view class="item-content">
-                <text class="item-label">行业</text>
-                <text class="item-value">{{ userInfo.info.industry || '点击选择行业' }}</text>
-              </view>
-              <view class="item-arrow">
-                <uni-icons type="right" size="14" color="#ccc"/>
-              </view>
-            </view>
-          </view>
-        </view>
-
-        <!-- 联系方式卡片 -->
-        <view class="info-card">
-          <view class="card-header">
-            <view class="header-icon contact-icon">
-              <uni-icons type="phone" size="18" color="#fff"/>
-            </view>
-            <text class="card-title">联系方式</text>
-          </view>
-          <view class="card-content">
-            <view class="info-item clickable" @click="editField('phone')">
-              <view class="item-icon">
-                <uni-icons type="phone-filled" size="16" color="#666"/>
-              </view>
-              <view class="item-content">
-                <text class="item-label">手机号码</text>
-                <text class="item-value">{{ formatPhoneNumber(userInfo.info.phone_number) }}</text>
-              </view>
-              <view class="item-arrow">
-                <uni-icons type="right" size="14" color="#ccc"/>
-              </view>
-            </view>
-            <view class="info-item clickable" @click="editField('email')">
-              <view class="item-icon">
-                <uni-icons type="email" size="16" color="#666"/>
-              </view>
-              <view class="item-content">
-                <text class="item-label">邮箱地址</text>
-                <text class="item-value">{{ userInfo.info.email || '点击绑定邮箱' }}</text>
-              </view>
-              <view class="item-arrow">
-                <uni-icons type="right" size="14" color="#ccc"/>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view> 
-      <!-- 退出登录按钮 -->
-      <view class="logout-section">
-        <button class="logout-btn" @click="confirmLogout">
-          <uni-icons type="loop" size="20" color="#ff4757"/>
-          <text class="logout-text">退出登录</text>
-        </button>
+        <view class="nav-right"></view>
       </view>
     </view>
 
-    <!-- 编辑字段弹窗 -->
-    <uni-popup ref="editPopup" type="center" :mask-click="false">
-      <view class="edit-modal">
-        <view class="modal-header">
-          <text class="modal-title">编辑{{ getFieldLabel(currentField) }}</text>
-          <view class="modal-close" @click="closeEdit">
-            <uni-icons type="closeempty" size="20" color="#999"/>
+    <!-- 消息列表区域 -->
+    <scroll-view
+      class="message-list"
+      :style="{ marginTop: statusBarHeight + 38 + 'px' }"
+      scroll-y="true"
+      :scroll-into-view="scrollIntoView"
+      :scroll-with-animation="true"
+      :bounces="false"
+    >
+      <!-- 消息列表 -->
+      <view class="message-list-content">
+        <!-- 日期分隔线 -->
+        <template v-for="(group, dateKey) in groupedMessages" :key="dateKey">
+          <view class="date-divider">
+            <view class="date-line"></view>
+            <text class="date-text">{{ dateKey }}</text>
+            <view class="date-line"></view>
           </view>
-        </view>
-        
-        <view class="modal-form">
-          <!-- 普通输入框 -->
-          <view v-if="isTextInput(currentField)" class="form-group">
-            <input 
-              class="form-input" 
-              v-model="editValue" 
-              :placeholder="getFieldPlaceholder(currentField)"
-              :maxlength="getFieldMaxLength(currentField)"
-              :type="currentField === 'phone' ? 'number' : 'text'"
-            />
-          </view>
-          
-          <!-- 手机号验证 -->
-          <view v-if="currentField === 'phone'" class="form-group">
-            <view class="phone-verify">
-              <input 
-                class="verify-input" 
-                v-model="verifyCode" 
-                placeholder="请输入验证码"
-                maxlength="6"
-                type="number"
-              />
-              <button 
-                class="send-code-btn" 
-                @click="sendVerifyCode"
-                :disabled="!canSendCode || codeSending"
-              >
-                {{ getCodeButtonText() }}
-              </button>
-            </view>
-          </view>
-          
-          <!-- 多行文本输入 -->
-          <view v-if="currentField === 'slogan'" class="form-group">
-            <textarea 
-              class="form-textarea" 
-              v-model="editValue" 
-              placeholder="请输入个性签名"
-              maxlength="100"
-            />
-          </view>
-          
-          <!-- 性别选择 -->
-          <view v-if="currentField === 'gender'" class="form-group">
-            <view class="gender-options">
-              <view 
-                class="gender-item" 
-                :class="{ active: editValue === 'F' }"
-                @click="editValue = 'F'"
-              >
-                <uni-icons type="person" size="16" :color="editValue === 'F' ? '#fff' : '#666'"/>
-                <text class="gender-label">女</text>
-              </view>
-              <view 
-                class="gender-item" 
-                :class="{ active: editValue === 'M' }"
-                @click="editValue = 'M'"
-              >
-                <uni-icons type="person" size="16" :color="editValue === 'M' ? '#fff' : '#666'"/>
-                <text class="gender-label">男</text>
-              </view>
-            </view>
-          </view>
-          
-          <!-- 生日选择 -->
-          <view v-if="currentField === 'birthday'" class="form-group">
-            <picker 
-              mode="date" 
-              :value="editValue" 
-              @change="onDateChange"
-            >
-              <view class="date-picker">
-                <text class="picker-text">{{ editValue || '请选择生日' }}</text>
-                <uni-icons type="calendar" size="16" color="#999"/>
-              </view>
-            </picker>
-          </view>
-          
-          <!-- 行业选择 -->
-          <view v-if="currentField === 'industry'" class="form-group">
-            <picker 
-              :value="industryIndex" 
-              :range="fieldstore.industory"
-              @change="onIndustryChange"
-            >
-              <view class="industry-picker">
-                <text class="picker-text">{{ editValue || '请选择行业' }}</text>
-                <uni-icons type="calendar" size="16" color="#999"/>
-              </view>
-            </picker>
-          </view>
-          
-          <!-- 修改：职位选择器 -->
-          <view v-if="currentField === 'position'" class="form-group">
-            <picker 
-              :value="positionIndex" 
-              :range="positionOptions"
-              @change="onPositionChange"
-            >
-              <view class="position-picker">
-                <text class="picker-text">{{ editValue || '请选择职位' }}</text>
-                <uni-icons type="star" size="16" color="#999"/>
-              </view>
-            </picker>
-          </view>
-        </view>
-        
-        <view class="modal-actions">
-          <button class="action-btn cancel-btn" @click="closeEdit">取消</button>
-          <button class="action-btn save-btn" @click="saveField" :disabled="isSaving">
-            {{ isSaving ? '保存中...' : '保存' }}
-          </button>
-        </view>
-      </view>
-    </uni-popup>
 
-    <!-- 加载提示 -->
-    <uni-popup ref="loadingPopup" type="center">
-      <view class="loading-modal">
-        <uni-load-more status="loading" :content-text="loadingText"/>
+          <!-- 该日期下的消息 -->
+          <view
+            v-for="message in group"
+            :key="message.id"
+            :id="`msg-${message.id}`"
+            class="message-item"
+          >
+            <!-- 管理员消息 -->
+            <view class="admin-message">
+              <!-- 管理员头像 -->
+              <view class="avatar-wrapper">
+                <view class="admin-avatar">
+                  <text class="avatar-text">管</text>
+                </view>
+                <view class="admin-badge">
+                  <text class="badge-text">管理员</text>
+                </view>
+              </view>
+
+              <!-- 消息内容区域 -->
+              <view class="message-content-wrapper">
+                <!-- 消息头部 -->
+                <view class="message-header">
+                  <text class="sender-name">系统管理员</text>
+                  <text class="message-time">{{ formatMessageTime(message.created_at) }}</text>
+                </view>
+
+                <!-- 消息气泡 -->
+                <view class="message-bubble" @tap="handleMessageTap(message)">
+                  <!-- 消息标题 -->
+                  <view v-if="message.title" class="message-title">
+                    <text class="title-text">{{ message.title }}</text>
+                    <view v-if="message.priority === 'high'" class="priority-badge">
+                      <text class="priority-text">重要</text>
+                    </view>
+                  </view>
+
+                  <!-- 消息内容 -->
+                  <view class="message-content">
+                    <text 
+                      class="content-text" 
+                      :class="{ 'expanded': expandedMessages[message.id] }"
+                    >{{ getDisplayContent(message) }}</text>
+                    
+                    <!-- 展开/收起按钮 -->
+                    <view 
+                      v-if="isLongContent(message.content)" 
+                      class="expand-btn"
+                      @tap.stop="toggleExpand(message.id)"
+                    >
+                      <text class="expand-text">
+                        {{ expandedMessages[message.id] ? '收起' : '查看全部' }}
+                      </text>
+                      <text class="expand-icon">
+                        {{ expandedMessages[message.id] ? '▲' : '▼' }}
+                      </text>
+                    </view>
+                  </view>
+
+                  <!-- 消息类型标签 -->
+                  <view v-if="message.type && message.type !== 'normal'" class="message-tags">
+                    <view class="tag-item" :class="`tag-${message.type}`">
+                      <text class="tag-text">{{ getTypeLabel(message.type) }}</text>
+                    </view>
+                  </view>
+
+                  <!-- 点击查看详情提示 -->
+                  <view v-if="hasMoreContent(message)" class="view-detail-hint">
+                    <text class="hint-text">点击查看详情</text>
+                    <text class="hint-arrow">›</text>
+                  </view>
+                </view>
+
+                <!-- 消息操作 -->
+                <view v-if="message.actions && message.actions.length > 0" class="message-actions">
+                  <view 
+                    v-for="action in message.actions" 
+                    :key="action.id"
+                    class="action-btn"
+                    :class="`action-${action.type}`"
+                    @tap="handleAction(action, message)"
+                  >
+                    <text class="action-text">{{ action.label }}</text>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </template>
+
+        <!-- 没有消息提示 -->
+        <view v-if="messages.length === 0 && !isLoading" class="empty-state">
+          <view class="empty-icon">📢</view>
+          <text class="empty-title">暂无管理员消息</text>
+          <text class="empty-desc">管理员发布的通知消息将在这里显示</text>
+        </view>
       </view>
-    </uni-popup>
+    </scroll-view>
+
+    <!-- 加载遮罩 -->
+    <view v-if="isLoading" class="loading-overlay">
+      <view class="loading-content">
+        <view class="loading-spinner"></view>
+        <text class="loading-text">加载中...</text>
+      </view>
+    </view>
   </view>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
-import { useInfoStore } from '@/store/Info.js'
-import {usefieldstore} from '@/store/field.js'
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 
-
-// Store 和基础数据
-const userInfo = useInfoStore()
-const fieldstore=usefieldstore()
-const SYSTEMINFO = uni.getSystemInfoSync()
-const statusBarHeight = ref(SYSTEMINFO.statusBarHeight)
-
-// 弹窗引用
-const editPopup = ref(null)
-const loadingPopup = ref(null)
-
-// 状态变量
-const isSaving = ref(false)
-const loadingText = ref({ more: '加载中...' })
-const currentField = ref('')
-const editValue = ref('')
-const verifyCode = ref('')
-const codeSending = ref(false)
-const countdown = ref(0)
-const canSendCode = ref(true)
-
-// // 行业选项
-// let industryOptions = []
-
-// 新增：职位选项
-const positionOptions = [
-  '总经理/CEO',
-  '副总经理/副CEO',
-  '总监',
-  '副总监',
-  '部门经理',
-  '副经理',
-  '主管/组长',
-  '高级工程师',
-  '工程师',
-  '初级工程师',
-  '高级专员',
-  '专员',
-  '助理专员',
-  '销售总监',
-  '销售经理',
-  '销售代表',
-  '市场总监',
-  '市场经理',
-  '市场专员',
-  '产品总监',
-  '产品经理',
-  '产品专员',
-  '技术总监',
-  '技术经理',
-  '架构师',
-  '开发工程师',
-  '测试工程师',
-  '运维工程师',
-  '设计总监',
-  '设计经理',
-  'UI设计师',
-  '平面设计师',
-  '人事总监',
-  '人事经理',
-  '人事专员',
-  '财务总监',
-  '财务经理',
-  '会计',
-  '出纳',
-  '行政总监',
-  '行政经理',
-  '行政专员',
-  '客服经理',
-  '客服专员',
-  '其他'
-]
-
-// 计算当前选中的行业索引
-const industryIndex = computed(() => {
-  return fieldstore.industory.indexOf(editValue.value) >= 0 ? fieldstore.industory.indexOf(editValue.value) : 0
+// 页面参数
+const props = defineProps({
+  id: String,
+  groupName: String
 })
 
-// 新增：计算当前选中的职位索引
-const positionIndex = computed(() => {
-  return positionOptions.indexOf(editValue.value) >= 0 ? positionOptions.indexOf(editValue.value) : 0
+// 页面状态
+const statusBarHeight = ref(0)
+const isLoading = ref(false)
+const scrollIntoView = ref('')
+
+// 群组信息
+const groupId = ref('')
+const groupName = ref('管理员通知')
+
+// 消息相关
+const messages = ref([])
+const expandedMessages = ref({})
+
+// 内容截断长度
+const CONTENT_LIMIT = 100
+
+// 生命周期
+onMounted(async () => {
+  const sysInfo = uni.getSystemInfoSync()
+  statusBarHeight.value = sysInfo.statusBarHeight || 0
 })
 
-// 页面挂载
-onMounted(() => {
-  initPage()
-})
-
-// 初始化页面
-const initPage = () => {
-  // 页面初始化逻辑
-  fieldstore.getindustory()
+onLoad(async (options) => {
+  groupId.value = options.id || ''
+  groupName.value = decodeURIComponent(options.groupName || '管理员通知')
   
+  await loadMessages()
+})
+
+onShow(() => {
+  // 页面显示时滚动到顶部
+  scrollToTop()
+})
+
+// 计算属性
+// 按日期分组的消息
+const groupedMessages = computed(() => {
+  const grouped = {}
+  
+  messages.value.forEach(message => {
+    const date = new Date(message.created_at)
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+    
+    let dateKey = ''
+    if (isSameDay(date, today)) {
+      dateKey = '今天'
+    } else if (isSameDay(date, yesterday)) {
+      dateKey = '昨天'
+    } else if (date.getFullYear() === today.getFullYear()) {
+      dateKey = `${date.getMonth() + 1}月${date.getDate()}日`
+    } else {
+      dateKey = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
+    }
+    
+    if (!grouped[dateKey]) {
+      grouped[dateKey] = []
+    }
+    grouped[dateKey].push(message)
+  })
+  
+  return grouped
+})
+
+// 方法定义
+const isSameDay = (date1, date2) => {
+  return date1.getFullYear() === date2.getFullYear() &&
+         date1.getMonth() === date2.getMonth() &&
+         date1.getDate() === date2.getDate()
 }
 
-// 返回上一页
+const loadMessages = async () => {
+  isLoading.value = true
+  
+  try {
+    // 这里应该调用API获取管理员消息列表
+    // const response = await getAdminMessages(groupId.value)
+    
+    // 模拟管理员消息数据
+    const mockMessages = generateMockAdminMessages()
+    messages.value = mockMessages
+    
+  } catch (error) {
+    console.error('加载消息失败:', error)
+    uni.showToast({
+      title: '加载消息失败',
+      icon: 'error'
+    })
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const generateMockAdminMessages = () => {
+  const messageTypes = [
+    { type: 'announcement', label: '公告' },
+    { type: 'maintenance', label: '维护' },
+    { type: 'event', label: '活动' },
+    { type: 'security', label: '安全' },
+    { type: 'update', label: '更新' }
+  ]
+  
+  const mockMessages = []
+  
+  for (let i = 0; i < 15; i++) {
+    const messageType = messageTypes[Math.floor(Math.random() * messageTypes.length)]
+    const isLongContent = Math.random() > 0.6
+    const hasTitle = Math.random() > 0.3
+    const priority = Math.random() > 0.8 ? 'high' : 'normal'
+    
+    let title = ''
+    let content = ''
+    
+    if (hasTitle) {
+      switch (messageType.type) {
+        case 'announcement':
+          title = `重要公告：关于${['系统升级', '政策调整', '功能更新', '服务优化'][Math.floor(Math.random() * 4)]}的通知`
+          break
+        case 'maintenance':
+          title = '系统维护通知'
+          break
+        case 'event':
+          title = `活动通知：${['双十一大促', '新年活动', '周年庆典', '限时优惠'][Math.floor(Math.random() * 4)]}`
+          break
+        case 'security':
+          title = '安全提醒'
+          break
+        case 'update':
+          title = '版本更新说明'
+          break
+      }
+    }
+    
+    if (isLongContent) {
+      content = `这是一条较长的管理员通知消息，包含了详细的说明和要求。消息内容较多，需要用户点击查看完整内容。本次通知涉及以下几个重要方面：\n\n1. 系统功能优化和改进\n2. 用户体验提升措施\n3. 安全性能增强\n4. 新功能介绍和使用指南\n\n请各位用户仔细阅读相关内容，如有疑问请及时联系客服。感谢您的配合与支持！\n\n详细内容请点击查看完整通知。`
+    } else {
+      content = `这是第${i + 1}条管理员通知，内容相对简短，可以直接在列表中完整显示。`
+    }
+    
+    const message = {
+      id: `admin_msg_${Date.now()}_${i}`,
+      title: hasTitle ? title : '',
+      content: content,
+      type: messageType.type,
+      priority: priority,
+      created_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+      sender_type: 'admin',
+      sender_name: '系统管理员',
+      read_status: Math.random() > 0.3 ? 'read' : 'unread',
+      actions: Math.random() > 0.7 ? [
+        { id: 'view_detail', type: 'primary', label: '查看详情', url: '/pages/notice/detail' },
+        { id: 'mark_read', type: 'secondary', label: '标记已读' }
+      ] : []
+    }
+    
+    mockMessages.push(message)
+  }
+  
+  return mockMessages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+}
+
+const scrollToTop = () => {
+  nextTick(() => {
+    if (messages.value.length > 0) {
+      scrollIntoView.value = `msg-${messages.value[0].id}`
+    }
+  })
+}
+
 const goBack = () => {
   uni.navigateBack()
 }
 
-// 格式化手机号
-const formatPhoneNumber = (phone) => {
-  if (!phone) return '未绑定'
-  return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
-}
-
-// 获取性别文本
-const getGenderText = (gender) => {
-	console.log("获取到的性别：",gender)
-  const genderMap = {
-    'M': '男',
-    'F': '女'
-  }
-  // return genderMap[gender] || '点击设置性别'
-  return gender
-}
-
-// 获取字段标签
-const getFieldLabel = (field) => {
-  const labels = {
-	'name': '姓名',
-    'nickname': '昵称',
-    'slogan': '个性签名',
-    'gender': '性别',
-    'birthday': '生日',
-    'unit': '单位',
-    'department': '部门',
-    'position': '职位',
-    'industry': '行业',
-    'email': '邮箱',
-    'phone': '手机号码'
-  }
-  return labels[field] || ''
-}
-
-// 获取字段占位符
-const getFieldPlaceholder = (field) => {
-  const placeholders = {
-	'name': '请输入姓名',
-    'nickname': '请输入昵称',
-    'unit': '请输入单位名称',
-    'department': '请输入部门名称',
-    'position': '请选择职位',
-    'email': '请输入邮箱地址',
-    'phone': '请输入新手机号码'
-  }
-  return placeholders[field] || ''
-}
-
-// 获取字段最大长度
-const getFieldMaxLength = (field) => {
-  const maxLengths = {
-	'name': 20,  
-    'nickname': 20,
-    'unit': 50,
-    'department': 30,
-    'position': 30,
-    'email': 50,
-    'phone': 11
-  }
-  return maxLengths[field] || 50
-}
-
-// 修改：判断是否为文本输入（职位不再是文本输入）
-const isTextInput = (field) => {
-  return ['name','nickname', 'unit', 'department', 'email', 'phone'].includes(field)
-}
-
-// 编辑字段
-const editField = (field) => {
-  currentField.value = field
-  editValue.value = userInfo.info[field] || ''
-  verifyCode.value = ''
-  editPopup.value?.open()
-}
-
-// 关闭编辑弹窗
-const closeEdit = () => {
-  editPopup.value?.close()
-  currentField.value = ''
-  editValue.value = ''
-  verifyCode.value = ''
-  // 清除倒计时
-  if (countdown.value > 0) {
-    clearInterval(countdownTimer.value)
-    countdown.value = 0
-    canSendCode.value = true
-  }
-}
-
-// 倒计时定时器
-let countdownTimer = ref(null)
-
-// 发送验证码
-const sendVerifyCode = async () => {
-  if (!editValue.value) {
-    uni.showToast({
-      title: '请先输入手机号',
-      icon: 'none'
-    })
-    return
-  }
-
-  // 手机号格式验证
-  const phoneRegex = /^1[3-9]\d{9}$/
-  if (!phoneRegex.test(editValue.value)) {
-    uni.showToast({
-      title: '手机号格式不正确',
-      icon: 'none'
-    })
-    return
-  }
-
-  try {
-    codeSending.value = true
-    
-    // 调用发送验证码接口
-    await sendPhoneVerifyCode(editValue.value)
-    
-    uni.showToast({
-      title: '验证码已发送',
-      icon: 'success'
-    })
-    
-    // 开始倒计时
-    startCountdown()
-    
-  } catch (error) {
-    console.error('发送验证码失败:', error)
-    uni.showToast({
-      title: '发送失败，请重试',
-      icon: 'error'
-    })
-  } finally {
-    codeSending.value = false
-  }
-}
-
-// 开始倒计时
-const startCountdown = () => {
-  canSendCode.value = false
-  countdown.value = 60
+const formatMessageTime = (timeStr) => {
+  if (!timeStr) return ''
   
-  countdownTimer.value = setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) {
-      clearInterval(countdownTimer.value)
-      canSendCode.value = true
-    }
-  }, 1000)
+  const time = new Date(timeStr)
+  const now = new Date()
+  
+  if (isSameDay(time, now)) {
+    return `${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(2, '0')}`
+  } else {
+    return `${time.getMonth() + 1}-${time.getDate()} ${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(2, '0')}`
+  }
 }
 
-// 获取验证码按钮文本
-const getCodeButtonText = () => {
-  if (codeSending.value) return '发送中...'
-  if (countdown.value > 0) return `${countdown.value}s`
-  return '发送验证码'
+const getTypeLabel = (type) => {
+  const labels = {
+    'announcement': '公告',
+    'maintenance': '维护',
+    'event': '活动',
+    'security': '安全',
+    'update': '更新',
+    'normal': '通知'
+  }
+  return labels[type] || '通知'
 }
 
-// 发送验证码API
-const sendPhoneVerifyCode = async (phone) => {
-  return new Promise((resolve, reject) => {
-    uni.request({
-      url: 'https://your-api-domain.com/api/phone/send-code',
-      method: 'POST',
-      data: { phone },
-      header: {
-        'Authorization': `Bearer ${userInfo.token}`
-      },
-      success: (res) => {
-        if (res.data.success) {
-          resolve(res.data.data)
-        } else {
-          reject(new Error(res.data.message || '发送失败'))
-        }
-      },
-      fail: (error) => {
-        reject(error)
-      }
-    })
-  })
+// 内容展开/收起相关
+const isLongContent = (content) => {
+  return content && content.length > CONTENT_LIMIT
 }
 
-// 日期选择变化
-const onDateChange = (e) => {
-  editValue.value = e.detail.value
+const getDisplayContent = (message) => {
+  if (!message.content) return ''
+  
+  const isExpanded = expandedMessages.value[message.id]
+  if (isExpanded || !isLongContent(message.content)) {
+    return message.content
+  }
+  
+  return message.content.substring(0, CONTENT_LIMIT) + '...'
 }
 
-// 行业选择变化
-const onIndustryChange = (e) => {
-  const index = e.detail.value
-  editValue.value = fieldstore.industory[index]
+const toggleExpand = (messageId) => {
+  expandedMessages.value[messageId] = !expandedMessages.value[messageId]
 }
 
-// 新增：职位选择变化
-const onPositionChange = (e) => {
-  const index = e.detail.value
-  editValue.value = positionOptions[index]
+const hasMoreContent = (message) => {
+  return message.title || message.actions?.length > 0 || isLongContent(message.content)
 }
 
-// 保存字段
-const saveField = async () => {
-  if (!editValue.value && currentField.value !== 'slogan') {
-    uni.showToast({
-      title: `请输入${getFieldLabel(currentField.value)}`,
-      icon: 'none'
-    })
+// 消息点击处理
+const handleMessageTap = (message) => {
+  // 如果是长内容且未展开，先展开
+  if (isLongContent(message.content) && !expandedMessages.value[message.id]) {
+    toggleExpand(message.id)
     return
   }
-
-  // 手机号特殊处理
-  if (currentField.value === 'phone') {
-    if (!verifyCode.value) {
-      uni.showToast({
-        title: '请输入验证码',
-        icon: 'none'
-      })
-      return
-    }
-    
-    const phoneRegex = /^1[3-9]\d{9}$/
-    if (!phoneRegex.test(editValue.value)) {
-      uni.showToast({
-        title: '手机号格式不正确',
-        icon: 'none'
-      })
-      return
-    }
-    
-    if (verifyCode.value.length !== 6) {
-      uni.showToast({
-        title: '验证码格式不正确',
-        icon: 'none'
-      })
-      return
-    }
-  }
-
-  // 邮箱格式验证
-  if (currentField.value === 'email' && editValue.value) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(editValue.value)) {
-      uni.showToast({
-        title: '邮箱格式不正确',
-        icon: 'none'
-      })
-      return
-    }
-  }
-
-  try {
-    isSaving.value = true
-    
-    // 调用保存接口
-    const updateData = {
-      [currentField.value]: editValue.value
-    }
-    
-    // 手机号需要传递验证码
-    if (currentField.value === 'phone') {
-      updateData.verifyCode = verifyCode.value
-    }
-    console.log("更新的数据：",updateData)
-    
-    // 更新本地数据
-	await userInfo.updateinfo(updateData)
-    await userInfo.getinfo()
-    
-    uni.showToast({
-      title: '保存成功',
-      icon: 'success'
-    })
-    
-    closeEdit()
-    
-  } catch (error) {
-    console.error('保存失败:', error)
-    uni.showToast({
-      title: error.message || '保存失败，请重试',
-      icon: 'error'
-    })
-  } finally {
-    isSaving.value = false
-  }
-}
-
-// 更换头像
-const changeAvatar = () => {
-  uni.chooseImage({
-    count: 1,
-    sizeType: ['compressed'],
-    sourceType: ['album', 'camera'],
-    success: (res) => {
-		
-      uploadAvatar(res.tempFilePaths[0])
-    }
-  })
-}
-
-// 上传头像
-const uploadAvatar = async (filePath) => {
-  try {
-    showLoading('上传头像中...')
-	const res=await userInfo.uploadimage(filePath)
-	await userInfo.updateinfo({'avatar_url':res.data.url})
-	await userInfo.getinfo()
-	console.log("res:",res)
-    
-    uni.showToast({
-      title: '头像更新成功',
-      icon: 'success'
-    })
-  } catch (error) {
-    uni.showToast({
-      title: '头像更新失败',
-      icon: 'error'
-    })
-  } finally {
-    hideLoading()
-  }
-}
-
-// 修改密码
-const changePassword = () => {
+  
+  // 跳转到消息详情页面
   uni.navigateTo({
-    url: '/pages/change-password/index'
+    url: `/pages/admin-message/detail?id=${message.id}&title=${encodeURIComponent(message.title || '管理员通知')}`
   })
 }
 
-// 隐私设置
-const privacySettings = () => {
-  uni.navigateTo({
-    url: '/pages/privacy/index'
-  })
-}
-
-// 确认退出登录
-const confirmLogout = () => {
-  uni.showModal({
-    title: '确认退出',
-    content: '确定要退出当前账号吗？',
-    confirmColor: '#ff4757',
-    success: (res) => {
-      if (res.confirm) {
-        logout()
+// 消息操作处理
+const handleAction = (action, message) => {
+  switch (action.type) {
+    case 'primary':
+      // 主要操作，通常是查看详情
+      uni.navigateTo({
+        url: `${action.url}?id=${message.id}`
+      })
+      break
+    case 'secondary':
+      // 次要操作，如标记已读
+      if (action.id === 'mark_read') {
+        markAsRead(message)
       }
-    }
-  })
-}
-
-// 退出登录
-const logout = async () => {
-  try {
-    showLoading('正在退出...')
-    
-    // 清空本地存储
-    await userInfo.deleteinfo()
-    
-    uni.showToast({
-      title: '已退出登录',
-      icon: 'success'
-    })
-    
-    // 返回首页或登录页
-    uni.reLaunch({
-      url: '/pages/mymessage/mymessage'
-    })
-    
-  } catch (error) {
-    console.error('退出登录失败:', error)
-  } finally {
-    hideLoading()
+      break
+    default:
+      uni.showToast({
+        title: '操作成功',
+        icon: 'success'
+      })
   }
 }
 
-// 显示加载提示
-const showLoading = (text = '加载中...') => {
-  loadingText.value.more = text
-  loadingPopup.value?.open()
-}
-
-// 隐藏加载提示
-const hideLoading = () => {
-  loadingPopup.value?.close()
+const markAsRead = async (message) => {
+  try {
+    // 这里调用API标记消息为已读
+    // await markMessageAsRead(message.id)
+    
+    // 更新本地状态
+    const messageIndex = messages.value.findIndex(msg => msg.id === message.id)
+    if (messageIndex !== -1) {
+      messages.value[messageIndex].read_status = 'read'
+    }
+    
+    uni.showToast({
+      title: '已标记为已读',
+      icon: 'success',
+      duration: 1500
+    })
+    
+  } catch (error) {
+    console.error('标记已读失败:', error)
+    uni.showToast({
+      title: '操作失败',
+      icon: 'error'
+    })
+  }
 }
 </script>
 
-<style lang="scss" scoped>
-	@import "../../style/detail.css";
-.profile-container {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #ff4757 0%, #ff6b7a 100%);
-  position: relative;
-}
-
-.status-bar {
-	
-  background: transparent;
-}
-
-
-.nav-bar {
-  height: 88rpx;
+<style scoped>
+.admin-message-container {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 32rpx;
-  position: relative;
-  z-index: 10;
-  
-
-
-  .nav-back {
-    width: 64rpx;
-    height: 64rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    backdrop-filter: blur(10rpx);
-  }
-
-  .nav-title {
-    font-size: 36rpx;
-    font-weight: 700;
-    color: #fff;
-  }
-
-  .nav-right {
-    width: 64rpx;
-  }
+  flex-direction: column;
+  height: 100vh;
+  background: #f8fafc;
 }
 
-.header-decoration {
-  position: absolute;
+/* 导航栏样式 */
+.custom-navbar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 400rpx;
-  pointer-events: none;
-
-  .deco-circle {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-
-    &.deco-1 {
-      width: 200rpx;
-      height: 200rpx;
-      top: 100rpx;
-      right: -50rpx;
-    }
-
-    &.deco-2 {
-      width: 120rpx;
-      height: 120rpx;
-      top: 200rpx;
-      left: -30rpx;
-    }
-
-    &.deco-3 {
-      width: 80rpx;
-      height: 80rpx;
-      top: 320rpx;
-      right: 100rpx;
-    }
-  }
+  z-index: 1000;
+  box-shadow: 0 2rpx 16rpx rgba(102, 126, 234, 0.3);
 }
 
-.profile-content {
-  position: relative;
-  z-index: 1;
-  padding: 0 32rpx 32rpx;
+.status-bar {
+  width: 100%;
 }
 
-.avatar-section {
-  text-align: center;
-  margin-bottom: 32rpx;
-  padding-top: 20rpx;
-
-  .avatar-wrapper {
-    position: relative;
-    display: inline-block;
-    margin-bottom: 24rpx;
-
-    .profile-avatar {
-      width: 160rpx;
-      height: 160rpx;
-      border-radius: 50%;
-      border: 6rpx solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.15);
-    }
-
-    .avatar-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    &:active .avatar-overlay {
-      opacity: 1;
-    }
-
-    .online-badge {
-      position: absolute;
-      bottom: 12rpx;
-      right: 12rpx;
-      width: 32rpx;
-      height: 32rpx;
-      background: #fff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
-
-      .badge-dot {
-        width: 16rpx;
-        height: 16rpx;
-        background: #2ed573;
-        border-radius: 50%;
-        animation: pulse 2s infinite;
-      }
-    }
-  }
-
-  .username {
-    display: block;
-    font-size: 40rpx;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 8rpx;
-    
-    /* 新增：可点击姓名样式 */
-    &.clickable-name {
-      cursor: pointer;
-      position: relative;
-      padding: 8rpx 16rpx;
-      border-radius: 20rpx;
-      transition: all 0.3s ease;
-      
-      &:hover {
-        background: rgba(255, 255, 255, 0.1);
-      }
-      
-      &:active {
-        background: rgba(255, 255, 255, 0.2);
-        transform: scale(0.98);
-      }
-      
-      /* 添加编辑图标提示 */
-      &::after {
-        content: '';
-        display: inline-block;
-        width: 24rpx;
-        height: 24rpx;
-        background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTExLjc0MiAyLjAxNUM2LjQxIDMuNzUgMS41IDUuNDE1IDEuNSA3LjVDMS41IDkuNTg1IDYuNDEgMTEuMjUgMTEuNzQyIDEyLjk4NUMxMi4wMzQgMTMuMDk3IDEyLjM1OSAxMy4wOTcgMTIuNjUxIDEyLjk4NUMxNy45ODMgMTEuMjUgMjIuOTAzIDkuNTg1IDIyLjkwMyA3LjVDMjIuOTAzIDUuNDE1IDE3Ljk4MyAzLjc1IDEyLjY1MSAyLjAxNUMxMi4zNTkgMS45MDMgMTIuMDM0IDEuOTAzIDExLjc0MiAyLjAxNVoiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuNyIvPgo8L3N2Zz4K') no-repeat center;
-        background-size: contain;
-        margin-left: 8rpx;
-        opacity: 0.7;
-      }
-    }
-  }
-
-  .user-id {
-    display: block;
-    font-size: 26rpx;
-    color: rgba(255, 255, 255, 0.8);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-.info-cards {
-  .info-card {
-    background: #fff;
-    border-radius: 24rpx;
-    margin-bottom: 24rpx;
-    overflow: hidden;
-    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      padding: 32rpx;
-      background: linear-gradient(135deg, #f8f9fa, #fff);
-      border-bottom: 1rpx solid #f0f0f0;
-
-      .header-icon {
-        width: 64rpx;
-        height: 64rpx;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 24rpx;
-
-        &.basic-icon {
-          background: linear-gradient(135deg, #667eea, #764ba2);
-        }
-
-        &.work-icon {
-          background: linear-gradient(135deg, #f093fb, #f5576c);
-        }
-
-        &.contact-icon {
-          background: linear-gradient(135deg, #2ed573, #7bed9f);
-        }
-
-        &.stats-icon {
-          background: linear-gradient(135deg, #ff9a9e, #fecfef);
-        }
-
-        &.security-icon {
-          background: linear-gradient(135deg, #ffa726, #ffcc02);
-        }
-      }
-
-      .card-title {
-        font-size: 32rpx;
-        font-weight: 700;
-        color: #333;
-      }
-    }
-
-    .card-content {
-      padding: 0 32rpx 32rpx;
-
-      .info-item {
-        display: flex;
-        align-items: flex-start;
-        padding: 24rpx 0;
-        border-bottom: 1rpx solid #f8f9fa;
-        position: relative;
-
-        &:last-child {
-          border-bottom: none;
-        }
-
-        &.clickable {
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-
-          &:hover {
-            background: #f8f9fa;
-          }
-
-          &:active {
-            background: #f0f0f0;
-          }
-        }
-
-        .item-icon {
-          width: 40rpx;
-          height: 40rpx;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-right: 24rpx;
-          margin-top: 4rpx;
-        }
-
-        .item-content {
-          flex: 1;
-
-          .item-label {
-            display: block;
-            font-size: 28rpx;
-            color: #666;
-            margin-bottom: 8rpx;
-          }
-
-          .item-value {
-            display: block;
-            font-size: 30rpx;
-            color: #333;
-            font-weight: 500;
-            line-height: 1.4;
-          }
-        }
-
-        .item-arrow {
-          width: 32rpx;
-          height: 32rpx;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-      }
-
-      .stats-grid {
-        display: flex;
-        padding: 24rpx 0;
-
-        .stats-item {
-          flex: 1;
-          text-align: center;
-
-          .stats-number {
-            display: block;
-            font-size: 48rpx;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 8rpx;
-          }
-
-          .stats-label {
-            display: block;
-            font-size: 26rpx;
-            color: #666;
-          }
-        }
-      }
-    }
-  }
-}
-
-.logout-section {
-  margin-top: 40rpx;
+.nav-content {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
   padding: 0 32rpx;
-
-  .logout-btn {
-    width: 100%;
-    height: 88rpx;
-    background: #fff;
-    border: 2rpx solid #ff4757;
-    border-radius: 44rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-
-    &:active {
-      background: #ff4757;
-      transform: scale(0.98);
-
-      .logout-text {
-        color: #fff;
-      }
-    }
-
-    &::after {
-      border: none;
-    }
-
-    .logout-text {
-      font-size: 32rpx;
-      font-weight: 600;
-      color: #ff4757;
-      margin-left: 12rpx;
-      transition: color 0.3s ease;
-    }
-  }
+  position: relative;
 }
 
-// 编辑弹窗样式
-.edit-modal {
-  background: #fff;
-  border-radius: 24rpx;
-  width: 680rpx;
-  max-width: 92vw;
-  max-height: 80vh;
-  overflow: hidden;
-
-  .modal-header {
-    height: 100rpx;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32rpx;
-    border-bottom: 1rpx solid #f0f0f0;
-    background: #fff;
-
-    .modal-title {
-      font-size: 32rpx;
-      font-weight: 700;
-      color: #333;
-    }
-
-    .modal-close {
-      width: 60rpx;
-      height: 60rpx;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: background-color 0.3s ease;
-
-      &:active {
-        background: #f8f9fa;
-      }
-    }
-  }
-
-  .modal-form {
-    padding: 40rpx;
-    max-height: 60vh;
-    overflow-y: auto;
-
-    .form-group {
-      margin-bottom: 32rpx;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-
-      .form-input{
-        width: 100%;
-        height: 96rpx;
-        padding: 0 32rpx;
-        border: 2rpx solid #e8e8e8;
-        border-radius: 16rpx;
-        font-size: 32rpx;
-        color: #333;
-        background: #fff;
-        transition: border-color 0.3s ease;
-        box-sizing: border-box;
-        line-height: 96rpx;
-        display: flex;
-        align-items: center;
-
-        &:focus {
-          border-color: #ff4757;
-          outline: none;
-        }
-
-        &::placeholder {
-          color: #999;
-          line-height: 96rpx;
-        }
-      }
-
-      .form-textarea {
-		   width: 100%;
-		          padding: 28rpx 24rpx;
-		          border: 2rpx solid #e8e8e8;
-		          border-radius: 16rpx;
-		          font-size: 30rpx;
-		          color: #333;
-		          background: #fff;
-		          transition: border-color 0.3s ease;
-		          box-sizing: border-box;
-		          line-height: 1.4;
-        height: 160rpx;
-        line-height: 1.6;
-        padding: 24rpx 32rpx;
-        resize: none;
-        font-family: inherit;
-        vertical-align: top;
-      }
-
-      .phone-verify {
-        display: flex;
-        gap: 20rpx;
-        align-items: stretch;
-
-        .verify-input {
-          flex: 1;
-          height: 96rpx;
-          padding: 0 32rpx;
-          border: 2rpx solid #e8e8e8;
-          border-radius: 16rpx;
-          font-size: 32rpx;
-          color: #333;
-          background: #fff;
-          transition: border-color 0.3s ease;
-          box-sizing: border-box;
-          line-height: 96rpx;
-
-          &:focus {
-            border-color: #ff4757;
-            outline: none;
-          }
-
-          &::placeholder {
-            color: #999;
-            line-height: 96rpx;
-          }
-        }
-
-        .send-code-btn {
-          height: 96rpx;
-          padding: 0 40rpx;
-          background: linear-gradient(135deg, #ff4757, #ff6b7a);
-          color: #fff;
-          border: none;
-          border-radius: 16rpx;
-          font-size: 28rpx;
-          font-weight: 600;
-          white-space: nowrap;
-          transition: all 0.3s ease;
-          min-width: 200rpx;
-          box-sizing: border-box;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          &:disabled {
-            opacity: 0.6;
-            background: #ccc;
-          }
-
-          &:not(:disabled):active {
-            transform: scale(0.98);
-          }
-
-          &::after {
-            border: none;
-          }
-        }
-      }
-
-      .gender-options {
-        display: flex;
-        gap: 24rpx;
-
-        .gender-item {
-          flex: 1;
-          height: 96rpx;
-          border: 2rpx solid #e8e8e8;
-          border-radius: 16rpx;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.3s ease;
-          cursor: pointer;
-
-          &.active {
-            border-color: #ff4757;
-            background: #ff4757;
-          }
-
-          &:active {
-            transform: scale(0.98);
-          }
-
-          .gender-label {
-            margin-left: 8rpx;
-            font-size: 32rpx;
-            font-weight: 500;
-            color: #333;
-            transition: color 0.3s ease;
-          }
-
-          &.active .gender-label {
-            color: #fff;
-          }
-        }
-      }
-
-      .date-picker, .industry-picker, .position-picker {
-        height: 96rpx;
-        padding: 0 32rpx;
-        border: 2rpx solid #e8e8e8;
-        border-radius: 16rpx;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        background: #fff;
-        transition: border-color 0.3s ease;
-        box-sizing: border-box;
-
-        &:active {
-          border-color: #ff4757;
-        }
-
-        .picker-text {
-          font-size: 32rpx;
-          color: #333;
-          flex: 1;
-          line-height: 1;
-        }
-      }
-    }
-  }
-
-  .modal-actions {
-    padding: 32rpx 40rpx 40rpx;
-    display: flex;
-    gap: 24rpx;
-    border-top: 1rpx solid #f0f0f0;
-    background: #fff;
-
-    .action-btn {
-      flex: 1;
-      height: 88rpx;
-      border-radius: 16rpx;
-      font-size: 30rpx;
-      font-weight: 600;
-      border: none;
-      transition: all 0.3s ease;
-
-      &:active {
-        transform: scale(0.98);
-      }
-
-      &::after {
-        border: none;
-      }
-
-      &.cancel-btn {
-        background: #f8f9fa;
-        color: #666;
-
-        &:active {
-          background: #e8e8e8;
-        }
-      }
-
-      &.save-btn {
-        background: linear-gradient(135deg, #ff4757, #ff6b7a);
-        color: #fff;
-        box-shadow: 0 4rpx 16rpx rgba(255, 71, 87, 0.3);
-
-        &:disabled {
-          opacity: 0.7;
-          transform: none;
-        }
-      }
-    }
-  }
-}
-
-// 加载提示样式
-.loading-modal {
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 16rpx;
-  padding: 40rpx;
+.nav-left {
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10rpx);
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
 }
 
-// 响应式适配
-@media screen and (max-width: 320px) {
-  .profile-content {
-    padding: 0 20rpx 20rpx;
+.nav-left:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.back-icon {
+  font-size: 48rpx;
+  font-weight: 300;
+  color: white;
+}
+
+.nav-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32rpx;
+}
+
+.nav-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: white;
+  line-height: 1.2;
+}
+
+.nav-subtitle {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 4rpx;
+}
+
+.nav-right {
+  width: 60rpx;
+}
+
+/* 消息列表样式 */
+.message-list {
+  flex: 1;
+  background: #f8fafc;
+}
+
+.message-list-content {
+  padding: 32rpx 24rpx 100rpx;
+}
+
+/* 日期分隔线 */
+.date-divider {
+  display: flex;
+  align-items: center;
+  margin: 40rpx 0 32rpx;
+}
+
+.date-line {
+  flex: 1;
+  height: 2rpx;
+  background: #e2e8f0;
+}
+
+.date-text {
+  font-size: 24rpx;
+  color: #64748b;
+  padding: 0 24rpx;
+  background: #f8fafc;
+}
+
+/* 消息项样式 */
+.message-item {
+  margin-bottom: 24rpx;
+}
+
+/* 管理员消息样式 */
+.admin-message {
+  display: flex;
+  gap: 20rpx;
+  align-items: flex-start;
+}
+
+/* 管理员头像 */
+.avatar-wrapper {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.admin-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(245, 158, 11, 0.3);
+}
+
+.avatar-text {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: white;
+}
+
+.admin-badge {
+  background: #f59e0b;
+  color: white;
+  font-size: 18rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(245, 158, 11, 0.2);
+}
+
+.badge-text {
+  font-size: 18rpx;
+  font-weight: 600;
+  color: white;
+}
+
+/* 消息内容包装器 */
+.message-content-wrapper {
+  flex: 1;
+  max-width: calc(100% - 120rpx);
+}
+
+/* 消息头部 */
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 12rpx;
+}
+
+.sender-name {
+  font-size: 26rpx;
+  color: #334155;
+  font-weight: 600;
+}
+
+.message-time {
+  font-size: 22rpx;
+  color: #94a3b8;
+}
+
+/* 消息气泡 */
+.message-bubble {
+  background: white;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+  border: 2rpx solid #f1f5f9;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.message-bubble:hover {
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.12);
+  border-color: #e2e8f0;
+}
+
+/* 消息标题 */
+.message-title {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 2rpx solid #f1f5f9;
+}
+
+.title-text {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.priority-badge {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(239, 68, 68, 0.3);
+}
+
+.priority-text {
+  font-size: 20rpx;
+  font-weight: 600;
+  color: white;
+}
+
+/* 消息内容 */
+.message-content {
+  margin-bottom: 16rpx;
+}
+
+.content-text {
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: #334155;
+  word-break: break-word;
+  white-space: pre-wrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.content-text.expanded {
+  display: block;
+  -webkit-line-clamp: none;
+}
+
+/* 展开按钮 */
+.expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  margin-top: 16rpx;
+  padding: 12rpx;
+  background: #f8fafc;
+  border-radius: 12rpx;
+  border: 2rpx solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.expand-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.expand-text {
+  font-size: 24rpx;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.expand-icon {
+  font-size: 20rpx;
+  color: #667eea;
+  transition: transform 0.2s ease;
+}
+
+/* 消息类型标签 */
+.message-tags {
+  display: flex;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.tag-item {
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.tag-announcement {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 2rpx solid rgba(239, 68, 68, 0.2);
+}
+
+.tag-maintenance {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+  border: 2rpx solid rgba(245, 158, 11, 0.2);
+}
+
+.tag-event {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 2rpx solid rgba(16, 185, 129, 0.2);
+}
+
+.tag-security {
+  background: rgba(139, 69, 19, 0.1);
+  color: #a16207;
+  border: 2rpx solid rgba(139, 69, 19, 0.2);
+}
+
+.tag-update {
+  background: rgba(102, 126, 234, 0.1);
+  color: #4f46e5;
+  border: 2rpx solid rgba(102, 126, 234, 0.2);
+}
+
+.tag-text {
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+/* 查看详情提示 */
+.view-detail-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 12rpx;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 12rpx;
+  margin-top: 16rpx;
+}
+
+.hint-text {
+  font-size: 24rpx;
+  color: #667eea;
+  font-weight: 500;
+}
+
+.hint-arrow {
+  font-size: 20rpx;
+  color: #667eea;
+}
+
+/* 消息操作 */
+.message-actions {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid #f1f5f9;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 16rpx 24rpx;
+  border-radius: 16rpx;
+  text-align: center;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 2rpx solid transparent;
+}
+
+.action-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.3);
+}
+
+.action-primary:hover {
+  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.4);
+  transform: translateY(-2rpx);
+}
+
+.action-secondary {
+  background: white;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+
+.action-secondary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.action-text {
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 40rpx;
+  gap: 24rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  opacity: 0.6;
+}
+
+.empty-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #334155;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* 加载样式 */
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid #e2e8f0;
+  border-top: 6rpx solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #64748b;
+  margin-top: 16rpx;
+}
+
+/* 加载遮罩 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  background: white;
+  border-radius: 24rpx;
+  padding: 48rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.2);
+}
+
+/* 响应式设计 */
+@media (max-width: 750rpx) {
+  .message-list-content {
+    padding: 24rpx 16rpx 80rpx;
   }
   
-  .nav-bar {
-    padding: 0 20rpx;
+  .admin-message {
+    gap: 16rpx;
   }
   
-  .edit-modal {
-    width: 95vw;
+  .message-bubble {
+    padding: 20rpx;
   }
   
-  .info-card .card-content {
-    padding: 0 20rpx 20rpx;
+  .message-actions {
+    flex-direction: column;
+  }
+  
+  .action-btn {
+    flex: none;
   }
 }
 
-// 暗色主题适配
+/* 暗黑模式适配 */
 @media (prefers-color-scheme: dark) {
-  .info-card {
-    background: #2d2d2d;
-    
-    .card-header {
-      background: linear-gradient(135deg, #333, #2d2d2d);
-      border-bottom-color: #444;
-    }
-    
-    .card-title {
-      color: #fff;
-    }
-    
-    .item-label {
-      color: #ccc;
-    }
-    
-    .item-value {
-      color: #fff;
-    }
-    
-    .info-item {
-      border-bottom-color: #444;
-      
-      &.clickable:hover {
-        background: #3d3d3d;
-      }
-      
-      &.clickable:active {
-        background: #4d4d4d;
-      }
-    }
-    
-    .stats-number {
-      color: #fff;
-    }
-    
-    .stats-label {
-      color: #ccc;
-    }
+  .admin-message-container {
+    background: #0f172a;
   }
   
-  .logout-btn {
-    background: #2d2d2d;
-    border-color: #ff4757;
+  .message-list {
+    background: #0f172a;
   }
   
-  .edit-modal {
-    background: #2d2d2d;
-    
-    .modal-header {
-      background: #2d2d2d;
-      border-bottom-color: #444;
-    }
-    
-    .modal-title {
-      color: #fff;
-    }
-    
-    .phone-verify {
-      .verify-input {
-        background: #3d3d3d;
-        border-color: #4d4d4d;
-        color: #fff;
-        
-        &::placeholder {
-          color: #999;
-        }
-      }
-    }
-    
-    .form-input, .form-textarea, .date-picker, .industry-picker, .position-picker {
-      background: #3d3d3d;
-      border-color: #4d4d4d;
-      color: #fff;
-      
-      &::placeholder {
-        color: #999;
-      }
-    }
-    
-    .gender-item {
-      background: #3d3d3d;
-      border-color: #4d4d4d;
-      
-      .gender-label {
-        color: #fff;
-      }
-    }
-    
-    .picker-text {
-      color: #fff;
-    }
-    
-    .modal-actions {
-      background: #2d2d2d;
-      border-top-color: #444;
-    }
-    
-    .cancel-btn {
-      background: #3d3d3d;
-      color: #ccc;
-    }
+  .date-text {
+    background: #0f172a;
+    color: #64748b;
+  }
+  
+  .date-line {
+    background: #334155;
+  }
+  
+  .message-bubble {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+  }
+  
+  .message-bubble:hover {
+    border-color: #475569;
+  }
+  
+  .title-text {
+    color: #f1f5f9;
+  }
+  
+  .content-text {
+    color: #cbd5e1;
+  }
+  
+  .sender-name {
+    color: #f1f5f9;
+  }
+  
+  .expand-btn {
+    background: #334155;
+    border-color: #475569;
+  }
+  
+  .expand-btn:hover {
+    background: #475569;
+    border-color: #64748b;
+  }
+  
+  .view-detail-hint {
+    background: rgba(102, 126, 234, 0.1);
+  }
+  
+  .message-actions {
+    border-top-color: #334155;
+  }
+  
+  .action-secondary {
+    background: #334155;
+    color: #cbd5e1;
+    border-color: #475569;
+  }
+  
+  .action-secondary:hover {
+    background: #475569;
+    border-color: #64748b;
+  }
+  
+  .empty-title {
+    color: #f1f5f9;
+  }
+  
+  .empty-desc {
+    color: #94a3b8;
+  }
+  
+  .loading-content {
+    background: #1e293b;
+  }
+}
+
+/* 动画效果 */
+.message-item {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 消息未读状态 */
+.message-bubble[data-unread="true"] {
+  border-left: 8rpx solid #667eea;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+.message-bubble[data-unread="true"]:before {
+  content: '';
+  position: absolute;
+  top: 12rpx;
+  right: 12rpx;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 12rpx rgba(239, 68, 68, 0.4);
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8rpx;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4rpx;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4rpx;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 消息气泡点击动画 */
+.message-bubble:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* 优化长文本显示 */
+.content-text:not(.expanded) {
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+}
+
+/* 标签动画 */
+.tag-item {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(20rpx);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 操作按钮点击效果 */
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+/* 头像闪烁动画（用于重要消息） */
+.admin-avatar.important {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 4rpx 12rpx rgba(245, 158, 11, 0.3);
+  }
+  50% {
+    box-shadow: 0 4rpx 20rpx rgba(245, 158, 11, 0.6);
+  }
+}
+
+/* 提升无障碍访问 */
+.message-bubble:focus {
+  outline: 4rpx solid rgba(102, 126, 234, 0.3);
+  outline-offset: 2rpx;
+}
+
+.action-btn:focus {
+  outline: 4rpx solid rgba(102, 126, 234, 0.3);
+  outline-offset: 2rpx;
+}
+
+/* 打印样式 */
+@media print {
+  .custom-navbar,
+  .loading-overlay {
+    display: none;
+  }
+  
+  .message-list {
+    margin-top: 0 !important;
+  }
+  
+  .message-bubble {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 2rpx solid #e2e8f0;
   }
 }
 </style>
