@@ -14,6 +14,7 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	const isapply=ref(false)
 	// 已经报名的活动
 	const applyactivity=ref([])
+	const applyactivityhistory=ref([])
 	
 	// 持久化存储个人信息
 	const setToken = (t) => {
@@ -162,9 +163,10 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	// 查询已经报名的活动
 	const userapply=async()=>{
 		try{
-			const res=await userRegisteredEvents()
+			const res=await userRegisteredEvents({event_status:"InProgress"})
 			applyactivity.value = Array.isArray(res.data) ? res.data : [];
-			
+			const reshistory=await userRegisteredEvents({event_status:"Completed"})
+			applyactivityhistory.value=Array.isArray(reshistory.data) ? reshistory.data : [];
 			console.log("已经报名的活动有",res)
 		}catch(e){
 			console.log(e)
@@ -187,7 +189,8 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 		IsRegistered,
 		isapply,
 		userapply,
-		applyactivity
+		applyactivity,
+		applyactivityhistory
 	}
 	
 })

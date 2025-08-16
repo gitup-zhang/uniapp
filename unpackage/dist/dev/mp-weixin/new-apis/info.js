@@ -12,7 +12,11 @@ function updateprofile(params) {
 function IsUserRegistered(params) {
   return utils_request.http.get(`/event/isUserRegistered/${params}`);
 }
+function getIndustory() {
+  return utils_request.http.get("/industry");
+}
 exports.IsUserRegistered = IsUserRegistered;
+exports.getIndustory = getIndustory;
 exports.getinfologin = getinfologin;
 exports.getinfoprofile = getinfoprofile;
 exports.updateprofile = updateprofile;

@@ -117,43 +117,7 @@
             />
           </view>
 
-          <!-- 出生日期 -->
-          <!-- <view class="form-item">
-            <view class="label">
-              <text>出生日期</text>
-              <text class="required">*</text>
-            </view>
-            <picker 
-              mode="date" 
-              :value="formData.birthDate" 
-              @change="onDateChange"
-              :end="maxDate"
-              :disabled="!isEditing"
-            >
-              <view class="picker-input" :class="{ 'disabled': !isEditing, 'editing': isEditing }">
-                <text class="picker-text" :class="{ 'placeholder': !formData.birthDate }">
-                  {{ formData.birthDate || '请选择出生日期' }}
-                </text>
-                <text class="picker-arrow" v-if="isEditing">❯</text>
-              </view>
-            </picker>
-          </view> -->
-
-          <!-- 身份证号码 -->
-          <!-- <view class="form-item">
-            <view class="label">
-              <text>身份证号码</text>
-              <text class="required">*</text>
-            </view>
-            <input 
-              class="input" 
-              v-model="formData.idCard" 
-              placeholder="请输入身份证号码"
-              placeholder-class="placeholder"
-              :disabled="!isEditing"
-              :class="{ 'disabled': !isEditing, 'editing': isEditing }"
-            />
-          </view> -->
+         
         </view>
 
         <!-- 工作信息组 -->
@@ -194,40 +158,34 @@
             <view class="label">行业</view>
             <picker 
               mode="selector" 
-              :range="industryOptions" 
+              :range="fieldstore.industory" 
               :value="formData.industryIndex"
               @change="onIndustryChange"
               :disabled="!isEditing"
             >
               <view class="picker-input" :class="{ 'disabled': !isEditing, 'editing': isEditing }">
                 <text class="picker-text" :class="{ 'placeholder': formData.industryIndex === -1 }">
-                  {{ formData.industryIndex === -1 ? '请选择行业' : industryOptions[formData.industryIndex] }}
+                  {{ formData.industryIndex === -1 ? '请选择行业' : fieldstore.industory[formData.industryIndex] }}
                 </text>
                 <text class="picker-arrow" v-if="isEditing">❯</text>
               </view>
             </picker>
           </view>
 
-          <!-- 职业 -->
+          <!-- 职业 - 修改为输入框 -->
           <view class="form-item">
             <view class="label">
               <text>职业</text>
               <text class="required">*</text>
             </view>
-            <picker 
-              mode="selector" 
-              :range="careerOptions" 
-              :value="formData.careerIndex"
-              @change="onCareerChange"
+            <input 
+              class="input" 
+              v-model="formData.career" 
+              placeholder="请输入职业"
+              placeholder-class="placeholder"
               :disabled="!isEditing"
-            >
-              <view class="picker-input" :class="{ 'disabled': !isEditing, 'editing': isEditing }">
-                <text class="picker-text" :class="{ 'placeholder': formData.careerIndex === -1 }">
-                  {{ formData.careerIndex === -1 ? '请选择职业' : careerOptions[formData.careerIndex] }}
-                </text>
-                <text class="picker-arrow" v-if="isEditing">❯</text>
-              </view>
-            </picker>
+              :class="{ 'disabled': !isEditing, 'editing': isEditing }"
+            />
           </view>
         </view>
       </view>
@@ -255,80 +213,14 @@ import {useInfoStore} from '@/store/Info.js'
 import {formatEventDate,Dataformat} from '@/utils/data.js'
 import { onShow } from '@dcloudio/uni-app'
 import {activityapply} from '@/new-apis/events.js'
+import {usefieldstore} from '@/store/field.js'
 
-
+const fieldstore=usefieldstore()
 const EventStore=useEventstore()
 const UserStore=useInfoStore()
 
 // 跳转到的活动id
 let id=ref()
-// 职业选项
-const careerOptions = [
- '总经理/CEO',
- '副总经理/副CEO',
- '总监',
- '副总监',
- '部门经理',
- '副经理',
- '主管/组长',
- '高级工程师',
- '工程师',
- '初级工程师',
- '高级专员',
- '专员',
- '助理专员',
- '销售总监',
- '销售经理',
- '销售代表',
- '市场总监',
- '市场经理',
- '市场专员',
- '产品总监',
- '产品经理',
- '产品专员',
- '技术总监',
- '技术经理',
- '架构师',
- '开发工程师',
- '测试工程师',
- '运维工程师',
- '设计总监',
- '设计经理',
- 'UI设计师',
- '平面设计师',
- '人事总监',
- '人事经理',
- '人事专员',
- '财务总监',
- '财务经理',
- '会计',
- '出纳',
- '行政总监',
- '行政经理',
- '行政专员',
- '客服经理',
- '客服专员',
- '其他'
-]
-
-// 行业选项
-const industryOptions = [
-  '互联网/电商',
-  '金融/银行',
-  '房地产/建筑',
-  '教育/培训',
-  '医疗/健康',
-  '制造业',
-  '服务业',
-  '政府/事业单位',
-  '媒体/广告',
-  '交通/物流',
-  '能源/环保',
-  '农业/食品',
-  '文化/娱乐',
-  '咨询/法律',
-  '其他'
-]
 
 // 编辑状态
 const isEditing = ref(false)
@@ -348,9 +240,7 @@ const formData = reactive({
   unit: '',
   sectoral: '',
   industryIndex: -1, // 行业选择索引
-  careerIndex: -1, // 职业选择索引，-1表示未选择
-  //birthDate: '',
-  //idCard: ''
+  career: '', // 职业改为字符串输入
 })
 
 // 验证码倒计时相关
@@ -393,20 +283,14 @@ const initFormData = () => {
   formData.email = userInfo.email || ''
   formData.unit = userInfo.unit || ''
   formData.sectoral = userInfo.department || ''
-  // formData.birthDate = userInfo.birth_date || ''
-  // formData.idCard = userInfo.id_card || ''
+  formData.career = userInfo.position || '' // 职业直接赋值字符串
   
   // 记录原始手机号
   originalPhone.value = formData.phone
   
-  // 根据职位和行业字符串找到对应的索引
-  if (userInfo.position) {
-    const positionIndex = careerOptions.findIndex(option => option === userInfo.position)
-    formData.careerIndex = positionIndex !== -1 ? positionIndex : -1
-  }
-  
+  // 只处理行业索引
   if (userInfo.industry) {
-    const industryIndex = industryOptions.findIndex(option => option === userInfo.industry)
+    const industryIndex = fieldstore.industory.findIndex(option => option === userInfo.industry)
     formData.industryIndex = industryIndex !== -1 ? industryIndex : -1
   }
   
@@ -426,11 +310,8 @@ const saveUserInfo = async () => {
       email: formData.email,
       unit: formData.unit.trim(),
       department: formData.sectoral.trim(),
-      // birth_date: formData.birthDate,
-      // id_card: formData.idCard,
-      // 将选择索引转换为具体内容
-      position: formData.careerIndex !== -1 ? careerOptions[formData.careerIndex] : '',
-      industry: formData.industryIndex !== -1 ? industryOptions[formData.industryIndex] : ''
+      position: formData.career.trim(), // 职业直接使用输入的字符串
+      industry: formData.industryIndex !== -1 ? fieldstore.industory[formData.industryIndex] : ''
     }
     
     // 如果需要手机验证码，添加验证码字段
@@ -549,16 +430,6 @@ const sendVerifyCode = async () => {
   }
 }
 
-// 日期选择
-// const onDateChange = (e) => {
-//   formData.birthDate = e.detail.value
-// }
-
-// 职业选择
-const onCareerChange = (e) => {
-  formData.careerIndex = e.detail.value
-}
-
 // 行业选择
 const onIndustryChange = (e) => {
   formData.industryIndex = e.detail.value
@@ -597,11 +468,6 @@ const validateFormData = () => {
     return false
   }
 
-  // if (formData.idCard && !/^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/.test(formData.idCard)) {
-  //   uni.showToast({ title: '请输入正确的身份证号码', icon: 'none' })
-  //   return false
-  // }
-
   return true
 }
 
@@ -622,8 +488,6 @@ const validateForm = () => {
     return false
   }
 
-  // 报名时不再验证验证码
-
   if (!formData.email) {
     uni.showToast({ title: '请输入邮箱地址', icon: 'none' })
     return false
@@ -641,25 +505,10 @@ const validateForm = () => {
     return false
   }
 
-  if (formData.careerIndex === -1) {
-    uni.showToast({ title: '请选择职业', icon: 'none' })
+  if (!formData.career.trim()) {
+    uni.showToast({ title: '请输入职业', icon: 'none' })
     return false
   }
-
-  // if (!formData.birthDate) {
-  //   uni.showToast({ title: '请选择出生日期', icon: 'none' })
-  //   return false
-  // }
-
-  // if (!formData.idCard) {
-  //   uni.showToast({ title: '请输入身份证号码', icon: 'none' })
-  //   return false
-  // }
-
-  // if (!/^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/.test(formData.idCard)) {
-  //   uni.showToast({ title: '请输入正确的身份证号码', icon: 'none' })
-  //   return false
-  // }
 
   return true
 }
@@ -699,19 +548,17 @@ const handleSubmit = async() => {
   }
     
     isSubmitted.value = true
-    
-    // 可以在这里添加跳转逻辑
-    
 }
 
 // 在组件挂载时调用初始化函数
 onMounted(() => {
   initFormData()
+  fieldstore.getindustory()
 })
+
 onLoad(async(option) => {
 	console.log("申请详细option:",option)
 	id = decodeURIComponent(option.id)
-	
 })
 </script>
 

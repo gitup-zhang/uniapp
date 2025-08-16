@@ -4,6 +4,7 @@ const store_Event = require("../../store/Event.js");
 const store_Info = require("../../store/Info.js");
 const utils_data = require("../../utils/data.js");
 const newApis_events = require("../../new-apis/events.js");
+const store_field = require("../../store/field.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   _easycom_uni_nav_bar2();
@@ -15,73 +16,10 @@ if (!Math) {
 const _sfc_main = {
   __name: "applydetail",
   setup(__props) {
+    const fieldstore = store_field.usefieldstore();
     const EventStore = store_Event.useEventstore();
     const UserStore = store_Info.useInfoStore();
     let id = common_vendor.ref();
-    const careerOptions = [
-      "总经理/CEO",
-      "副总经理/副CEO",
-      "总监",
-      "副总监",
-      "部门经理",
-      "副经理",
-      "主管/组长",
-      "高级工程师",
-      "工程师",
-      "初级工程师",
-      "高级专员",
-      "专员",
-      "助理专员",
-      "销售总监",
-      "销售经理",
-      "销售代表",
-      "市场总监",
-      "市场经理",
-      "市场专员",
-      "产品总监",
-      "产品经理",
-      "产品专员",
-      "技术总监",
-      "技术经理",
-      "架构师",
-      "开发工程师",
-      "测试工程师",
-      "运维工程师",
-      "设计总监",
-      "设计经理",
-      "UI设计师",
-      "平面设计师",
-      "人事总监",
-      "人事经理",
-      "人事专员",
-      "财务总监",
-      "财务经理",
-      "会计",
-      "出纳",
-      "行政总监",
-      "行政经理",
-      "行政专员",
-      "客服经理",
-      "客服专员",
-      "其他"
-    ];
-    const industryOptions = [
-      "互联网/电商",
-      "金融/银行",
-      "房地产/建筑",
-      "教育/培训",
-      "医疗/健康",
-      "制造业",
-      "服务业",
-      "政府/事业单位",
-      "媒体/广告",
-      "交通/物流",
-      "能源/环保",
-      "农业/食品",
-      "文化/娱乐",
-      "咨询/法律",
-      "其他"
-    ];
     const isEditing = common_vendor.ref(false);
     const isSubmitted = common_vendor.ref(false);
     const originalPhone = common_vendor.ref("");
@@ -95,10 +33,8 @@ const _sfc_main = {
       sectoral: "",
       industryIndex: -1,
       // 行业选择索引
-      careerIndex: -1
-      // 职业选择索引，-1表示未选择
-      //birthDate: '',
-      //idCard: ''
+      career: ""
+      // 职业改为字符串输入
     });
     const countDown = common_vendor.ref(0);
     const isCountingDown = common_vendor.computed(() => countDown.value > 0);
@@ -128,13 +64,10 @@ const _sfc_main = {
       formData.email = userInfo.email || "";
       formData.unit = userInfo.unit || "";
       formData.sectoral = userInfo.department || "";
+      formData.career = userInfo.position || "";
       originalPhone.value = formData.phone;
-      if (userInfo.position) {
-        const positionIndex = careerOptions.findIndex((option) => option === userInfo.position);
-        formData.careerIndex = positionIndex !== -1 ? positionIndex : -1;
-      }
       if (userInfo.industry) {
-        const industryIndex = industryOptions.findIndex((option) => option === userInfo.industry);
+        const industryIndex = fieldstore.industory.findIndex((option) => option === userInfo.industry);
         formData.industryIndex = industryIndex !== -1 ? industryIndex : -1;
       }
       isSubmitted.value = !!(userInfo.name && userInfo.phone_number && userInfo.email);
@@ -148,11 +81,9 @@ const _sfc_main = {
           email: formData.email,
           unit: formData.unit.trim(),
           department: formData.sectoral.trim(),
-          // birth_date: formData.birthDate,
-          // id_card: formData.idCard,
-          // 将选择索引转换为具体内容
-          position: formData.careerIndex !== -1 ? careerOptions[formData.careerIndex] : "",
-          industry: formData.industryIndex !== -1 ? industryOptions[formData.industryIndex] : ""
+          position: formData.career.trim(),
+          // 职业直接使用输入的字符串
+          industry: formData.industryIndex !== -1 ? fieldstore.industory[formData.industryIndex] : ""
         };
         if (needPhoneVerification.value) {
           if (!formData.verifyCode) {
@@ -246,9 +177,6 @@ const _sfc_main = {
         });
       }
     };
-    const onCareerChange = (e) => {
-      formData.careerIndex = e.detail.value;
-    };
     const onIndustryChange = (e) => {
       formData.industryIndex = e.detail.value;
     };
@@ -304,8 +232,8 @@ const _sfc_main = {
         common_vendor.index.showToast({ title: "请输入单位名称", icon: "none" });
         return false;
       }
-      if (formData.careerIndex === -1) {
-        common_vendor.index.showToast({ title: "请选择职业", icon: "none" });
+      if (!formData.career.trim()) {
+        common_vendor.index.showToast({ title: "请输入职业", icon: "none" });
         return false;
       }
       return true;
@@ -342,6 +270,7 @@ const _sfc_main = {
     };
     common_vendor.onMounted(() => {
       initFormData();
+      fieldstore.getindustory();
     });
     common_vendor.onLoad(async (option) => {
       console.log("申请详细option:", option);
@@ -402,29 +331,24 @@ const _sfc_main = {
         P: isEditing.value ? 1 : "",
         Q: formData.sectoral,
         R: common_vendor.o(($event) => formData.sectoral = $event.detail.value),
-        S: common_vendor.t(formData.industryIndex === -1 ? "请选择行业" : industryOptions[formData.industryIndex]),
+        S: common_vendor.t(formData.industryIndex === -1 ? "请选择行业" : common_vendor.unref(fieldstore).industory[formData.industryIndex]),
         T: formData.industryIndex === -1 ? 1 : "",
         U: isEditing.value
       }, isEditing.value ? {} : {}, {
         V: !isEditing.value ? 1 : "",
         W: isEditing.value ? 1 : "",
-        X: industryOptions,
+        X: common_vendor.unref(fieldstore).industory,
         Y: formData.industryIndex,
         Z: common_vendor.o(onIndustryChange),
         aa: !isEditing.value,
-        ab: common_vendor.t(formData.careerIndex === -1 ? "请选择职业" : careerOptions[formData.careerIndex]),
-        ac: formData.careerIndex === -1 ? 1 : "",
-        ad: isEditing.value
-      }, isEditing.value ? {} : {}, {
-        ae: !isEditing.value ? 1 : "",
-        af: isEditing.value ? 1 : "",
-        ag: careerOptions,
-        ah: formData.careerIndex,
-        ai: common_vendor.o(onCareerChange),
-        aj: !isEditing.value,
-        ak: common_vendor.o(handleSubmit),
-        al: isEditing.value,
-        am: isEditing.value ? 1 : ""
+        ab: !isEditing.value,
+        ac: !isEditing.value ? 1 : "",
+        ad: isEditing.value ? 1 : "",
+        ae: formData.career,
+        af: common_vendor.o(($event) => formData.career = $event.detail.value),
+        ag: common_vendor.o(handleSubmit),
+        ah: isEditing.value,
+        ai: isEditing.value ? 1 : ""
       });
     };
   }

@@ -255,21 +255,6 @@ const goToLogin = () => {
   });
 }
 
-// const handleLogout = () => {
-//   uni.showModal({
-//     title: '确认登出',
-//     content: '确定要退出登录吗？',
-//     success: (res) => {
-//       if (res.confirm) {
-//         userStore.logout()
-//         uni.showToast({
-//           title: '已退出登录',
-//           icon: 'success'
-//         })
-//       }
-//     }
-//   })
-// }
 
 // 加载用户消息数据的方法
 const loadUserMessages = async () => {

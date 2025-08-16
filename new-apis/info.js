@@ -28,3 +28,7 @@ export function uploadimage(params){
 export function IsUserRegistered(params){
 	return http.get(`/event/isUserRegistered/${params}`)
 }
+// 获取行业选项
+export function getIndustory(){
+	return http.get('/industry')
+}

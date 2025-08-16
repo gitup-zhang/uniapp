@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const store_Info = require("../../store/Info.js");
+const store_field = require("../../store/field.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
@@ -19,6 +20,7 @@ const _sfc_main = {
   __name: "profile",
   setup(__props) {
     const userInfo = store_Info.useInfoStore();
+    const fieldstore = store_field.usefieldstore();
     const SYSTEMINFO = common_vendor.index.getSystemInfoSync();
     common_vendor.ref(SYSTEMINFO.statusBarHeight);
     const editPopup = common_vendor.ref(null);
@@ -31,80 +33,14 @@ const _sfc_main = {
     const codeSending = common_vendor.ref(false);
     const countdown = common_vendor.ref(0);
     const canSendCode = common_vendor.ref(true);
-    const industryOptions = [
-      "互联网/电商",
-      "金融/银行",
-      "房地产/建筑",
-      "教育/培训",
-      "医疗/健康",
-      "制造业",
-      "服务业",
-      "政府/事业单位",
-      "媒体/广告",
-      "交通/物流",
-      "能源/环保",
-      "农业/食品",
-      "文化/娱乐",
-      "咨询/法律",
-      "其他"
-    ];
-    const positionOptions = [
-      "总经理/CEO",
-      "副总经理/副CEO",
-      "总监",
-      "副总监",
-      "部门经理",
-      "副经理",
-      "主管/组长",
-      "高级工程师",
-      "工程师",
-      "初级工程师",
-      "高级专员",
-      "专员",
-      "助理专员",
-      "销售总监",
-      "销售经理",
-      "销售代表",
-      "市场总监",
-      "市场经理",
-      "市场专员",
-      "产品总监",
-      "产品经理",
-      "产品专员",
-      "技术总监",
-      "技术经理",
-      "架构师",
-      "开发工程师",
-      "测试工程师",
-      "运维工程师",
-      "设计总监",
-      "设计经理",
-      "UI设计师",
-      "平面设计师",
-      "人事总监",
-      "人事经理",
-      "人事专员",
-      "财务总监",
-      "财务经理",
-      "会计",
-      "出纳",
-      "行政总监",
-      "行政经理",
-      "行政专员",
-      "客服经理",
-      "客服专员",
-      "其他"
-    ];
     const industryIndex = common_vendor.computed(() => {
-      return industryOptions.indexOf(editValue.value) >= 0 ? industryOptions.indexOf(editValue.value) : 0;
-    });
-    const positionIndex = common_vendor.computed(() => {
-      return positionOptions.indexOf(editValue.value) >= 0 ? positionOptions.indexOf(editValue.value) : 0;
+      return fieldstore.industory.indexOf(editValue.value) >= 0 ? fieldstore.industory.indexOf(editValue.value) : 0;
     });
     common_vendor.onMounted(() => {
       initPage();
     });
     const initPage = () => {
+      fieldstore.getindustory();
     };
     const goBack = () => {
       common_vendor.index.navigateBack();
@@ -140,7 +76,7 @@ const _sfc_main = {
         "nickname": "请输入昵称",
         "unit": "请输入单位名称",
         "department": "请输入部门名称",
-        "position": "请选择职位",
+        "position": "请输入职位",
         "email": "请输入邮箱地址",
         "phone": "请输入新手机号码"
       };
@@ -159,7 +95,7 @@ const _sfc_main = {
       return maxLengths[field] || 50;
     };
     const isTextInput = (field) => {
-      return ["name", "nickname", "unit", "department", "email", "phone"].includes(field);
+      return ["name", "nickname", "unit", "department", "position", "email", "phone"].includes(field);
     };
     const editField = (field) => {
       var _a;
@@ -260,11 +196,7 @@ const _sfc_main = {
     };
     const onIndustryChange = (e) => {
       const index = e.detail.value;
-      editValue.value = industryOptions[index];
-    };
-    const onPositionChange = (e) => {
-      const index = e.detail.value;
-      editValue.value = positionOptions[index];
+      editValue.value = fieldstore.industory[index];
     };
     const saveField = async () => {
       if (!editValue.value && currentField.value !== "slogan") {
@@ -485,7 +417,7 @@ const _sfc_main = {
           size: "16",
           color: "#666"
         }),
-        C: common_vendor.t(common_vendor.unref(userInfo).info.position || "点击选择职位"),
+        C: common_vendor.t(common_vendor.unref(userInfo).info.position || "点击设置职位"),
         D: common_vendor.p({
           type: "right",
           size: "14",
@@ -604,40 +536,28 @@ const _sfc_main = {
           color: "#999"
         }),
         aC: industryIndex.value,
-        aD: industryOptions,
+        aD: common_vendor.unref(fieldstore).industory,
         aE: common_vendor.o(onIndustryChange)
       } : {}, {
-        aF: currentField.value === "position"
-      }, currentField.value === "position" ? {
-        aG: common_vendor.t(editValue.value || "请选择职位"),
-        aH: common_vendor.p({
-          type: "star",
-          size: "16",
-          color: "#999"
-        }),
-        aI: positionIndex.value,
-        aJ: positionOptions,
-        aK: common_vendor.o(onPositionChange)
-      } : {}, {
-        aL: common_vendor.o(closeEdit),
-        aM: common_vendor.t(isSaving.value ? "保存中..." : "保存"),
-        aN: common_vendor.o(saveField),
-        aO: isSaving.value,
-        aP: common_vendor.sr(editPopup, "7b181482-22", {
+        aF: common_vendor.o(closeEdit),
+        aG: common_vendor.t(isSaving.value ? "保存中..." : "保存"),
+        aH: common_vendor.o(saveField),
+        aI: isSaving.value,
+        aJ: common_vendor.sr(editPopup, "7b181482-22", {
           "k": "editPopup"
         }),
-        aQ: common_vendor.p({
+        aK: common_vendor.p({
           type: "center",
           ["mask-click"]: false
         }),
-        aR: common_vendor.p({
+        aL: common_vendor.p({
           status: "loading",
           ["content-text"]: loadingText.value
         }),
-        aS: common_vendor.sr(loadingPopup, "7b181482-29", {
+        aM: common_vendor.sr(loadingPopup, "7b181482-28", {
           "k": "loadingPopup"
         }),
-        aT: common_vendor.p({
+        aN: common_vendor.p({
           type: "center"
         })
       });

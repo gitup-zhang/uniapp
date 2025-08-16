@@ -31,7 +31,7 @@ const _sfc_main = {
       try {
         await useinfo.userapply();
         activityList.value = useinfo.applyactivity;
-        expiredActivityList.value = useinfo.applyactivity;
+        expiredActivityList.value = useinfo.applyactivityhistory;
       } catch (error) {
         console.error("加载活动数据失败:", error);
         common_vendor.index.showToast({

@@ -1,3 +1,4 @@
+
 <template>
   <view class="profile-container">
     
@@ -119,14 +120,14 @@
                 <uni-icons type="right" size="14" color="#ccc"/>
               </view>
             </view>
-            <!-- 修改：职位改为选择器 -->
+            <!-- 修改：职位改为文本输入框 -->
             <view class="info-item clickable" @click="editField('position')">
               <view class="item-icon">
                 <uni-icons type="star" size="16" color="#666"/>
               </view>
               <view class="item-content">
                 <text class="item-label">职位</text>
-                <text class="item-value">{{ userInfo.info.position || '点击选择职位' }}</text>
+                <text class="item-value">{{ userInfo.info.position || '点击设置职位' }}</text>
               </view>
               <view class="item-arrow">
                 <uni-icons type="right" size="14" color="#ccc"/>
@@ -284,26 +285,12 @@
           <view v-if="currentField === 'industry'" class="form-group">
             <picker 
               :value="industryIndex" 
-              :range="industryOptions"
+              :range="fieldstore.industory"
               @change="onIndustryChange"
             >
               <view class="industry-picker">
                 <text class="picker-text">{{ editValue || '请选择行业' }}</text>
                 <uni-icons type="calendar" size="16" color="#999"/>
-              </view>
-            </picker>
-          </view>
-          
-          <!-- 修改：职位选择器 -->
-          <view v-if="currentField === 'position'" class="form-group">
-            <picker 
-              :value="positionIndex" 
-              :range="positionOptions"
-              @change="onPositionChange"
-            >
-              <view class="position-picker">
-                <text class="picker-text">{{ editValue || '请选择职位' }}</text>
-                <uni-icons type="star" size="16" color="#999"/>
               </view>
             </picker>
           </view>
@@ -330,10 +317,12 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useInfoStore } from '@/store/Info.js'
+import {usefieldstore} from '@/store/field.js'
 
 
 // Store 和基础数据
 const userInfo = useInfoStore()
+const fieldstore=usefieldstore()
 const SYSTEMINFO = uni.getSystemInfoSync()
 const statusBarHeight = ref(SYSTEMINFO.statusBarHeight)
 
@@ -351,82 +340,9 @@ const codeSending = ref(false)
 const countdown = ref(0)
 const canSendCode = ref(true)
 
-// 行业选项
-const industryOptions = [
-  '互联网/电商',
-  '金融/银行',
-  '房地产/建筑',
-  '教育/培训',
-  '医疗/健康',
-  '制造业',
-  '服务业',
-  '政府/事业单位',
-  '媒体/广告',
-  '交通/物流',
-  '能源/环保',
-  '农业/食品',
-  '文化/娱乐',
-  '咨询/法律',
-  '其他'
-]
-
-// 新增：职位选项
-const positionOptions = [
-  '总经理/CEO',
-  '副总经理/副CEO',
-  '总监',
-  '副总监',
-  '部门经理',
-  '副经理',
-  '主管/组长',
-  '高级工程师',
-  '工程师',
-  '初级工程师',
-  '高级专员',
-  '专员',
-  '助理专员',
-  '销售总监',
-  '销售经理',
-  '销售代表',
-  '市场总监',
-  '市场经理',
-  '市场专员',
-  '产品总监',
-  '产品经理',
-  '产品专员',
-  '技术总监',
-  '技术经理',
-  '架构师',
-  '开发工程师',
-  '测试工程师',
-  '运维工程师',
-  '设计总监',
-  '设计经理',
-  'UI设计师',
-  '平面设计师',
-  '人事总监',
-  '人事经理',
-  '人事专员',
-  '财务总监',
-  '财务经理',
-  '会计',
-  '出纳',
-  '行政总监',
-  '行政经理',
-  '行政专员',
-  '客服经理',
-  '客服专员',
-  '其他'
-]
-
 // 计算当前选中的行业索引
 const industryIndex = computed(() => {
-  return industryOptions.indexOf(editValue.value) >= 0 ? industryOptions.indexOf(editValue.value) : 0
-})
-
-// 新增：计算当前选中的职位索引
-const positionIndex = computed(() => {
-  return positionOptions.indexOf(editValue.value) >= 0 ? positionOptions.indexOf(editValue.value) : 0
+  return fieldstore.industory.indexOf(editValue.value) >= 0 ? fieldstore.industory.indexOf(editValue.value) : 0
 })
 
 // 页面挂载
@@ -437,6 +353,8 @@ onMounted(() => {
 // 初始化页面
 const initPage = () => {
   // 页面初始化逻辑
+  fieldstore.getindustory()
+  
 }
 
 // 返回上一页
@@ -486,7 +404,7 @@ const getFieldPlaceholder = (field) => {
     'nickname': '请输入昵称',
     'unit': '请输入单位名称',
     'department': '请输入部门名称',
-    'position': '请选择职位',
+    'position': '请输入职位',
     'email': '请输入邮箱地址',
     'phone': '请输入新手机号码'
   }
@@ -507,9 +425,9 @@ const getFieldMaxLength = (field) => {
   return maxLengths[field] || 50
 }
 
-// 修改：判断是否为文本输入（职位不再是文本输入）
+// 修改：判断是否为文本输入（职位现在是文本输入）
 const isTextInput = (field) => {
-  return ['name','nickname', 'unit', 'department', 'email', 'phone'].includes(field)
+  return ['name','nickname', 'unit', 'department', 'position', 'email', 'phone'].includes(field)
 }
 
 // 编辑字段
@@ -635,13 +553,7 @@ const onDateChange = (e) => {
 // 行业选择变化
 const onIndustryChange = (e) => {
   const index = e.detail.value
-  editValue.value = industryOptions[index]
-}
-
-// 新增：职位选择变化
-const onPositionChange = (e) => {
-  const index = e.detail.value
-  editValue.value = positionOptions[index]
+  editValue.value = fieldstore.industory[index]
 }
 
 // 保存字段

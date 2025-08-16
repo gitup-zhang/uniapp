@@ -8,6 +8,7 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
   const signal = common_vendor.ref(false);
   const isapply = common_vendor.ref(false);
   const applyactivity = common_vendor.ref([]);
+  const applyactivityhistory = common_vendor.ref([]);
   const setToken = (t) => {
     token.value = t;
     signal.value = true;
@@ -118,8 +119,10 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
   };
   const userapply = async () => {
     try {
-      const res = await newApis_events.userRegisteredEvents();
+      const res = await newApis_events.userRegisteredEvents({ event_status: "InProgress" });
       applyactivity.value = Array.isArray(res.data) ? res.data : [];
+      const reshistory = await newApis_events.userRegisteredEvents({ event_status: "Completed" });
+      applyactivityhistory.value = Array.isArray(reshistory.data) ? reshistory.data : [];
       console.log("已经报名的活动有", res);
     } catch (e) {
       console.log(e);
@@ -139,7 +142,8 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
     IsRegistered,
     isapply,
     userapply,
-    applyactivity
+    applyactivity,
+    applyactivityhistory
   };
 });
 exports.useInfoStore = useInfoStore;

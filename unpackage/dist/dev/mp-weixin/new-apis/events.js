@@ -13,7 +13,7 @@ function cancelapply(params) {
   return utils_request.http.delete(`/event/cancelRegistration/${params}`);
 }
 function userRegisteredEvents(params) {
-  return utils_request.http.get("/event/userRegisteredEvents");
+  return utils_request.http.get("/event/userRegisteredEvents", params);
 }
 exports.activityapply = activityapply;
 exports.cancelapply = cancelapply;

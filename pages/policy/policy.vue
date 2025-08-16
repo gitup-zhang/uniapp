@@ -97,14 +97,7 @@
 	 <view v-if="activeTab === 'policy'">
     <scroll-view class="news-scroll" scroll-y="true" @scrolltolower="loadMore">
       <view>
-        <!-- <uni-card 
-          v-for="item in listarticles.listpolicy" 
-          :key="item.article_id"
-          :title="item.article_title" 
-          :extra="Dataformat(item.release_time)"
-          @click="OnClick(item.article_id)">
-          <text>{{ item.brief_content }}</text>
-        </uni-card> -->
+       
 		<ArticlePolicyVue 
 		        v-for="item in listarticles.listpolicy" 
 		        :key="item.article_id"
@@ -122,15 +115,7 @@
 	<view v-else>
 	  <scroll-view class="news-scroll" scroll-y="true" @scrolltolower="loadMore">
 	    <view>
-	      <!-- <uni-card
-	        v-for="item in listarticles.listnew"
-	        :key="item.article_id"
-	        :title="item.article_title"
-	        :extra="Dataformat(item.release_time)"
-	        :thumbnail="item.cover_image_url"
-	        @click="OnClick(item.article_id)">
-	        <text class="uni-body">{{ item.brief_content }}</text>
-	      </uni-card> -->
+	      
 		  <ArticleCard 
 		        v-for="item in listarticles.listnew" 
 		               :key="item.article_id"

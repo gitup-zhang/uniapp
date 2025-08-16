@@ -18,6 +18,6 @@ export function cancelapply(params){
 }
 // 查询已经报名的活动
 export function userRegisteredEvents(params){
-	return http.get('/event/userRegisteredEvents')
+	return http.get('/event/userRegisteredEvents',params)
 }
 
