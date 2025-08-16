@@ -512,44 +512,41 @@ const _sfc_main = {
         av: common_vendor.t(common_vendor.unref(userInfo).info.newsViews || 0),
         aw: common_vendor.t(common_vendor.unref(userInfo).info.policyViews || 0),
         ax: common_vendor.t(common_vendor.unref(userInfo).info.field || 3),
-        ay: hasActivities.value
-      }, hasActivities.value ? {
-        az: common_vendor.p({
+        ay: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        aA: common_vendor.o(viewAllActivities)
-      } : {}, {
-        aB: hasActivities.value
+        az: common_vendor.o(viewAllActivities),
+        aA: hasActivities.value
       }, hasActivities.value ? {
-        aC: common_vendor.o(onAction),
-        aD: common_vendor.o(onCancel),
-        aE: common_vendor.p({
+        aB: common_vendor.o(onAction),
+        aC: common_vendor.o(onCancel),
+        aD: common_vendor.p({
           activityData: myActivityData.value
         })
       } : {
-        aF: common_vendor.p({
+        aE: common_vendor.p({
           type: "search",
           size: "16",
           color: "#fff"
         }),
-        aG: common_vendor.o(discoverActivities),
-        aH: common_vendor.p({
+        aF: common_vendor.o(discoverActivities),
+        aG: common_vendor.p({
           type: "refresh",
           size: "16",
           color: "#667eea"
         }),
-        aI: common_vendor.o(refreshActivities)
+        aH: common_vendor.o(refreshActivities)
       }), {
-        aJ: common_vendor.p({
+        aI: common_vendor.p({
           status: "loading",
           ["content-text"]: loadingText.value
         }),
-        aK: common_vendor.sr(loadingPopup, "a5a8e0a1-14", {
+        aJ: common_vendor.sr(loadingPopup, "a5a8e0a1-14", {
           "k": "loadingPopup"
         }),
-        aL: common_vendor.p({
+        aK: common_vendor.p({
           type: "center"
         })
       });

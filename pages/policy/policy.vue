@@ -60,7 +60,7 @@
             class="dropdown-item" 
             @click="selectOption('domain', null)" 
             :class="{ selected: selectedDomain.field_id === 0 }">
-            <text class="item-icon">🌐</text>
+            <text class="item-icon">🌍</text>
             <text class="item-text">全部</text>
             <text v-if="selectedDomain.field_id === 0" class="check-icon">✓</text>
           </view>
@@ -70,7 +70,7 @@
             :key="item.field_id"
             @click="selectOption('domain', item)" 
             :class="{ selected: selectedDomain.field_id === item.field_id }">
-            <text class="item-icon">📁</text>
+            <text class="item-icon">📋</text>
             <text class="item-text">{{ item.field_name }}</text>
             <text v-if="selectedDomain.field_id === item.field_id" class="check-icon">✓</text>
           </view>
@@ -95,41 +95,107 @@
 
     <!-- 政策列表 -->
 	 <view v-if="activeTab === 'policy'">
-    <scroll-view class="news-scroll" scroll-y="true" @scrolltolower="loadMore">
-      <view>
-       
-		<ArticlePolicyVue 
-		        v-for="item in listarticles.listpolicy" 
-		        :key="item.article_id"
-		        :policyData="item"
-		        @click="handlePolicyClick"
+      <scroll-view 
+        class="news-scroll" 
+        scroll-y="true" 
+        @scrolltolower="loadMore"
+        :refresher-enabled="true"
+        @refresherrefresh="onRefresh"
+        :refresher-triggered="refreshTriggered">
+        
+        <view v-if="!initialLoading">
+          <!-- 有数据时显示列表 -->
+          <view v-if="listarticles.listpolicy.length > 0">
+            <ArticlePolicyVue 
+              v-for="item in listarticles.listpolicy" 
+              :key="item.article_id"
+              :policyData="item"
+              @click="handlePolicyClick" />
+          </view>
+          
+          <!-- 空状态 -->
+          <view v-else class="empty-state">
+            <view class="empty-icon">📋</view>
+            <view class="empty-title">暂无政策信息</view>
+            <view class="empty-desc">{{ getEmptyMessage() }}</view>
+            <view class="empty-action" @click="resetFilters">
+              <text>重置筛选</text>
+            </view>
+          </view>
+        </view>
 
-		 />
+        <!-- 初始加载状态 -->
+        <view v-if="initialLoading" class="initial-loading">
+          <view class="loading-spinner"></view>
+          <view class="loading-text">加载中...</view>
+        </view>
 
-        <view v-if="listarticles.loading" class="loading">加载中...</view>
-        <view v-else-if="!listarticles.hasMore" class="no-more">没有更多内容</view>
+        <!-- 底部加载更多状态 -->
+        <view v-if="!initialLoading && listarticles.listpolicy.length > 0" class="load-more-container">
+          <view v-if="listarticles.loading" class="loading-more">
+            <view class="loading-spinner-small"></view>
+            <text>加载更多...</text>
+          </view>
+          <view v-else-if="!listarticles.hasMore" class="no-more">
+            <view class="no-more-line"></view>
+            <text>已加载全部内容</text>
+            <view class="no-more-line"></view>
+          </view>
+        </view>
+      </scroll-view>
+	</view>
+
+	<!-- 新闻列表 -->
+	<view v-else>
+	  <scroll-view 
+      class="news-scroll" 
+      scroll-y="true" 
+      @scrolltolower="loadMore"
+      :refresher-enabled="true"
+      @refresherrefresh="onRefresh"
+      :refresher-triggered="refreshTriggered">
+      
+      <view v-if="!initialLoading">
+        <!-- 有数据时显示列表 -->
+        <view v-if="listarticles.listnew.length > 0">
+          <ArticleCard 
+            v-for="item in listarticles.listnew" 
+            :key="item.article_id"
+            :newsData="item"
+            @click="handleNewsClick" />
+        </view>
+        
+        <!-- 空状态 -->
+        <view v-else class="empty-state">
+          <view class="empty-icon">📰</view>
+          <view class="empty-title">暂无新闻信息</view>
+          <view class="empty-desc">{{ getEmptyMessage() }}</view>
+          <view class="empty-action" @click="resetFilters">
+            <text>重置筛选</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 初始加载状态 -->
+      <view v-if="initialLoading" class="initial-loading">
+        <view class="loading-spinner"></view>
+        <view class="loading-text">加载中...</view>
+      </view>
+
+      <!-- 底部加载更多状态 -->
+      <view v-if="!initialLoading && listarticles.listnew.length > 0" class="load-more-container">
+        <view v-if="listarticles.loading" class="loading-more">
+          <view class="loading-spinner-small"></view>
+          <text>加载更多...</text>
+        </view>
+        <view v-else-if="!listarticles.hasMore" class="no-more">
+          <view class="no-more-line"></view>
+          <text>已加载全部内容</text>
+          <view class="no-more-line"></view>
+        </view>
       </view>
     </scroll-view>
 	</view>
-	<!-- 新闻列表 -->
-	<view v-else>
-	  <scroll-view class="news-scroll" scroll-y="true" @scrolltolower="loadMore">
-	    <view>
-	      
-		  <ArticleCard 
-		        v-for="item in listarticles.listnew" 
-		               :key="item.article_id"
-		               :newsData="item"
-		               @click="handleNewsClick"   
-			/>
-	      <view v-if="listarticles.loading" class="loading">加载中...</view>
-	      <view v-else-if="!listarticles.hasMore" class="no-more">没有更多内容</view>
-	    </view>
-	  </scroll-view>
-	  
-	</view>
-	
-	
   </view>
 </template>
 
@@ -142,11 +208,6 @@ import { onShow } from '@dcloudio/uni-app'
 import Tabswitch from '@/components/Tabswitch/Tabswitch.vue'
 import ArticleCard from '@/components/ArticleCard/ArticleCard.vue'
 import ArticlePolicyVue from '../../components/ArticleCard/ArticlePolicy.vue'
-
-
-
-
-
 
 const listarticles = useArticlesStore()
 const field = usefieldstore()
@@ -162,6 +223,12 @@ const currentDropdown = ref(null)
 // 是否精选
 const isselected=ref(0)
 
+// 初始加载状态
+const initialLoading = ref(false)
+
+// 下拉刷新状态
+const refreshTriggered = ref(false)
+
 // 初始值设为"全部"
 const selectedDomain = ref({ field_id: 0,field_code: "", field_name: '全部' })
 const selectedTime = ref('发布时间')
@@ -171,7 +238,6 @@ const timeList = ['全部', '最近一周', '最近一月', '最近一年']
 
 // 定义参数查询的结构体
 const Params = { 
-  // field_id: 0,
   field_type: "",
   page: 0,
   is_selection: 0,
@@ -185,18 +251,77 @@ watch(activeTab, (newVal, oldVal) => {
   console.log('Tab 变化:', oldVal, '=>', newVal)
   if (newVal === 'news') {
     listarticles.resetpage(1)
+	resetFilters()
 	Params.article_type="NEWS"
   } else if (newVal === 'policy') {
     listarticles.resetpage(1)
+	resetFilters()
 	Params.article_type="POLICY"
   }
 })
+
+// 获取空状态提示文案
+function getEmptyMessage() {
+  if (searchbar.value) {
+    return `未找到与"${searchbar.value}"相关的内容，试试其他关键词吧`
+  }
+  if (selectedDomain.value.field_id !== 0 || selectedTime.value !== '全部') {
+    return '当前筛选条件下暂无内容，试试调整筛选条件'
+  }
+  return '暂时还没有内容，请稍后再来看看'
+}
+
+// 重置筛选条件
+function resetFilters() {
+  searchbar.value = ""
+  selectedDomain.value = { field_id: 0,field_code: "", field_name: '全部' }
+  selectedTime.value = '全部'
+  
+  // 重置参数
+  Params.article_title = ""
+  Params.field_type = ""
+  Params.release_time = ""
+  Params.page = 1
+  
+  // 重新加载数据
+  loadData()
+}
+
+// 下拉刷新
+async function onRefresh() {
+  refreshTriggered.value = true
+  Params.page = 1
+  
+  try {
+    await listarticles.getlistpolicy(Params)
+  } catch (error) {
+    console.error('刷新失败:', error)
+  } finally {
+    refreshTriggered.value = false
+  }
+}
+
+// 统一的数据加载方法
+async function loadData() {
+  initialLoading.value = true
+  try {
+    await listarticles.getlistpolicy(Params)
+  } catch (error) {
+    console.error('加载数据失败:', error)
+    uni.showToast({
+      title: '加载失败，请重试',
+      icon: 'none'
+    })
+  } finally {
+    initialLoading.value = false
+  }
+}
 
 // 搜索
 function search() {
 	Params.article_title=searchbar.value
 	Params.page=1
-  listarticles.getlistpolicy(Params)
+  loadData()
   console.log("搜索关键词:", searchbar.value)
 }
 
@@ -205,14 +330,18 @@ function cancel() {
   searchbar.value = ""
   Params.page=1
   Params.article_title=searchbar.value
-  listarticles.getlistpolicy(Params)
+  loadData()
 }
 
 // 加载更多
 function loadMore() {
- Params.page=listarticles.page+1
-listarticles.getarticlemore(Params)
-  console.log("到底了")
+  if (listarticles.loading || !listarticles.hasMore) {
+    return
+  }
+  
+  Params.page = listarticles.page + 1
+  listarticles.getarticlemore(Params)
+  console.log("加载更多，当前页码:", Params.page)
 }
 
 // 切换下拉框
@@ -226,17 +355,15 @@ function selectOption(type, value) {
     if (value === null) {
       selectedDomain.value = { field_id: 0,field_code: "", field_name: '全部' }
 	  Params.page=1
-	  // Params.field_id=selectedDomain.value.field_id
 	  Params.field_type=selectedDomain.value.field_code
-      listarticles.getlistpolicy(Params)
+      loadData()
     } else {
 		console.log("value值：",value)
       selectedDomain.value = value
 	  Params.page=1
-	  // Params.field_id=selectedDomain.value.field_id
 	  Params.field_type=selectedDomain.value.field_code
 	  console.log("params:",Params)
-      listarticles.getlistpolicy(Params)
+      loadData()
     }
   }
 
@@ -244,21 +371,17 @@ function selectOption(type, value) {
 	  console.log(value)
     selectedTime.value = value
 	if (value === '最近一周') {
-	      // 计算并更新为最近一周
 	      Params.release_time = getLastWeekDate();
 	    } else if (value === '最近一月') {
-	      // 计算并更新为最近一月
 	      Params.release_time = getLastMonthDate();
 	    } else if (value === '最近一年') {
-	      // 计算并更新为最近一年
 	      Params.release_time = getLastYearDate();
 	    } else {
-	      // 清空时间筛选
 	      Params.release_time = '';
 	    }
 	
 	    Params.page = 1;
-	    listarticles.getlistpolicy(Params);
+	    loadData()
   }
 
   currentDropdown.value = null
@@ -280,23 +403,6 @@ const handleNewsClick = (newsItem) => {
   })
 }
 
-// 处理预览
-const handlePreview = (policyItem) => {
-  console.log('预览政策:', policyItem)
-  uni.navigateTo({
-    url: `/pages/policy-preview/policy-preview?id=${policyItem.id}`
-  })
-}
-
-// // 处理下载
-// const handleDownload = (policyItem) => {
-//   console.log('下载政策:', policyItem)
-//   uni.showToast({
-//     title: '开始下载',
-//     icon: 'success'
-//   })
-// }
-
 // 跳转详情
 function OnClick(id) {
 	console.log("测试的Id:"+id)
@@ -304,25 +410,27 @@ function OnClick(id) {
     url: `/pages/detail/articledetail?id=${id}`
   })
 }
+
 // 在页面显示时判断来源
 onShow(() => {
   const source = uni.getStorageSync('tabSource') || 'tabbar'
-		field.getfield()
+  field.getfield()
+  
   if (source === 'switchTab') {
     console.log('来源：通过 uni.switchTab() 跳转');
 	Params.is_selection=1
 	Params.page=1
-	listarticles.getlistpolicy(Params)
+	loadData()
 	Params.article_type="NEWS"
-	listarticles.getlistpolicy(Params)
+	loadData()
 	Params.article_type=activeTab.value.toUpperCase()
   } else {
     console.log('来源：用户点击 tabBar 进入');
 	isselected.value=0
 	Params.page=1
-	listarticles.getlistpolicy(Params)
+	loadData()
 	Params.article_type="NEWS"
-	listarticles.getlistpolicy(Params) 
+	loadData()
 	Params.article_type=activeTab.value.toUpperCase()
   }
 
@@ -499,11 +607,125 @@ onShow(() => {
   font-weight: 700;
 }
 
-.loading,
-.no-more {
+/* 空状态样式 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 60rpx;
   text-align: center;
-  color: #999;
+  background: #fff;
+  margin: 20rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.6;
+}
+
+.empty-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.empty-desc {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 40rpx;
+}
+
+.empty-action {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16rpx 40rpx;
+  border-radius: 50rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  transition: transform 0.2s ease;
+}
+
+.empty-action:active {
+  transform: scale(0.95);
+}
+
+/* 初始加载状态 */
+.initial-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 60rpx;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #f3f3f3;
+  border-top: 4rpx solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #666;
+  margin-top: 20rpx;
+}
+
+/* 底部加载更多容器 */
+.load-more-container {
   padding: 20rpx;
 }
 
+/* 加载更多状态 */
+.loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  padding: 20rpx;
+  color: #666;
+  font-size: 28rpx;
+}
+
+.loading-spinner-small {
+  width: 32rpx;
+  height: 32rpx;
+  border: 2rpx solid #f3f3f3;
+  border-top: 2rpx solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* 没有更多内容 */
+.no-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20rpx;
+  padding: 30rpx;
+  color: #999;
+  font-size: 26rpx;
+}
+
+.no-more-line {
+  flex: 1;
+  height: 1rpx;
+  background: #e5e5e5;
+  max-width: 120rpx;
+}
+
+/* 旋转动画 */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>

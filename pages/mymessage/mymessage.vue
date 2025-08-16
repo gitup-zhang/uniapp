@@ -248,7 +248,7 @@
         <view class="activity-section">
           <view class="section-header">
             <text class="section-title">我的活动</text>
-            <view class="section-more" @click="viewAllActivities" v-if="hasActivities">
+            <view class="section-more" @click="viewAllActivities" >
               <text class="more-text">查看全部</text>
               <uni-icons type="right" size="14" color="#999"/>
             </view>

@@ -6,29 +6,28 @@ const _sfc_main = {
     message: {
       type: Object,
       required: true,
-      default: () => ({})
+      default: () => ({
+        group_name: "",
+        unread_count: 0,
+        latest_content: "",
+        latest_time: ""
+      })
     }
   },
-  emits: ["tap", "toggleRead"],
+  emits: ["tap"],
   setup(__props, { emit: __emit }) {
     const props = __props;
     const emit = __emit;
-    const getSourceText = () => {
-      if (props.message.type === "system") {
-        return "系统消息";
-      }
-      return props.message.groupName || "群组消息";
+    const getAvatarText = () => {
+      const name = props.message.group_name || "未知";
+      return name.charAt(0).toUpperCase();
     };
     const handleCardTap = () => {
       emit("tap", props.message);
     };
-    const toggleRead = () => {
-      emit("toggleRead", props.message);
-    };
-    const handleAvatarError = () => {
-      console.log("头像加载失败");
-    };
     const formatTime = (time) => {
+      if (!time)
+        return "";
       const now = /* @__PURE__ */ new Date();
       const msgTime = new Date(time);
       const diff = now - msgTime;
@@ -46,32 +45,23 @@ const _sfc_main = {
       } else if (days <= 7) {
         return `${days}天前`;
       } else {
-        return time.split(" ")[0];
+        const month = msgTime.getMonth() + 1;
+        const date = msgTime.getDate();
+        return `${month}月${date}日`;
       }
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: __props.message.type === "system"
-      }, __props.message.type === "system" ? {} : {
-        b: __props.message.avatar || "/static/default-group.png",
-        c: common_vendor.o(handleAvatarError)
-      }, {
-        d: !__props.message.isRead
-      }, !__props.message.isRead ? {} : {}, {
-        e: common_vendor.t(__props.message.title),
-        f: __props.message.priority === "high"
-      }, __props.message.priority === "high" ? {} : {}, {
-        g: common_vendor.t(formatTime(__props.message.time)),
-        h: common_vendor.t(__props.message.brief),
-        i: common_vendor.t(getSourceText()),
-        j: __props.message.type === "group"
-      }, __props.message.type === "group" ? {
-        k: common_vendor.t(__props.message.memberCount)
+        a: common_vendor.t(getAvatarText()),
+        b: __props.message.unread_count > 0
+      }, __props.message.unread_count > 0 ? {
+        c: common_vendor.t(__props.message.unread_count > 99 ? "99+" : __props.message.unread_count)
       } : {}, {
-        l: __props.message.isRead ? 1 : "",
-        m: common_vendor.o(toggleRead),
-        n: !__props.message.isRead ? 1 : "",
-        o: common_vendor.o(handleCardTap)
+        d: common_vendor.t(__props.message.group_name),
+        e: common_vendor.t(formatTime(__props.message.latest_time)),
+        f: common_vendor.t(__props.message.latest_content),
+        g: __props.message.unread_count > 0 ? 1 : "",
+        h: common_vendor.o(handleCardTap)
       });
     };
   }

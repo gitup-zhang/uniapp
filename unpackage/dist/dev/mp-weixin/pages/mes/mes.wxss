@@ -199,6 +199,33 @@
   padding-bottom: 40rpx;
 }
 
+/* 加载状态 */
+.loading-state.data-v-bb2249ad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 40rpx;
+}
+.loading-spinner.data-v-bb2249ad {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid rgba(102, 126, 234, 0.2);
+  border-top: 6rpx solid #667eea;
+  border-radius: 50%;
+  animation: spin-bb2249ad 1s linear infinite;
+  margin-bottom: 24rpx;
+}
+@keyframes spin-bb2249ad {
+0% { transform: rotate(0deg);
+}
+100% { transform: rotate(360deg);
+}
+}
+.loading-text.data-v-bb2249ad {
+  font-size: 28rpx;
+  color: #9ca3af;
+}
+
 /* 空状态样式 */
 .empty-state.data-v-bb2249ad {
   display: flex;

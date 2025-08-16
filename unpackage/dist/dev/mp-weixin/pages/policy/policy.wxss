@@ -148,10 +148,118 @@
   color: #667eea;
   font-weight: 700;
 }
-.loading,
-.no-more {
+
+/* 空状态样式 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 60rpx;
   text-align: center;
-  color: #999;
+  background: #fff;
+  margin: 20rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.6;
+}
+.empty-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+.empty-desc {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 40rpx;
+}
+.empty-action {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16rpx 40rpx;
+  border-radius: 50rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  transition: transform 0.2s ease;
+}
+.empty-action:active {
+  transform: scale(0.95);
+}
+
+/* 初始加载状态 */
+.initial-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 60rpx;
+  text-align: center;
+}
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #f3f3f3;
+  border-top: 4rpx solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+.loading-text {
+  font-size: 28rpx;
+  color: #666;
+  margin-top: 20rpx;
+}
+
+/* 底部加载更多容器 */
+.load-more-container {
   padding: 20rpx;
 }
 
+/* 加载更多状态 */
+.loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  padding: 20rpx;
+  color: #666;
+  font-size: 28rpx;
+}
+.loading-spinner-small {
+  width: 32rpx;
+  height: 32rpx;
+  border: 2rpx solid #f3f3f3;
+  border-top: 2rpx solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* 没有更多内容 */
+.no-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20rpx;
+  padding: 30rpx;
+  color: #999;
+  font-size: 26rpx;
+}
+.no-more-line {
+  flex: 1;
+  height: 1rpx;
+  background: #e5e5e5;
+  max-width: 120rpx;
+}
+
+/* 旋转动画 */
+@keyframes spin {
+0% { transform: rotate(0deg);
+}
+100% { transform: rotate(360deg);
+}
+}

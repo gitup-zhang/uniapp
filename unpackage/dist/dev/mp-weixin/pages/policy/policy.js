@@ -25,11 +25,12 @@ const _sfc_main = {
     const searchbar = common_vendor.ref("");
     const currentDropdown = common_vendor.ref(null);
     const isselected = common_vendor.ref(0);
+    const initialLoading = common_vendor.ref(false);
+    const refreshTriggered = common_vendor.ref(false);
     const selectedDomain = common_vendor.ref({ field_id: 0, field_code: "", field_name: "全部" });
     const selectedTime = common_vendor.ref("发布时间");
     const timeList = ["全部", "最近一周", "最近一月", "最近一年"];
     const Params = {
-      // field_id: 0,
       field_type: "",
       page: 0,
       is_selection: 0,
@@ -41,28 +42,77 @@ const _sfc_main = {
       console.log("Tab 变化:", oldVal, "=>", newVal);
       if (newVal === "news") {
         listarticles.resetpage(1);
+        resetFilters();
         Params.article_type = "NEWS";
       } else if (newVal === "policy") {
         listarticles.resetpage(1);
+        resetFilters();
         Params.article_type = "POLICY";
       }
     });
+    function getEmptyMessage() {
+      if (searchbar.value) {
+        return `未找到与"${searchbar.value}"相关的内容，试试其他关键词吧`;
+      }
+      if (selectedDomain.value.field_id !== 0 || selectedTime.value !== "全部") {
+        return "当前筛选条件下暂无内容，试试调整筛选条件";
+      }
+      return "暂时还没有内容，请稍后再来看看";
+    }
+    function resetFilters() {
+      searchbar.value = "";
+      selectedDomain.value = { field_id: 0, field_code: "", field_name: "全部" };
+      selectedTime.value = "全部";
+      Params.article_title = "";
+      Params.field_type = "";
+      Params.release_time = "";
+      Params.page = 1;
+      loadData();
+    }
+    async function onRefresh() {
+      refreshTriggered.value = true;
+      Params.page = 1;
+      try {
+        await listarticles.getlistpolicy(Params);
+      } catch (error) {
+        console.error("刷新失败:", error);
+      } finally {
+        refreshTriggered.value = false;
+      }
+    }
+    async function loadData() {
+      initialLoading.value = true;
+      try {
+        await listarticles.getlistpolicy(Params);
+      } catch (error) {
+        console.error("加载数据失败:", error);
+        common_vendor.index.showToast({
+          title: "加载失败，请重试",
+          icon: "none"
+        });
+      } finally {
+        initialLoading.value = false;
+      }
+    }
     function search() {
       Params.article_title = searchbar.value;
       Params.page = 1;
-      listarticles.getlistpolicy(Params);
+      loadData();
       console.log("搜索关键词:", searchbar.value);
     }
     function cancel() {
       searchbar.value = "";
       Params.page = 1;
       Params.article_title = searchbar.value;
-      listarticles.getlistpolicy(Params);
+      loadData();
     }
     function loadMore() {
+      if (listarticles.loading || !listarticles.hasMore) {
+        return;
+      }
       Params.page = listarticles.page + 1;
       listarticles.getarticlemore(Params);
-      console.log("到底了");
+      console.log("加载更多，当前页码:", Params.page);
     }
     function toggleDropdown(type) {
       currentDropdown.value = currentDropdown.value === type ? null : type;
@@ -73,14 +123,14 @@ const _sfc_main = {
           selectedDomain.value = { field_id: 0, field_code: "", field_name: "全部" };
           Params.page = 1;
           Params.field_type = selectedDomain.value.field_code;
-          listarticles.getlistpolicy(Params);
+          loadData();
         } else {
           console.log("value值：", value);
           selectedDomain.value = value;
           Params.page = 1;
           Params.field_type = selectedDomain.value.field_code;
           console.log("params:", Params);
-          listarticles.getlistpolicy(Params);
+          loadData();
         }
       }
       if (type === "time") {
@@ -96,7 +146,7 @@ const _sfc_main = {
           Params.release_time = "";
         }
         Params.page = 1;
-        listarticles.getlistpolicy(Params);
+        loadData();
       }
       currentDropdown.value = null;
     }
@@ -119,17 +169,17 @@ const _sfc_main = {
         console.log("来源：通过 uni.switchTab() 跳转");
         Params.is_selection = 1;
         Params.page = 1;
-        listarticles.getlistpolicy(Params);
+        loadData();
         Params.article_type = "NEWS";
-        listarticles.getlistpolicy(Params);
+        loadData();
         Params.article_type = activeTab.value.toUpperCase();
       } else {
         console.log("来源：用户点击 tabBar 进入");
         isselected.value = 0;
         Params.page = 1;
-        listarticles.getlistpolicy(Params);
+        loadData();
         Params.article_type = "NEWS";
-        listarticles.getlistpolicy(Params);
+        loadData();
         Params.article_type = activeTab.value.toUpperCase();
       }
       common_vendor.index.removeStorageSync("tabSource");
@@ -196,7 +246,11 @@ const _sfc_main = {
       } : {}, {
         y: activeTab.value === "policy"
       }, activeTab.value === "policy" ? common_vendor.e({
-        z: common_vendor.f(common_vendor.unref(listarticles).listpolicy, (item, k0, i0) => {
+        z: !initialLoading.value
+      }, !initialLoading.value ? common_vendor.e({
+        A: common_vendor.unref(listarticles).listpolicy.length > 0
+      }, common_vendor.unref(listarticles).listpolicy.length > 0 ? {
+        B: common_vendor.f(common_vendor.unref(listarticles).listpolicy, (item, k0, i0) => {
           return {
             a: item.article_id,
             b: common_vendor.o(handlePolicyClick, item.article_id),
@@ -205,13 +259,28 @@ const _sfc_main = {
               policyData: item
             })
           };
-        }),
-        A: common_vendor.unref(listarticles).loading
+        })
+      } : {
+        C: common_vendor.t(getEmptyMessage()),
+        D: common_vendor.o(resetFilters)
+      }) : {}, {
+        E: initialLoading.value
+      }, initialLoading.value ? {} : {}, {
+        F: !initialLoading.value && common_vendor.unref(listarticles).listpolicy.length > 0
+      }, !initialLoading.value && common_vendor.unref(listarticles).listpolicy.length > 0 ? common_vendor.e({
+        G: common_vendor.unref(listarticles).loading
       }, common_vendor.unref(listarticles).loading ? {} : !common_vendor.unref(listarticles).hasMore ? {} : {}, {
-        B: !common_vendor.unref(listarticles).hasMore,
-        C: common_vendor.o(loadMore)
+        H: !common_vendor.unref(listarticles).hasMore
+      }) : {}, {
+        I: common_vendor.o(loadMore),
+        J: common_vendor.o(onRefresh),
+        K: refreshTriggered.value
       }) : common_vendor.e({
-        D: common_vendor.f(common_vendor.unref(listarticles).listnew, (item, k0, i0) => {
+        L: !initialLoading.value
+      }, !initialLoading.value ? common_vendor.e({
+        M: common_vendor.unref(listarticles).listnew.length > 0
+      }, common_vendor.unref(listarticles).listnew.length > 0 ? {
+        N: common_vendor.f(common_vendor.unref(listarticles).listnew, (item, k0, i0) => {
           return {
             a: item.article_id,
             b: common_vendor.o(handleNewsClick, item.article_id),
@@ -220,11 +289,22 @@ const _sfc_main = {
               newsData: item
             })
           };
-        }),
-        E: common_vendor.unref(listarticles).loading
+        })
+      } : {
+        O: common_vendor.t(getEmptyMessage()),
+        P: common_vendor.o(resetFilters)
+      }) : {}, {
+        Q: initialLoading.value
+      }, initialLoading.value ? {} : {}, {
+        R: !initialLoading.value && common_vendor.unref(listarticles).listnew.length > 0
+      }, !initialLoading.value && common_vendor.unref(listarticles).listnew.length > 0 ? common_vendor.e({
+        S: common_vendor.unref(listarticles).loading
       }, common_vendor.unref(listarticles).loading ? {} : !common_vendor.unref(listarticles).hasMore ? {} : {}, {
-        F: !common_vendor.unref(listarticles).hasMore,
-        G: common_vendor.o(loadMore)
+        T: !common_vendor.unref(listarticles).hasMore
+      }) : {}, {
+        U: common_vendor.o(loadMore),
+        V: common_vendor.o(onRefresh),
+        W: refreshTriggered.value
       }));
     };
   }

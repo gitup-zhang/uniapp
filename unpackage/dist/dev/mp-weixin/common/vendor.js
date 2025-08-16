@@ -7730,6 +7730,7 @@ const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
 const onShow = /* @__PURE__ */ createHook(ON_SHOW);
 const onLaunch = /* @__PURE__ */ createHook(ON_LAUNCH);
 const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
+const onPullDownRefresh = /* @__PURE__ */ createHook(ON_PULL_DOWN_REFRESH);
 var isVue2 = false;
 function set(target, key, val) {
   if (Array.isArray(target)) {
@@ -8811,6 +8812,7 @@ exports.o = o;
 exports.onLaunch = onLaunch;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;
+exports.onPullDownRefresh = onPullDownRefresh;
 exports.onShow = onShow;
 exports.p = p;
 exports.reactive = reactive;
