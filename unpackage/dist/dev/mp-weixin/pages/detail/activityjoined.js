@@ -117,6 +117,7 @@ const _sfc_main = {
             c: common_vendor.o(handleCancel, activity.id),
             d: "beed2d58-0-" + i0,
             e: common_vendor.p({
+              status: activeTab.value,
               activityData: activity
             })
           };

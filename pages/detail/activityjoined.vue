@@ -63,6 +63,7 @@
             <ActivityTicketList
               v-for="activity in currentActivityList"
               :key="activity.id"
+			  :status="activeTab" 
               :activityData="activity"
               @action="handleAction"
               @cancel="handleCancel"

@@ -1,7 +1,7 @@
 <template> 
   <view class="page">
     <!-- 顶部固定导航栏 -->
-    <uni-nav-bar statusBar="true" backgroundColor="#ff4757" fixed="true" leftWidth="150px">
+    <uni-nav-bar statusBar="true" backgroundColor="#dc2626" fixed="true" leftWidth="150px">
       <template v-slot:left>
         <view class="navbar-title">热门活动</view>
       </template>

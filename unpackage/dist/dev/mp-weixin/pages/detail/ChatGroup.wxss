@@ -8,7 +8,7 @@
 
 /* 导航栏样式 */
 .custom-navbar.data-v-6f6e3c6b {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
   color: white;
   position: fixed;
   top: 0;
@@ -39,10 +39,33 @@
 .nav-left.data-v-6f6e3c6b:active {
   background-color: rgba(255, 255, 255, 0.1);
 }
-.back-icon.data-v-6f6e3c6b {
+
+/* .back-icon {
   font-size: 48rpx;
   font-weight: 300;
   color: white;
+} */
+.back-btn.data-v-6f6e3c6b {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  -webkit-backdrop-filter: blur(10rpx);
+          backdrop-filter: blur(10rpx);
+}
+.back-btn.data-v-6f6e3c6b:active {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0.95);
+}
+.back-icon.data-v-6f6e3c6b {
+  font-size: 44rpx;
+  color: white;
+  font-weight: 300;
+  margin-left: -4rpx;
 }
 .nav-center.data-v-6f6e3c6b {
   flex: 1;

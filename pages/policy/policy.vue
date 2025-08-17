@@ -1,7 +1,7 @@
 <template>
   <view class="page">
     <!-- 顶部固定导航栏 -->
-    <uni-nav-bar statusBar="true" backgroundColor="#ff4757" fixed="true">
+    <uni-nav-bar statusBar="true" backgroundColor="#dc2626" fixed="true">
       <template v-slot:left>
         <view class="navbar-title">咨询</view>
       </template>

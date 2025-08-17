@@ -5,7 +5,9 @@
       <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
       <view class="nav-content">
         <view class="nav-left" @tap="goBack">
-          <text class="back-icon">‹</text>
+          <view class="back-btn">
+            <text class="back-icon">‹</text>
+          </view>
         </view>
         <view class="nav-center">
           <text class="nav-title">{{ groupName }}</text>
@@ -14,6 +16,7 @@
         <view class="nav-right"></view>
       </view>
     </view>
+	
 
     <!-- 消息列表区域 -->
     <scroll-view
@@ -267,7 +270,7 @@ const generateMockAdminMessagesWithMedia = () => {
     id: 'msg_5',
     title: '新功能演示视频',
     content: `我们为大家准备了新功能的详细演示视频，快来看看吧：
-[video:http://vjs.zencdn.net/v/oceans.mp4]
+[video:https://media.w3.org/2010/05/sintel/trailer.mp4]
 视频时长：3分钟，建议在WiFi环境下观看。`,
     type: 'update',
     priority: 'normal',
@@ -391,7 +394,7 @@ const markAsRead = async (message) => {
 
 /* 导航栏样式 */
 .custom-navbar {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
   color: white;
   position: fixed;
   top: 0;
@@ -427,10 +430,33 @@ const markAsRead = async (message) => {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.back-icon {
+/* .back-icon {
   font-size: 48rpx;
   font-weight: 300;
   color: white;
+} */
+.back-btn {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10rpx);
+}
+
+.back-btn:active {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0.95);
+}
+
+.back-icon {
+  font-size: 44rpx;
+  color: white;
+  font-weight: 300;
+  margin-left: -4rpx;
 }
 
 .nav-center {

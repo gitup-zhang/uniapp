@@ -8814,6 +8814,7 @@ exports.onLoad = onLoad;
 exports.onMounted = onMounted;
 exports.onPullDownRefresh = onPullDownRefresh;
 exports.onShow = onShow;
+exports.onUnmounted = onUnmounted;
 exports.p = p;
 exports.reactive = reactive;
 exports.ref = ref;

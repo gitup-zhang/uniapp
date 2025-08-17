@@ -374,7 +374,7 @@ const _sfc_main = {
       } : {}, {
         y: isLoadingMore.value
       }, isLoadingMore.value ? {} : {}, {
-        z: statusBarHeight.value + 44 + 68 + "px",
+        z: statusBarHeight.value + 44 + 56 + "px",
         A: common_vendor.o(loadMoreMessages),
         B: isRefreshing.value,
         C: common_vendor.o(handleRefresh),

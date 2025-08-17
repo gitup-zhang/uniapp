@@ -30,7 +30,7 @@
             :class="{ active: activeTab === 'all' }"
             @tap="switchTab('all')"
           >
-            全部
+            <text class="tab-text">全部</text>
             <view class="tab-badge" v-if="totalUnreadCount > 0">{{ totalUnreadCount > 99 ? '99+' : totalUnreadCount }}</view>
           </view>
           <view 
@@ -38,7 +38,7 @@
             :class="{ active: activeTab === 'system' }"
             @tap="switchTab('system')"
           >
-            系统消息
+            <text class="tab-text">系统消息</text>
             <view class="tab-badge" v-if="systemUnreadCount > 0">{{ systemUnreadCount > 99 ? '99+' : systemUnreadCount }}</view>
           </view>
           <view 
@@ -46,7 +46,7 @@
             :class="{ active: activeTab === 'group' }"
             @tap="switchTab('group')"
           >
-            群组消息
+            <text class="tab-text">群组消息</text>
             <view class="tab-badge" v-if="groupUnreadCount > 0">{{ groupUnreadCount > 99 ? '99+' : groupUnreadCount }}</view>
           </view>
         </view>
@@ -57,15 +57,15 @@
           @tap="markAllAsRead"
           v-if="getCurrentUnreadCount() > 0"
         >
-          <text class="mark-all-icon">✓</text>
-          <text class="mark-all-text">全部已读</text>
+          <text class="read-btn-icon">✓</text>
+          <text class="read-btn-text">已读</text>
         </view>
       </view>
       
       <!-- 消息列表 -->
       <scroll-view
         class="message-list"
-        :style="{ marginTop: statusBarHeight + 44 + 68 + 'px' }"
+        :style="{ marginTop: statusBarHeight + 44 + 56 + 'px' }"
         scroll-y="true"
         enable-back-to-top="true"
         :bounces="false"
@@ -533,7 +533,7 @@ const markAllAsRead = async () => {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
 }
 
 /* 登录提示样式 */
@@ -543,7 +543,7 @@ const markAllAsRead = async () => {
   align-items: center;
   justify-content: center;
   padding: 80rpx;
-  background: linear-gradient(135deg, #ff4757 0%, #ff6b7a 100%);
+  background: linear-gradient(135deg, #e53e3e 0%, #fc8181 100%);
 }
 
 .login-card {
@@ -587,20 +587,20 @@ const markAllAsRead = async () => {
 }
 
 .login-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
   color: white;
   border: none;
   border-radius: 60rpx;
   padding: 32rpx 80rpx;
   font-size: 32rpx;
   font-weight: 600;
-  box-shadow: 0 16rpx 40rpx rgba(102, 126, 234, 0.3);
+  box-shadow: 0 16rpx 40rpx rgba(229, 62, 62, 0.3);
   transition: all 0.3s ease;
 }
 
 .login-btn:active {
   transform: translateY(4rpx);
-  box-shadow: 0 8rpx 20rpx rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8rpx 20rpx rgba(229, 62, 62, 0.4);
 }
 
 .login-btn-text {
@@ -612,19 +612,19 @@ const markAllAsRead = async () => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #f8fafc;
+  background: #fff5f5;
 }
 
 /* 自定义导航栏 */
 .custom-navbar {
-  background: linear-gradient(135deg, #ff4757 0%, #ff6b7a 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
   color: white;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 999;
-  box-shadow: 0 4rpx 20rpx rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4rpx 20rpx rgba(229, 62, 62, 0.3);
 }
 
 .status-bar {
@@ -651,57 +651,72 @@ const markAllAsRead = async () => {
   left: 0;
   width: 100%;
   z-index: 998;
-  background: #f8fafc;
-  padding: 24rpx 32rpx;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12rpx 32rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 2rpx solid rgba(0,0,0,0.05);
+  border-bottom: 1rpx solid rgba(229, 62, 62, 0.08);
   backdrop-filter: blur(20rpx);
+  height: 56px;
 }
 
 .tabs-container {
   display: flex;
-  gap: 16rpx;
+  gap: 8rpx;
+  flex: 1;
 }
 
 .filter-tab {
-  padding: 16rpx 32rpx;
-  background: white;
-  border-radius: 32rpx;
+  padding: 12rpx 24rpx;
+  background: transparent;
+  border-radius: 24rpx;
   font-size: 28rpx;
-  color: #4a5568;
-  border: 3rpx solid transparent;
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.08);
+  color: #6b7280;
   position: relative;
-  font-weight: 600;
-  transition: all 0.3s ease;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80rpx;
+  text-align: center;
+  border: 1rpx solid transparent;
+}
+
+.filter-tab:active {
+  transform: scale(0.98);
 }
 
 .filter-tab.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
-  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.4);
-  transform: translateY(-2rpx);
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(239, 68, 68, 0.25);
+}
+
+.tab-text {
+  font-size: 28rpx;
+  font-weight: inherit;
 }
 
 .tab-badge {
   position: absolute;
-  top: -12rpx;
-  right: -12rpx;
-  background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%);
+  top: -8rpx;
+  right: -8rpx;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white;
   font-size: 20rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 20rpx;
-  min-width: 32rpx;
-  height: 32rpx;
+  padding: 2rpx 8rpx;
+  border-radius: 12rpx;
+  min-width: 24rpx;
+  height: 24rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  border: 4rpx solid white;
-  box-shadow: 0 4rpx 12rpx rgba(255, 71, 87, 0.4);
+  font-weight: 600;
+  border: 2rpx solid white;
+  box-shadow: 0 2rpx 6rpx rgba(245, 158, 11, 0.3);
 }
 
 /* 一键已读按钮 */
@@ -709,34 +724,36 @@ const markAllAsRead = async () => {
   display: flex;
   align-items: center;
   gap: 8rpx;
-  padding: 16rpx 24rpx;
+  padding: 12rpx 20rpx;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-radius: 32rpx;
-  box-shadow: 0 4rpx 16rpx rgba(16, 185, 129, 0.3);
+  border-radius: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(16, 185, 129, 0.25);
   color: white;
-  font-size: 26rpx;
-  font-weight: 600;
-  transition: all 0.3s ease;
+  font-size: 24rpx;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-width: 80rpx;
 }
 
 .mark-all-read-btn:active {
-  transform: scale(0.95);
-  box-shadow: 0 2rpx 8rpx rgba(16, 185, 129, 0.4);
+  transform: scale(0.98);
+  box-shadow: 0 1rpx 4rpx rgba(16, 185, 129, 0.3);
 }
 
-.mark-all-icon {
-  font-size: 28rpx;
+.read-btn-icon {
+  font-size: 24rpx;
   font-weight: bold;
 }
 
-.mark-all-text {
+.read-btn-text {
   font-size: 24rpx;
+  font-weight: 500;
 }
 
 /* 消息列表 */
 .message-list {
   flex: 1;
-  background: #f8fafc;
+  background: #fff5f5;
 }
 
 .message-list-content {
@@ -755,8 +772,8 @@ const markAllAsRead = async () => {
 .loading-spinner {
   width: 60rpx;
   height: 60rpx;
-  border: 6rpx solid rgba(102, 126, 234, 0.2);
-  border-top: 6rpx solid #667eea;
+  border: 6rpx solid rgba(229, 62, 62, 0.2);
+  border-top: 6rpx solid #e53e3e;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 24rpx;
@@ -823,7 +840,7 @@ const markAllAsRead = async () => {
 
 .wave {
   position: absolute;
-  border: 4rpx solid rgba(102, 126, 234, 0.1);
+  border: 4rpx solid rgba(229, 62, 62, 0.1);
   border-radius: 50%;
   width: 100%;
   height: 100%;

@@ -161,7 +161,7 @@ const _sfc_main = {
         id: "msg_5",
         title: "新功能演示视频",
         content: `我们为大家准备了新功能的详细演示视频，快来看看吧：
-[video:http://vjs.zencdn.net/v/oceans.mp4]
+[video:https://media.w3.org/2010/05/sintel/trailer.mp4]
 视频时长：3分钟，建议在WiFi环境下观看。`,
         type: "update",
         priority: "normal",

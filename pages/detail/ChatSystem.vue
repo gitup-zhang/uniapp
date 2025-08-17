@@ -1,118 +1,149 @@
 <template>
-  <view class="system-message-container">
+  <view class="system-message-page">
     <!-- 自定义导航栏 -->
     <view class="custom-navbar">
       <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
       <view class="nav-content">
         <view class="nav-left" @tap="goBack">
-          <text class="back-icon">‹</text>
+          <view class="back-btn">
+            <text class="back-icon">‹</text>
+          </view>
         </view>
         <view class="nav-center">
           <text class="nav-title">系统消息</text>
         </view>
-        <view class="nav-right"></view>
+        <view class="nav-right">
+          <view class="message-count" v-if="messages.length > 0">
+            <text class="count-text"></text>
+          </view>
+        </view>
       </view>
     </view>
 
-    <!-- 消息内容区域 -->
+    <!-- 消息列表 -->
     <scroll-view
-      class="message-content"
-      :style="{ marginTop: statusBarHeight + 88 + 'px' }"
+      class="message-list"
+      :style="{ marginTop: statusBarHeight + 48 + 'px' }"
       scroll-y="true"
-      :bounces="false"
+      :bounces="true"
       :refresher-enabled="true"
       :refresher-triggered="isRefreshing"
       @refresherrefresh="handleRefresh"
       @refresherrestore="handleRefreshRestore"
+      @scrolltolower="loadMore"
     >
-      <view class="content-wrapper">
+      <view class="list-wrapper">
         <!-- 加载状态 -->
-        <view v-if="isLoading" class="loading-state">
+        <view v-if="isLoading && messages.length === 0" class="loading-container">
           <view class="loading-spinner"></view>
-          <text class="loading-text">加载中...</text>
+          <text class="loading-text">正在加载消息...</text>
         </view>
 
-        <!-- 消息详情 -->
-        <view v-else-if="messageDetail" class="message-detail">
-          <!-- 消息头部 -->
-          <view class="message-header">
-            <view class="system-icon">
-              <text class="icon-text">🔔</text>
-            </view>
-            <view class="header-info">
-              <text class="message-title">{{ messageDetail.title || '系统通知' }}</text>
-              <text class="message-time">{{ formatTime(messageDetail.created_at) }}</text>
-            </view>
-            <view class="message-status" v-if="messageDetail.is_read === 0">
-              <view class="unread-dot"></view>
+        <!-- 消息列表 -->
+        <view v-else class="messages-container">
+          <!-- 消息项 -->
+          <view 
+            v-for="(message, index) in messages" 
+            :key="message.id"
+            class="message-item"
+            :class="{ 'expanded': message.expanded }"
+          >
+            <!-- 消息卡片 -->
+            <view class="message-card">
+              <!-- 装饰线条 -->
+              <view class="decoration-line"></view>
+              
+              <!-- 消息头部 -->
+              <view class="message-header">
+                <view class="message-icon">
+                  <text class="icon-text">📢</text>
+                </view>
+                <view class="header-content">
+                  <text class="message-title">{{ message.title }}</text>
+                  <text class="message-time">{{ formatTime(message.time) }}</text>
+                </view>
+              </view>
+
+              <!-- 消息内容区域 -->
+              <view class="message-body">
+                <!-- 短内容直接显示 -->
+                <view v-if="getContentType(message.content) === 'short'" class="content-wrapper">
+                  <text class="content-text">{{ message.content }}</text>
+                </view>
+
+                <!-- 中等长度内容可折叠 -->
+                <view v-else-if="getContentType(message.content) === 'medium'" class="content-wrapper">
+                  <text 
+                    class="content-text" 
+                    :class="{ 'content-collapsed': !message.expanded }"
+                  >
+                    {{ message.content }}
+                  </text>
+                  
+                  <!-- 折叠/展开控制 -->
+                  <view class="toggle-section">
+                    <view class="fade-mask" v-if="!message.expanded"></view>
+                    <view class="toggle-btn" @tap="toggleContent(index)">
+                      <text class="toggle-text">{{ message.expanded ? '收起' : '展开' }}</text>
+                      <view class="toggle-icon" :class="{ 'rotated': message.expanded }">
+                        <text class="icon-arrow">▼</text>
+                      </view>
+                    </view>
+                  </view>
+                </view>
+
+                <!-- 超长内容显示预览 -->
+                <view v-else class="content-wrapper">
+                  <text class="content-preview">{{ getPreviewText(message.content) }}</text>
+                  
+                  <view class="action-section">
+                    <view class="detail-btn" @tap="viewFullContent(message)">
+                      <view class="btn-content">
+                        <text class="btn-text">查看完整内容</text>
+                        <view class="btn-arrow">
+                          <text class="arrow-icon">→</text>
+                        </view>
+                      </view>
+                    </view>
+                  </view>
+                </view>
+              </view>
             </view>
           </view>
 
-          <!-- 消息内容 -->
-          <view class="message-body">
-            <view class="content-section">
-              <text class="content-text">{{ messageDetail.content || messageDetail.message || '暂无内容' }}</text>
+          <!-- 加载更多 -->
+          <view v-if="hasMore" class="load-more-section">
+            <view v-if="isLoadingMore" class="loading-more">
+              <view class="loading-spinner small"></view>
+              <text class="loading-text">加载更多消息...</text>
             </view>
-
-            <!-- 附加信息 -->
-            <view v-if="messageDetail.extra_data" class="extra-info">
-              <view class="extra-title">详细信息</view>
-              <view class="extra-content">
-                <text class="extra-text">{{ formatExtraData(messageDetail.extra_data) }}</text>
-              </view>
-            </view>
-
-            <!-- 操作按钮 -->
-            <view class="action-buttons">
-              <view 
-                v-if="messageDetail.action_url" 
-                class="action-btn primary-btn" 
-                @tap="handleAction"
-              >
-                <text class="btn-text">查看详情</text>
-              </view>
-              <view 
-                v-if="messageDetail.is_read === 0" 
-                class="action-btn secondary-btn" 
-                @tap="markAsRead"
-              >
-                <text class="btn-text">标记已读</text>
+            <view v-else class="load-more-trigger" @tap="loadMore">
+              <view class="load-trigger-btn">
+                <text class="trigger-text">加载更多消息</text>
+                <view class="trigger-icon">
+                  <text class="icon-plus">+</text>
+                </view>
               </view>
             </view>
           </view>
 
-          <!-- 相关消息 -->
-          <view v-if="relatedMessages.length > 0" class="related-messages">
-            <view class="related-header">
-              <text class="related-title">相关消息</text>
-            </view>
-            <view class="related-list">
-              <view 
-                v-for="related in relatedMessages" 
-                :key="related.id"
-                class="related-item"
-                @tap="viewRelatedMessage(related)"
-              >
-                <view class="related-content">
-                  <text class="related-text">{{ related.title || related.content }}</text>
-                  <text class="related-time">{{ formatTime(related.created_at) }}</text>
-                </view>
-                <view class="related-arrow">
-                  <text class="arrow-icon">›</text>
-                </view>
-              </view>
-            </view>
+          <!-- 无更多数据 -->
+          <view v-else-if="messages.length > 0" class="no-more-section">
+            <view class="no-more-line"></view>
+            <text class="no-more-text">已显示全部消息</text>
+            <view class="no-more-line"></view>
           </view>
         </view>
 
-        <!-- 错误状态 -->
-        <view v-else class="error-state">
-          <view class="error-icon">❌</view>
-          <text class="error-title">加载失败</text>
-          <text class="error-desc">无法获取消息详情，请稍后重试</text>
-          <view class="retry-btn" @tap="loadMessageDetail">
-            <text class="retry-text">重新加载</text>
+        <!-- 空状态 -->
+        <view v-if="!isLoading && messages.length === 0" class="empty-state">
+          <view class="empty-illustration">
+            <view class="empty-circle">
+              <text class="empty-icon">📭</text>
+            </view>
           </view>
+          <text class="empty-title">暂无系统消息</text>
+          <text class="empty-desc">系统重要通知会在这里显示</text>
         </view>
       </view>
     </scroll-view>
@@ -120,25 +151,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
-import { useMesstore } from '@/store/mes.js'
-
-// 页面参数
-const props = defineProps({
-  id: String,
-  groupName: String
-})
-
-// 状态管理
-const mesStore = useMesstore()
 
 // 响应式数据
 const statusBarHeight = ref(0)
 const isLoading = ref(false)
 const isRefreshing = ref(false)
-const messageDetail = ref(null)
-const relatedMessages = ref([])
+const isLoadingMore = ref(false)
+const hasMore = ref(true)
+const currentPage = ref(1)
+const messages = ref([])
+
+// 内容长度配置
+const CONTENT_CONFIG = {
+  SHORT_LIMIT: 80,     // 短内容限制（字符数）
+  MEDIUM_LIMIT: 300,   // 中等内容限制
+  PREVIEW_LENGTH: 120, // 预览内容长度
+  COLLAPSE_HEIGHT: 3   // 折叠时显示行数
+}
 
 // 生命周期
 onMounted(async () => {
@@ -147,141 +178,177 @@ onMounted(async () => {
 })
 
 onLoad(async (options) => {
-  const messageId = options.id || ''
-  const groupName = decodeURIComponent(options.groupName || '系统消息')
-  
-  await loadMessageDetail(messageId)
-})
-
-onShow(() => {
-  // 页面显示时标记消息为已读
-  if (messageDetail.value && messageDetail.value.is_read === 0) {
-    markAsRead()
-  }
+  await loadMessages()
 })
 
 // 方法定义
-const loadMessageDetail = async (messageId) => {
-  if (!messageId && !props.id) {
-    uni.showToast({
-      title: '消息ID不存在',
-      icon: 'error'
-    })
-    return
+const loadMessages = async (page = 1) => {
+  if (page === 1) {
+    isLoading.value = true
+  } else {
+    isLoadingMore.value = true
   }
-  
-  const id = messageId || props.id
-  isLoading.value = true
-  
+
   try {
-    // 先从store中查找消息
-    let message = mesStore.getSystemMessageById(id)
+    // 模拟API调用
+    await new Promise(resolve => setTimeout(resolve, 800)) // 模拟网络延迟
+    const mockMessages = generateMockMessages(page)
     
-    if (!message) {
-      // 如果store中没有，调用API获取详情
-      // message = await getSystemMessageDetail(id)
-      
-      // 模拟API调用
-      message = generateMockSystemMessage(id)
-    }
-    
-    if (message) {
-      messageDetail.value = message
-      
-      // 加载相关消息
-      await loadRelatedMessages()
+    if (page === 1) {
+      messages.value = mockMessages.map(msg => ({
+        ...msg,
+        expanded: false
+      }))
     } else {
-      messageDetail.value = null
+      messages.value.push(...mockMessages.map(msg => ({
+        ...msg,
+        expanded: false
+      })))
     }
-    
+
+    hasMore.value = page < 3
+    currentPage.value = page
+
   } catch (error) {
-    console.error('加载系统消息详情失败:', error)
-    messageDetail.value = null
-    
+    console.error('加载消息失败:', error)
     uni.showToast({
-      title: '加载失败',
-      icon: 'error'
+      title: '加载失败，请重试',
+      icon: 'none',
+      duration: 2000
     })
   } finally {
     isLoading.value = false
+    isLoadingMore.value = false
   }
 }
 
-const generateMockSystemMessage = (id) => {
-  const mockTypes = [
+const generateMockMessages = (page) => {
+  const messages = []
+  const baseId = (page - 1) * 8
+
+  const messageTemplates = [
     {
       title: '系统维护通知',
-      content: '系统将于今晚23:00-次日02:00进行例行维护，届时部分功能可能暂时无法使用，请您提前做好相关准备。维护期间给您带来的不便，敬请谅解。',
-      type: 'maintenance'
+      shortContent: '系统将于今晚23:00进行维护升级，预计2小时完成。',
+      mediumContent: '尊敬的用户，系统将于今晚23:00-次日01:00进行例行维护升级。维护期间，部分功能可能暂时无法使用，包括登录、支付、数据同步等。我们建议您提前保存工作进度，避免数据丢失。维护完成后，系统性能将得到显著提升，感谢您的理解与支持。如有紧急问题，请联系在线客服。',
+      longContent: '尊敬的用户，为了给您提供更优质的服务体验，我们将于今晚23:00至次日01:00进行系统全面维护升级。本次维护涉及服务器硬件升级、数据库性能优化、安全系统更新、新功能模块部署等多个方面。维护期间，以下功能将暂时无法使用：用户登录注册、在线支付交易、文件上传下载、实时消息推送、数据报表生成、第三方接口调用等核心服务。为确保您的数据安全，我们强烈建议您在维护开始前及时保存所有工作进度，备份重要数据，并退出系统。维护完成后，系统将实现以下改进：响应速度提升60%以上、并发处理能力增强3倍、数据安全等级提升至金融级标准、新增智能推荐功能、优化移动端用户体验。预计维护将按时完成，如遇特殊情况需要延长维护时间，我们会第一时间通过短信、邮件等方式通知您。维护期间给您带来的不便，我们深表歉意。如有任何紧急问题或疑问，请通过以下方式联系我们：24小时客服热线400-888-6666、紧急邮箱emergency@example.com、官方微信客服。感谢您一直以来的信任与支持！'
     },
     {
-      title: '新功能上线',
-      content: '我们很高兴地宣布，全新的消息推送功能现已上线！您可以在设置中自定义消息提醒方式，获得更好的使用体验。',
-      type: 'feature'
+      title: '安全提醒通知',
+      shortContent: '检测到您的账户存在异常登录行为，请及时检查。',
+      mediumContent: '安全提醒：我们的风控系统检测到您的账户在北京地区有异常登录记录，时间为今日14:30。如果这是您本人操作，请忽略此消息。如果不是您本人操作，请立即修改密码，启用双重验证，并检查账户资金安全。我们建议定期更换密码，使用复杂密码组合，不在公共场所登录账户。',
+      longContent: '重要安全提醒：我们的智能风控系统在今日14:30:25检测到您的账户出现异常登录行为。具体信息如下：登录地点：北京市朝阳区（IP:120.244.xxx.xxx）、设备信息：Windows 10专业版Chrome浏览器、登录状态：成功登录并进行了部分操作。系统同时检测到以下异常特征：登录地点与您常用地点不符、设备指纹信息陌生、登录时间段异常、操作行为模式与平时差异较大。如果这是您本人的正常操作，请点击确认安全按钮，系统将记录此次登录为安全行为。如果这不是您本人操作，说明您的账户可能已被他人盗用，请立即采取以下安全措施：1.立即修改账户密码，建议使用包含大小写字母、数字、特殊符号的强密码；2.启用双重验证功能，绑定手机号码和邮箱；3.检查并清除可疑登录设备；4.修改密保问题和答案；5.检查账户资金变动和重要信息修改记录；6.如发现任何损失，请立即联系客服进行处理。为了您的账户安全，我们建议：定期更换密码（建议每3个月一次）、不要在公共网络或设备上登录、开启登录短信提醒功能、定期查看账户安全报告。如需帮助，请联系7×24小时安全专线：400-666-8888。'
     },
     {
-      title: '安全提醒',
-      content: '检测到您的账户在异地登录，如非本人操作，请及时修改密码并启用双重验证以保障账户安全。',
-      type: 'security'
+      title: '新功能上线公告',
+      shortContent: '全新的智能推荐功能已正式上线，快来体验吧！',
+      mediumContent: '好消息！经过3个月的精心开发，全新的AI智能推荐系统现已正式上线！新功能基于深度学习算法，能够根据您的使用习惯和偏好，为您推荐最相关的内容和服务。同时，我们还优化了界面设计，提升了系统响应速度，增加了夜间模式等实用功能。赶快更新到最新版本，体验更智能、更便捷的服务吧！',
+      longContent: '重大更新公告！经过我们产品团队3个月的潜心研发和精心打磨，基于最新AI技术的智能推荐系统现已正式发布上线！本次更新是我们产品历史上最重要的里程碑之一，将为您带来前所未有的个性化体验。核心功能亮点：1.AI智能推荐引擎：采用先进的深度学习和神经网络算法，通过分析您的浏览历史、操作习惯、兴趣标签等多维度数据，实现99.7%准确率的个性化内容推荐；2.实时学习能力：系统会根据您的每一次点击、停留时间、分享行为等实时调整推荐策略，越用越懂您；3.多场景适配：支持首页推荐、搜索联想、相关推荐、跨品类推荐等多种场景，全方位提升使用体验；4.隐私保护：所有个性化分析均在本地进行，绝不上传个人隐私数据，确保信息安全。界面体验升级：全新Material You设计语言、支持深色/浅色主题自动切换、优化动画效果和交互反馈、提升页面加载速度50%、新增手势操作和快捷键支持。功能增强：新增批量操作、增强搜索功能、支持多格式文件预览、优化移动端适配、增加无障碍支持。立即更新：您可以通过应用商店搜索更新，或在设置中检查版本更新。首次使用时，系统会引导您完成个性化设置，整个过程仅需3分钟。我们相信这次更新将为您带来全新的使用体验，如有任何问题或建议，欢迎通过意见反馈渠道与我们联系。感谢您的支持与信任！'
     }
   ]
+
+  for (let i = 0; i < 8; i++) {
+    const template = messageTemplates[i % messageTemplates.length]
+    const contentType = i % 3 // 0: short, 1: medium, 2: long
+    
+    let content = ''
+    switch (contentType) {
+      case 0:
+        content = template.shortContent
+        break
+      case 1:
+        content = template.mediumContent
+        break
+      case 2:
+        content = template.longContent
+        break
+    }
+
+    messages.push({
+      id: `msg_${baseId + i + 1}`,
+      title: template.title,
+      content: content,
+      time: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+    })
+  }
+
+  return messages
+}
+
+const getContentType = (content) => {
+  if (!content) return 'short'
   
-  const randomType = mockTypes[Math.floor(Math.random() * mockTypes.length)]
-  
-  return {
-    id: id,
-    title: randomType.title,
-    content: randomType.content,
-    message: randomType.content,
-    type: randomType.type,
-    created_at: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-    updated_at: new Date().toISOString(),
-    is_read: Math.random() > 0.5 ? 1 : 0,
-    action_url: Math.random() > 0.7 ? 'https://example.com/detail' : null,
-    extra_data: Math.random() > 0.6 ? {
-      priority: 'high',
-      category: randomType.type,
-      source: 'system'
-    } : null
+  const length = content.length
+  if (length <= CONTENT_CONFIG.SHORT_LIMIT) {
+    return 'short'
+  } else if (length <= CONTENT_CONFIG.MEDIUM_LIMIT) {
+    return 'medium'
+  } else {
+    return 'long'
   }
 }
 
-const loadRelatedMessages = async () => {
+const getPreviewText = (content) => {
+  if (!content) return ''
+  return content.length > CONTENT_CONFIG.PREVIEW_LENGTH 
+    ? content.substring(0, CONTENT_CONFIG.PREVIEW_LENGTH) + '...'
+    : content
+}
+
+const toggleContent = (index) => {
+  messages.value[index].expanded = !messages.value[index].expanded
+}
+
+const viewFullContent = (message) => {
+  // 跳转到消息详情页
+  uni.navigateTo({
+    url: `/pages/message-detail/index?id=${message.id}&title=${encodeURIComponent(message.title)}`
+  })
+}
+
+const formatTime = (timeStr) => {
+  if (!timeStr) return ''
+  
   try {
-    // 这里应该调用API获取相关消息
-    // const related = await getRelatedSystemMessages(messageDetail.value.id)
+    const time = new Date(timeStr)
+    const now = new Date()
+    const diff = now - time
     
-    // 模拟相关消息
-    const mockRelated = []
-    for (let i = 0; i < Math.floor(Math.random() * 3) + 1; i++) {
-      mockRelated.push({
-        id: `related_${Date.now()}_${i}`,
-        title: `相关通知 ${i + 1}`,
-        content: `这是与当前消息相关的通知内容 ${i + 1}`,
-        created_at: new Date(Date.now() - Math.random() * 3 * 24 * 60 * 60 * 1000).toISOString()
-      })
+    if (diff < 60000) {
+      return '刚刚'
+    } else if (diff < 3600000) {
+      return `${Math.floor(diff / 60000)}分钟前`
+    } else if (diff < 86400000) {
+      return `${Math.floor(diff / 3600000)}小时前`
+    } else if (diff < 604800000) {
+      return `${Math.floor(diff / 86400000)}天前`
+    } else {
+      const month = String(time.getMonth() + 1).padStart(2, '0')
+      const date = String(time.getDate()).padStart(2, '0')
+      const hours = String(time.getHours()).padStart(2, '0')
+      const minutes = String(time.getMinutes()).padStart(2, '0')
+      
+      if (time.getFullYear() === now.getFullYear()) {
+        return `${month}-${date} ${hours}:${minutes}`
+      } else {
+        return `${time.getFullYear()}-${month}-${date}`
+      }
     }
-    
-    relatedMessages.value = mockRelated
-    
   } catch (error) {
-    console.error('加载相关消息失败:', error)
-    relatedMessages.value = []
+    return String(timeStr)
   }
 }
 
 const handleRefresh = async () => {
   isRefreshing.value = true
-  
   try {
-    await loadMessageDetail(messageDetail.value?.id)
+    await loadMessages(1)
     uni.showToast({
       title: '刷新成功',
       icon: 'success',
       duration: 1500
     })
   } catch (error) {
-    console.error('刷新失败:', error)
     uni.showToast({
       title: '刷新失败',
       icon: 'error'
@@ -295,120 +362,31 @@ const handleRefreshRestore = () => {
   isRefreshing.value = false
 }
 
+const loadMore = async () => {
+  if (!hasMore.value || isLoadingMore.value) return
+  await loadMessages(currentPage.value + 1)
+}
+
 const goBack = () => {
   uni.navigateBack()
-}
-
-const formatTime = (timeStr) => {
-  if (!timeStr) return ''
-  
-  try {
-    const time = new Date(timeStr)
-    const now = new Date()
-    
-    const year = time.getFullYear()
-    const month = String(time.getMonth() + 1).padStart(2, '0')
-    const date = String(time.getDate()).padStart(2, '0')
-    const hours = String(time.getHours()).padStart(2, '0')
-    const minutes = String(time.getMinutes()).padStart(2, '0')
-    
-    // 如果是今年，不显示年份
-    if (year === now.getFullYear()) {
-      return `${month}-${date} ${hours}:${minutes}`
-    } else {
-      return `${year}-${month}-${date} ${hours}:${minutes}`
-    }
-  } catch (error) {
-    console.error('时间格式化错误:', error)
-    return String(timeStr)
-  }
-}
-
-const formatExtraData = (extraData) => {
-  if (!extraData || typeof extraData !== 'object') return ''
-  
-  try {
-    return Object.entries(extraData)
-      .map(([key, value]) => `${key}: ${value}`)
-      .join('\n')
-  } catch (error) {
-    return String(extraData)
-  }
-}
-
-const markAsRead = async () => {
-  if (!messageDetail.value || messageDetail.value.is_read === 1) return
-  
-  try {
-    // 调用store方法标记已读
-    await mesStore.markSystemMessageAsRead(messageDetail.value.id)
-    
-    // 更新本地状态
-    messageDetail.value.is_read = 1
-    
-    uni.showToast({
-      title: '已标记为已读',
-      icon: 'success',
-      duration: 1500
-    })
-    
-  } catch (error) {
-    console.error('标记已读失败:', error)
-    uni.showToast({
-      title: '操作失败',
-      icon: 'error'
-    })
-  }
-}
-
-const handleAction = () => {
-  if (!messageDetail.value?.action_url) return
-  
-  // 这里可以处理不同类型的操作
-  uni.showModal({
-    title: '跳转确认',
-    content: '是否要打开相关链接？',
-    success: (res) => {
-      if (res.confirm) {
-        // 可以跳转到内部页面或外部链接
-        uni.navigateTo({
-          url: `/pages/webview/index?url=${encodeURIComponent(messageDetail.value.action_url)}`
-        })
-      }
-    }
-  })
-}
-
-const viewRelatedMessage = (relatedMessage) => {
-  // 跳转到相关消息详情
-  uni.navigateTo({
-    url: `/pages/system-message/index?id=${relatedMessage.id}&groupName=${encodeURIComponent('系统消息')}`
-  })
 }
 </script>
 
 <style scoped>
-.system-message-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background: #f8fafc;
+.system-message-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #fff5f5 0%, #fef2f2 100%);
 }
 
-/* 导航栏样式 */
+/* 导航栏 */
 .custom-navbar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
-  box-shadow: 0 2rpx 16rpx rgba(102, 126, 234, 0.3);
-}
-
-.status-bar {
-  width: 100%;
+  box-shadow: 0 8rpx 32rpx rgba(239, 68, 68, 0.3);
 }
 
 .nav-content {
@@ -416,75 +394,102 @@ const viewRelatedMessage = (relatedMessage) => {
   display: flex;
   align-items: center;
   padding: 0 32rpx;
-  position: relative;
 }
 
-.nav-left {
+.nav-left, .nav-right {
+  width: 80rpx;
+  display: flex;
+  align-items: center;
+}
+
+.nav-right {
+  justify-content: flex-end;
+}
+
+.back-btn {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60rpx;
-  height: 60rpx;
-  border-radius: 50%;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10rpx);
 }
 
-.nav-left:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+.back-btn:active {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0.95);
 }
 
 .back-icon {
-  font-size: 36rpx;
-  font-weight: 300;
+  font-size: 44rpx;
   color: white;
-  line-height: 1;
+  font-weight: 300;
+  margin-left: -4rpx;
 }
 
 .nav-center {
   flex: 1;
   display: flex;
   justify-content: center;
-  margin: 0 20rpx;
 }
 
 .nav-title {
   font-size: 36rpx;
   font-weight: 600;
   color: white;
-  text-align: center;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
 }
 
-.nav-right {
-  width: 60rpx;
+.message-count {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 20rpx;
+  padding: 8rpx 16rpx;
+  backdrop-filter: blur(10rpx);
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
 }
 
-/* 消息内容区域 */
-.message-content {
+.count-text {
+  font-size: 24rpx;
+  color: white;
+  font-weight: 600;
+}
+
+/* 消息列表 */
+.message-list {
   flex: 1;
   height: 100vh;
 }
 
-.content-wrapper {
+.list-wrapper {
   padding: 32rpx 24rpx 100rpx;
 }
 
 /* 加载状态 */
-.loading-state {
+.loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 400rpx;
-  gap: 24rpx;
+  gap: 32rpx;
 }
 
 .loading-spinner {
-  width: 60rpx;
-  height: 60rpx;
-  border: 6rpx solid #e5e7eb;
-  border-top: 6rpx solid #667eea;
+  width: 64rpx;
+  height: 64rpx;
+  border: 4rpx solid rgba(239, 68, 68, 0.1);
+  border-left: 4rpx solid #ef4444;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+.loading-spinner.small {
+  width: 48rpx;
+  height: 48rpx;
+  border-width: 3rpx;
 }
 
 @keyframes spin {
@@ -494,83 +499,108 @@ const viewRelatedMessage = (relatedMessage) => {
 
 .loading-text {
   font-size: 28rpx;
-  color: #6b7280;
+  color: #9ca3af;
+  font-weight: 500;
 }
 
-/* 消息详情 */
-.message-detail {
+/* 消息容器 */
+.messages-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+/* 消息项 */
+.message-item {
+  animation: fadeInUp 0.6s ease forwards;
+  opacity: 0;
+  transform: translateY(30rpx);
+}
+
+.message-item:nth-child(1) { animation-delay: 0.1s; }
+.message-item:nth-child(2) { animation-delay: 0.2s; }
+.message-item:nth-child(3) { animation-delay: 0.3s; }
+.message-item:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 消息卡片 */
+.message-card {
   background: white;
   border-radius: 24rpx;
-  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  margin-bottom: 32rpx;
+  box-shadow: 0 8rpx 32rpx rgba(239, 68, 68, 0.08);
+  border: 2rpx solid rgba(239, 68, 68, 0.05);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.message-card:hover {
+  transform: translateY(-4rpx);
+  box-shadow: 0 16rpx 48rpx rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.1);
+}
+
+/* 装饰线条 */
+.decoration-line {
+  height: 6rpx;
+  background: linear-gradient(90deg, #ef4444 0%, #f87171 50%, #fca5a5 100%);
 }
 
 /* 消息头部 */
 .message-header {
   display: flex;
   align-items: center;
-  padding: 32rpx 24rpx;
-  border-bottom: 2rpx solid #f3f4f6;
-  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  padding: 32rpx 32rpx 16rpx;
 }
 
-.system-icon {
+.message-icon {
   width: 80rpx;
   height: 80rpx;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 20rpx;
-  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.3);
+  margin-right: 24rpx;
+  border: 3rpx solid rgba(239, 68, 68, 0.1);
 }
 
 .icon-text {
-  font-size: 36rpx;
+  font-size: 32rpx;
 }
 
-.header-info {
+.header-content {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
 }
 
 .message-title {
   font-size: 32rpx;
-  font-weight: 600;
+  font-weight: 700;
   color: #1f2937;
   line-height: 1.4;
+  margin-bottom: 8rpx;
+  letter-spacing: 0.5rpx;
 }
 
 .message-time {
   font-size: 24rpx;
   color: #6b7280;
-  line-height: 1.2;
-}
-
-.message-status {
-  display: flex;
-  align-items: center;
-}
-
-.unread-dot {
-  width: 16rpx;
-  height: 16rpx;
-  border-radius: 50%;
-  background: #ef4444;
-  box-shadow: 0 0 12rpx rgba(239, 68, 68, 0.4);
+  font-weight: 500;
 }
 
 /* 消息内容 */
 .message-body {
-  padding: 32rpx 24rpx;
+  padding: 0 32rpx 32rpx;
 }
 
-.content-section {
-  margin-bottom: 32rpx;
+.content-wrapper {
+  position: relative;
 }
 
 .content-text {
@@ -578,331 +608,506 @@ const viewRelatedMessage = (relatedMessage) => {
   line-height: 1.8;
   color: #374151;
   text-align: justify;
+  word-break: break-word;
 }
 
-/* 附加信息 */
-.extra-info {
-  margin-bottom: 32rpx;
-  background: #f8fafc;
-  border-radius: 16rpx;
-  padding: 24rpx;
-  border-left: 8rpx solid #667eea;
+/* 折叠状态的内容 */
+.content-collapsed {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  position: relative;
 }
 
-.extra-title {
-  font-size: 26rpx;
-  font-weight: 600;
-  color: #4b5563;
-  margin-bottom: 16rpx;
+/* 渐变遮罩 */
+.fade-mask {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60rpx;
+  background: linear-gradient(transparent, white);
+  pointer-events: none;
 }
 
-.extra-content {
-  background: white;
-  border-radius: 12rpx;
-  padding: 20rpx;
+/* 切换按钮区域 */
+.toggle-section {
+  position: relative;
+  margin-top: 24rpx;
 }
 
-.extra-text {
-  font-size: 24rpx;
-  line-height: 1.6;
-  color: #6b7280;
-  white-space: pre-line;
-}
-
-/* 操作按钮 */
-.action-buttons {
-  display: flex;
-  gap: 16rpx;
-  flex-wrap: wrap;
-}
-
-.action-btn {
-  flex: 1;
-  min-width: 200rpx;
-  height: 80rpx;
-  border-radius: 16rpx;
+.toggle-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+  gap: 12rpx;
+  padding: 16rpx 24rpx;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-radius: 50rpx;
+  border: 2rpx solid rgba(239, 68, 68, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.primary-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+.toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.1), transparent);
+  transition: left 0.6s ease;
 }
 
-.primary-btn:hover {
-  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.4);
-  transform: translateY(-2rpx);
+.toggle-btn:active::before {
+  left: 100%;
 }
 
-.secondary-btn {
-  background: white;
-  border: 2rpx solid #e5e7eb;
-  color: #6b7280;
+.toggle-btn:active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
 }
 
-.secondary-btn:hover {
-  border-color: #667eea;
-  color: #667eea;
-  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.2);
+.toggle-text {
+  font-size: 26rpx;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.toggle-icon {
+  transition: transform 0.3s ease;
+}
+
+.toggle-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.icon-arrow {
+  font-size: 20rpx;
+  color: #ef4444;
+}
+
+/* 预览内容 */
+.content-preview {
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: #374151;
+  text-align: justify;
+  margin-bottom: 24rpx;
+}
+
+/* 操作区域 */
+.action-section {
+  display: flex;
+  justify-content: center;
+}
+
+.detail-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-radius: 50rpx;
+  padding: 20rpx 32rpx;
+  box-shadow: 0 8rpx 24rpx rgba(239, 68, 68, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.detail-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.detail-btn:active::before {
+  left: 100%;
+}
+
+.detail-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 4rpx 16rpx rgba(239, 68, 68, 0.4);
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
 }
 
 .btn-text {
   font-size: 28rpx;
-  font-weight: 500;
-}
-
-/* 相关消息 */
-.related-messages {
-  background: white;
-  border-radius: 24rpx;
-  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  margin-bottom: 32rpx;
-}
-
-.related-header {
-  padding: 32rpx 24rpx 16rpx;
-  border-bottom: 2rpx solid #f3f4f6;
-  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-}
-
-.related-title {
-  font-size: 30rpx;
+  color: white;
   font-weight: 600;
-  color: #1f2937;
 }
 
-.related-list {
-  padding: 0;
+.btn-arrow {
+  transition: transform 0.3s ease;
 }
 
-.related-item {
-  display: flex;
-  align-items: center;
-  padding: 24rpx;
-  border-bottom: 2rpx solid #f9fafb;
-  transition: background-color 0.2s ease;
-}
-
-.related-item:last-child {
-  border-bottom: none;
-}
-
-.related-item:hover {
-  background-color: #f8fafc;
-}
-
-.related-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
-  margin-right: 16rpx;
-}
-
-.related-text {
-  font-size: 28rpx;
-  color: #374151;
-  line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.related-time {
-  font-size: 22rpx;
-  color: #9ca3af;
-}
-
-.related-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40rpx;
-  height: 40rpx;
-  border-radius: 50%;
-  background: #f3f4f6;
-  transition: all 0.2s ease;
-}
-
-.related-item:hover .related-arrow {
-  background: #667eea;
+.detail-btn:active .btn-arrow {
+  transform: translateX(4rpx);
 }
 
 .arrow-icon {
   font-size: 24rpx;
-  color: #6b7280;
-  transition: color 0.2s ease;
-}
-
-.related-item:hover .arrow-icon {
   color: white;
+  font-weight: bold;
 }
 
-/* 错误状态 */
-.error-state {
+/* 加载更多区域 */
+.load-more-section {
+  display: flex;
+  justify-content: center;
+  padding: 48rpx 0;
+}
+
+.loading-more {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.load-more-trigger {
+  display: flex;
+  justify-content: center;
+}
+
+.load-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx 40rpx;
+  background: white;
+  border: 3rpx solid #fee2e2;
+  border-radius: 50rpx;
+  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 16rpx rgba(239, 68, 68, 0.1);
+}
+
+.load-trigger-btn:active {
+  transform: scale(0.95);
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.trigger-text {
+  font-size: 28rpx;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.trigger-icon {
+  width: 32rpx;
+  height: 32rpx;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-plus {
+  font-size: 20rpx;
+  color: white;
+  font-weight: bold;
+}
+
+/* 无更多数据 */
+.no-more-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+  padding: 48rpx 0;
+}
+
+.no-more-line {
+  flex: 1;
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent, #fee2e2, transparent);
+}
+
+.no-more-text {
+  font-size: 26rpx;
+  color: #9ca3af;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* 空状态 */
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 500rpx;
-  gap: 24rpx;
-  padding: 32rpx;
+  height: 60vh;
+  gap: 32rpx;
 }
 
-.error-icon {
+.empty-illustration {
+  position: relative;
+}
+
+.empty-circle {
+  width: 200rpx;
+  height: 200rpx;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 50%, #fecaca 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  animation: float 3s ease-in-out infinite;
+  box-shadow: 0 16rpx 48rpx rgba(239, 68, 68, 0.15);
+}
+
+.empty-circle::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4rpx solid rgba(239, 68, 68, 0.1);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10rpx); }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% { 
+    transform: scale(1.1);
+    opacity: 0.1;
+  }
+}
+
+.empty-icon {
   font-size: 80rpx;
-  margin-bottom: 16rpx;
 }
 
-.error-title {
-  font-size: 32rpx;
-  font-weight: 600;
+.empty-title {
+  font-size: 36rpx;
+  font-weight: 700;
   color: #374151;
   text-align: center;
 }
 
-.error-desc {
-  font-size: 26rpx;
-  color: #6b7280;
+.empty-desc {
+  font-size: 28rpx;
+  color: #9ca3af;
   text-align: center;
   line-height: 1.6;
-  margin-bottom: 16rpx;
-}
-
-.retry-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 16rpx;
-  padding: 20rpx 40rpx;
-  transition: all 0.2s ease;
-  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.3);
-}
-
-.retry-btn:hover {
-  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.4);
-  transform: translateY(-2rpx);
-}
-
-.retry-text {
-  font-size: 28rpx;
-  font-weight: 500;
+  max-width: 400rpx;
 }
 
 /* 响应式设计 */
 @media (max-width: 750rpx) {
-  .content-wrapper {
+  .list-wrapper {
     padding: 24rpx 16rpx 100rpx;
   }
   
   .message-header {
-    padding: 24rpx 20rpx;
+    padding: 24rpx 24rpx 12rpx;
   }
   
   .message-body {
-    padding: 24rpx 20rpx;
+    padding: 0 24rpx 24rpx;
   }
   
-  .action-buttons {
-    flex-direction: column;
+  .message-icon {
+    width: 64rpx;
+    height: 64rpx;
+    margin-right: 16rpx;
   }
   
-  .action-btn {
-    flex: none;
-    width: 100%;
+  .icon-text {
+    font-size: 28rpx;
+  }
+  
+  .message-title {
+    font-size: 30rpx;
+  }
+  
+  .content-text, .content-preview {
+    font-size: 26rpx;
+  }
+  
+  .empty-circle {
+    width: 160rpx;
+    height: 160rpx;
+  }
+  
+  .empty-icon {
+    font-size: 64rpx;
   }
 }
 
 /* 暗黑模式支持 */
 @media (prefers-color-scheme: dark) {
-  .system-message-container {
-    background: #111827;
+  .system-message-page {
+    background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
   }
   
-  .message-detail,
-  .related-messages {
+  .message-card {
     background: #1f2937;
-    box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.3);
+    border-color: rgba(239, 68, 68, 0.2);
+    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.3);
   }
   
-  .message-header,
-  .related-header {
-    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-    border-bottom-color: #374151;
+  .message-card:hover {
+    box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.4);
+    border-color: rgba(239, 68, 68, 0.3);
   }
   
   .message-title {
     color: #f9fafb;
   }
   
-  .content-text {
+  .content-text, .content-preview {
     color: #d1d5db;
   }
   
-  .extra-info {
-    background: #374151;
+  .message-time {
+    color: #9ca3af;
   }
   
-  .extra-content {
+  .message-icon {
+    background: linear-gradient(135deg, #2d1b1b 0%, #3c2626 100%);
+    border-color: rgba(239, 68, 68, 0.2);
+  }
+  
+  .toggle-btn {
+    background: linear-gradient(135deg, #2d1b1b 0%, #3c2626 100%);
+    border-color: rgba(239, 68, 68, 0.2);
+  }
+  
+  .toggle-btn:active {
+    background: linear-gradient(135deg, #3c2626 0%, #4a2c2c 100%);
+  }
+  
+  .fade-mask {
+    background: linear-gradient(transparent, #1f2937);
+  }
+  
+  .load-trigger-btn {
     background: #1f2937;
+    border-color: rgba(239, 68, 68, 0.2);
   }
   
-  .related-item {
-    border-bottom-color: #374151;
+  .load-trigger-btn:active {
+    background: #2d1b1b;
+    border-color: rgba(239, 68, 68, 0.3);
   }
   
-  .related-item:hover {
-    background-color: #374151;
+  .empty-circle {
+    background: linear-gradient(135deg, #2d1b1b 0%, #3c2626 50%, #4a2c2c 100%);
   }
   
-  .related-text {
-    color: #d1d5db;
+  .empty-title {
+    color: #f9fafb;
   }
   
-  .secondary-btn {
-    background: #374151;
-    border-color: #4b5563;
-    color: #d1d5db;
+  .empty-desc {
+    color: #9ca3af;
+  }
+  
+  .no-more-line {
+    background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.2), transparent);
   }
 }
 
-/* 动画效果 */
-.message-detail,
-.related-messages {
-  animation: fadeInUp 0.4s ease-out;
+/* 高级动画效果 */
+.message-card {
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(40rpx);
+.message-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg, 
+    transparent, 
+    rgba(239, 68, 68, 0.03), 
+    transparent
+  );
+  transition: left 0.8s ease;
+}
+
+.message-card:hover::before {
+  left: 100%;
+}
+
+/* 平滑滚动 */
+.message-list {
+  scroll-behavior: smooth;
+}
+
+/* 触摸优化 */
+.back-btn,
+.toggle-btn,
+.detail-btn,
+.load-trigger-btn {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* 无障碍支持 */
+@media (prefers-reduced-motion: reduce) {
+  .message-item,
+  .empty-circle,
+  .loading-spinner {
+    animation: none;
   }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .message-card,
+  .toggle-btn,
+  .detail-btn {
+    transition: none;
   }
 }
 
-/* 滚动条样式 */
-::-webkit-scrollbar {
-  width: 8rpx;
+/* 高分辨率屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2) {
+  .decoration-line {
+    height: 3px;
+  }
+  
+  .message-card {
+    border-width: 1px;
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f3f4;
-  border-radius: 4rpx;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c1c4c7;
-  border-radius: 4rpx;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a8abaf;
+/* 横屏适配 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .empty-state {
+    height: 40vh;
+  }
+  
+  .empty-circle {
+    width: 120rpx;
+    height: 120rpx;
+  }
+  
+  .empty-icon {
+    font-size: 48rpx;
+  }
 }
 </style>

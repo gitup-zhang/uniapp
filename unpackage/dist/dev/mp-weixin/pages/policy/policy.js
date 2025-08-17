@@ -188,7 +188,7 @@ const _sfc_main = {
       return common_vendor.e({
         a: common_vendor.p({
           statusBar: "true",
-          backgroundColor: "#ff4757",
+          backgroundColor: "#dc2626",
           fixed: "true"
         }),
         b: common_vendor.o(search),

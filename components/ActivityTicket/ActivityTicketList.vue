@@ -1,10 +1,14 @@
 <template>
-  <view class="activity-card">
+  <view :class="['activity-card', statusClass]">
     <!-- 顶部装饰条 -->
     <view class="card-header">
       <view class="status-badge">
-        <text class="status-dot"></text>
-        <text class="status-text">进行中</text>
+        <text :class="['status-dot', statusClass]"></text>
+        <text class="status-text">{{ statusText }}</text>
+      </view>
+      <!-- 过期状态遮罩 -->
+      <view v-if="isExpired" class="expired-overlay">
+        <text class="expired-text">已过期</text>
       </view>
     </view>
     
@@ -13,12 +17,12 @@
       <view class="content-left">
         <view class="title-section">
           <text class="title">{{ props.activityData.title }}</text>
-          <text class="subtitle">精彩活动等你参与</text>
+          <text class="subtitle">{{ isExpired ? '活动已结束' : '精彩活动等你参与' }}</text>
         </view>
         
         <view class="info-list">
           <view class="info-item">
-            <view class="icon-wrapper location">
+            <view :class="['icon-wrapper', 'location', statusClass]">
               <text class="icon">📍</text>
             </view>
             <view class="text-content">
@@ -28,53 +32,76 @@
           </view>
           
           <view class="info-item">
-            <view class="icon-wrapper date">
+            <view :class="['icon-wrapper', 'date', statusClass]">
               <text class="icon">📅</text>
             </view>
             <view class="text-content">
               <text class="label">活动时间</text>
-              <text class="value">{{  formatEventDate(props.activityData.event_start_time,props.activityData.event_end_time) }}</text>
+              <text class="value">{{ formatEventDate(props.activityData.event_start_time, props.activityData.event_end_time) }}</text>
             </view>
           </view>
         </view>
         
         <!-- 参与人数信息 -->
-        <view class="participants-info">
+        <view :class="['participants-info', statusClass]">
           <view class="avatars">
-            <view class="avatar"></view>
-            <view class="avatar"></view>
-            <view class="avatar"></view>
+            <view :class="['avatar', statusClass]"></view>
+            <view :class="['avatar', statusClass]"></view>
+            <view :class="['avatar', statusClass]"></view>
             <text class="more">+99</text>
           </view>
-          <text class="participants-text">已有102人参与</text>
+          <text class="participants-text">{{ isExpired ? '共102人参与过' : '已有102人参与' }}</text>
         </view>
       </view>
       
       <!-- 右侧按钮区 -->
       <view class="content-right">
-        <button class="action-btn primary" @click="handleAction">
-          <text class="btn-icon">✓</text>
-          <text class="btn-text">签到</text>
-        </button>
-        <button class="action-btn secondary" @click="handleCancel">
-          <text class="btn-icon">✕</text>
-          <text class="btn-text">取消报名</text>
-        </button>
+        <template v-if="!isExpired">
+          <button 
+            :class="['action-btn', checkInButtonConfig.class]" 
+            :disabled="checkInButtonConfig.disabled"
+            @click="handleAction"
+          >
+            <text class="btn-icon">{{ checkInButtonConfig.icon }}</text>
+            <text class="btn-text">{{ checkInButtonConfig.text }}</text>
+          </button>
+          <button class="action-btn secondary" @click="handleCancel">
+            <text class="btn-icon">✕</text>
+            <text class="btn-text">取消报名</text>
+          </button>
+        </template>
+        <template v-else>
+          <button class="action-btn expired" @click="handleViewDetails">
+            <text class="btn-icon">👁</text>
+            <text class="btn-text">查看详情</text>
+          </button>
+          <button class="action-btn archive" @click="handleArchive">
+            <text class="btn-icon">📁</text>
+            <text class="btn-text">归档</text>
+          </button>
+        </template>
       </view>
     </view>
     
     <!-- 底部进度条 -->
-    <view class="progress-section">
+    <view :class="['progress-section', statusClass]">
       <view class="progress-bar">
-        <view class="progress-fill"></view>
+        <view 
+          :class="['progress-fill', statusClass]" 
+          :style="{ width: activityProgress + '%' }"
+        ></view>
       </view>
-      <text class="progress-text">活动进度 65%</text>
+      <text class="progress-text">
+        {{ isExpired ? '活动已完成 100%' : `活动进度 ${activityProgress}%` }}
+      </text>
     </view>
   </view>
 </template>
 
 <script setup>
-	import {formatEventDate} from '@/utils/data.js'
+import { formatEventDate } from '@/utils/data.js'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+
 // Props
 const props = defineProps({
   activityData: {
@@ -86,19 +113,131 @@ const props = defineProps({
       event_end_time: "",
       event_start_time: "",
     })
+  },
+  status: {
+    type: String,
+    default: 'active',
+    validator: (value) => ['active', 'expired'].includes(value)
   }
 })
 
 // Emits
-const emit = defineEmits(['action', 'cancel'])
+const emit = defineEmits(['action', 'cancel', 'viewDetails', 'archive'])
+
+// 响应式数据
+const currentTime = ref(new Date())
+let timer = null
+
+// 生命周期
+onMounted(() => {
+  // 每分钟更新一次当前时间
+  timer = setInterval(() => {
+    currentTime.value = new Date()
+  }, 60000)
+})
+
+onUnmounted(() => {
+  if (timer) {
+    clearInterval(timer)
+  }
+})
+
+// 计算属性
+const isExpired = computed(() => props.status === 'expired')
+
+const statusClass = computed(() => props.status)
+
+// 时间相关计算
+const timeStatus = computed(() => {
+  if (isExpired.value) return 'expired'
+  
+  const now = currentTime.value.getTime()
+  const startTime = new Date(props.activityData.event_start_time).getTime()
+  const endTime = new Date(props.activityData.event_end_time).getTime()
+  
+  if (now < startTime) return 'not_started'
+  if (now >= startTime && now <= endTime) return 'ongoing'
+  return 'expired'
+})
+
+const statusText = computed(() => {
+  switch (timeStatus.value) {
+    case 'not_started': return '未开始'
+    case 'ongoing': return '进行中'
+    case 'expired': return '已过期'
+    default: return '进行中'
+  }
+})
+
+// 活动进度计算
+const activityProgress = computed(() => {
+  if (isExpired.value) return 100
+  
+  const now = currentTime.value.getTime()
+  const startTime = new Date(props.activityData.event_start_time).getTime()
+  const endTime = new Date(props.activityData.event_end_time).getTime()
+  
+  if (now < startTime) return 0
+  if (now > endTime) return 100
+  
+  const total = endTime - startTime
+  const elapsed = now - startTime
+  const progress = Math.round((elapsed / total) * 100)
+  
+  return Math.max(0, Math.min(100, progress))
+})
+
+// 签到按钮状态
+const checkInButtonConfig = computed(() => {
+  switch (timeStatus.value) {
+    case 'not_started':
+      return {
+        text: '未开始',
+        icon: '⏰',
+        disabled: true,
+        class: 'not-started'
+      }
+    case 'ongoing':
+      return {
+        text: '签到',
+        icon: '✓',
+        disabled: false,
+        class: 'primary'
+      }
+    case 'expired':
+      return {
+        text: '已结束',
+        icon: '🔒',
+        disabled: true,
+        class: 'expired'
+      }
+    default:
+      return {
+        text: '签到',
+        icon: '✓',
+        disabled: false,
+        class: 'primary'
+      }
+  }
+})
 
 // 方法
 const handleAction = () => {
-  emit('action', props.activityData)
+  if (!checkInButtonConfig.value.disabled) {
+    emit('action', props.activityData)
+  }
 }
 
 const handleCancel = () => {
   emit('cancel', props.activityData)
+}
+
+const handleViewDetails = () => {
+  emit('viewDetails', props.activityData)
+}
+
+const handleArchive = () => {
+  emit('archive', props.activityData)
 }
 </script>
 
@@ -111,6 +250,14 @@ const handleCancel = () => {
   overflow: hidden;
   border: 1rpx solid rgba(255, 255, 255, 0.8);
   position: relative;
+  transition: all 0.3s ease;
+}
+
+/* 过期状态整体样式 */
+.activity-card.expired {
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+  opacity: 0.85;
 }
 
 /* 顶部装饰和状态 */
@@ -118,6 +265,10 @@ const handleCancel = () => {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   padding: 16rpx 24rpx;
   position: relative;
+}
+
+.card-header.expired {
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
 }
 
 .card-header::before {
@@ -128,6 +279,9 @@ const handleCancel = () => {
   right: 0;
   bottom: 0;
   background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+}
+
+.card-header.active::before {
   animation: shimmer 3s infinite;
 }
 
@@ -145,10 +299,25 @@ const handleCancel = () => {
 .status-dot {
   width: 12rpx;
   height: 12rpx;
-  background: #4ade80;
   border-radius: 50%;
+}
+
+.status-dot.ongoing,
+.status-dot.active {
+  background: #4ade80;
   box-shadow: 0 0 8rpx rgba(74, 222, 128, 0.5);
   animation: pulse 2s infinite;
+}
+
+.status-dot.not_started {
+  background: #fbbf24;
+  box-shadow: 0 0 8rpx rgba(251, 191, 36, 0.5);
+  animation: pulse 2s infinite;
+}
+
+.status-dot.expired {
+  background: #d1d5db;
+  box-shadow: 0 0 4rpx rgba(209, 213, 219, 0.3);
 }
 
 @keyframes pulse {
@@ -160,6 +329,24 @@ const handleCancel = () => {
   font-size: 22rpx;
   color: white;
   font-weight: 500;
+}
+
+/* 过期遮罩 */
+.expired-overlay {
+  position: absolute;
+  top: 50%;
+  right: 24rpx;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 8rpx 16rpx;
+  border-radius: 12rpx;
+  backdrop-filter: blur(4rpx);
+}
+
+.expired-text {
+  font-size: 20rpx;
+  color: white;
+  font-weight: 600;
 }
 
 /* 主要内容区 */
@@ -190,10 +377,18 @@ const handleCancel = () => {
   display: block;
 }
 
+.expired .title {
+  color: #6b7280;
+}
+
 .subtitle {
   font-size: 22rpx;
   color: #6b7280;
   opacity: 0.8;
+}
+
+.expired .subtitle {
+  color: #9ca3af;
 }
 
 .info-list {
@@ -219,16 +414,30 @@ const handleCancel = () => {
   flex-shrink: 0;
 }
 
-.icon-wrapper.location {
+.icon-wrapper.location.active {
   background: linear-gradient(135deg, #fecaca, #fca5a5);
 }
 
-.icon-wrapper.date {
+.icon-wrapper.date.active {
   background: linear-gradient(135deg, #fed7d7, #f56565);
+}
+
+.icon-wrapper.location.expired {
+  background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+}
+
+.icon-wrapper.date.expired {
+  background: linear-gradient(135deg, #e5e7eb, #d1d5db);
 }
 
 .icon {
   font-size: 24rpx;
+  filter: grayscale(0);
+}
+
+.expired .icon {
+  filter: grayscale(1);
+  opacity: 0.7;
 }
 
 .text-content {
@@ -244,11 +453,19 @@ const handleCancel = () => {
   font-weight: 500;
 }
 
+.expired .label {
+  color: #d1d5db;
+}
+
 .value {
   font-size: 24rpx;
   color: #374151;
   line-height: 1.4;
   font-weight: 500;
+}
+
+.expired .value {
+  color: #9ca3af;
 }
 
 /* 参与人数信息 */
@@ -257,9 +474,18 @@ const handleCancel = () => {
   align-items: center;
   gap: 16rpx;
   padding: 16rpx;
-  background: linear-gradient(135deg, #fef2f2, #fee2e2);
   border-radius: 16rpx;
   border: 1rpx solid #fecaca;
+}
+
+.participants-info.active {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border-color: #fecaca;
+}
+
+.participants-info.expired {
+  background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+  border-color: #e5e7eb;
 }
 
 .avatars {
@@ -272,17 +498,32 @@ const handleCancel = () => {
   width: 32rpx;
   height: 32rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
   border: 2rpx solid white;
   margin-right: -8rpx;
 }
 
-.avatar:nth-child(2) {
+.avatar.active {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.avatar.active:nth-child(2) {
   background: linear-gradient(135deg, #f97316, #ea580c);
 }
 
-.avatar:nth-child(3) {
+.avatar.active:nth-child(3) {
   background: linear-gradient(135deg, #ec4899, #db2777);
+}
+
+.avatar.expired {
+  background: linear-gradient(135deg, #9ca3af, #6b7280);
+}
+
+.avatar.expired:nth-child(2) {
+  background: linear-gradient(135deg, #a1a1aa, #71717a);
+}
+
+.avatar.expired:nth-child(3) {
+  background: linear-gradient(135deg, #94a3b8, #64748b);
 }
 
 .more {
@@ -294,8 +535,15 @@ const handleCancel = () => {
 
 .participants-text {
   font-size: 20rpx;
-  color: #dc2626;
   font-weight: 500;
+}
+
+.participants-info.active .participants-text {
+  color: #dc2626;
+}
+
+.participants-info.expired .participants-text {
+  color: #9ca3af;
 }
 
 /* 右侧按钮区 */
@@ -338,6 +586,7 @@ const handleCancel = () => {
   left: 100%;
 }
 
+/* 活跃状态按钮 */
 .action-btn.primary {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
@@ -347,6 +596,26 @@ const handleCancel = () => {
 .action-btn.primary:active {
   transform: translateY(2rpx);
   box-shadow: 0 4rpx 16rpx rgba(239, 68, 68, 0.4);
+}
+
+/* 未开始状态按钮 */
+.action-btn.not-started {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: white;
+  box-shadow: 0 8rpx 24rpx rgba(251, 191, 36, 0.3);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.action-btn.not-started:active {
+  transform: none;
+}
+
+/* 禁用状态 */
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .action-btn.secondary {
@@ -362,6 +631,33 @@ const handleCancel = () => {
   color: #475569;
 }
 
+/* 过期状态按钮 */
+.action-btn.expired {
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+  color: #6b7280;
+  border: 2rpx solid #d1d5db;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+}
+
+.action-btn.expired:active {
+  transform: translateY(2rpx);
+  background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+  color: #4b5563;
+}
+
+.action-btn.archive {
+  background: linear-gradient(135deg, #fef3c7, #fed7aa);
+  color: #92400e;
+  border: 2rpx solid #fde68a;
+  box-shadow: 0 4rpx 16rpx rgba(251, 191, 36, 0.15);
+}
+
+.action-btn.archive:active {
+  transform: translateY(2rpx);
+  background: linear-gradient(135deg, #fde68a, #fcd34d);
+  color: #78350f;
+}
+
 .btn-icon {
   font-size: 20rpx;
 }
@@ -373,8 +669,15 @@ const handleCancel = () => {
 /* 底部进度条 */
 .progress-section {
   padding: 20rpx 24rpx 24rpx;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   border-top: 1rpx solid #dee2e6;
+}
+
+.progress-section.active {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+.progress-section.expired {
+  background: linear-gradient(135deg, #f1f3f4, #e8eaed);
 }
 
 .progress-bar {
@@ -385,24 +688,46 @@ const handleCancel = () => {
   margin-bottom: 12rpx;
 }
 
+.expired .progress-bar {
+  background: #f1f3f4;
+}
+
 .progress-fill {
-  width: 65%;
   height: 100%;
-  background: linear-gradient(90deg, #ef4444, #dc2626);
   border-radius: 4rpx;
+}
+
+.progress-fill.active {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
   animation: progressFill 2s ease-in-out;
+}
+
+.progress-fill.expired {
+  background: linear-gradient(90deg, #9ca3af, #6b7280);
+  animation: progressComplete 1s ease-in-out;
 }
 
 @keyframes progressFill {
   from { width: 0%; }
-  to { width: 65%; }
+}
+
+@keyframes progressComplete {
+  from { width: 0%; }
+  to { width: 100%; }
 }
 
 .progress-text {
   font-size: 20rpx;
-  color: #6c757d;
   text-align: center;
   font-weight: 500;
+}
+
+.progress-section.active .progress-text {
+  color: #6c757d;
+}
+
+.progress-section.expired .progress-text {
+  color: #9ca3af;
 }
 
 /* 响应式适配 */
@@ -432,8 +757,17 @@ const handleCancel = () => {
     border: 1rpx solid rgba(75, 85, 99, 0.3);
   }
   
+  .activity-card.expired {
+    background: linear-gradient(145deg, #374151, #1f2937);
+    border: 1rpx solid rgba(55, 65, 81, 0.5);
+  }
+  
   .title {
     color: #f9fafb;
+  }
+  
+  .expired .title {
+    color: #9ca3af;
   }
   
   .subtitle {
@@ -442,6 +776,10 @@ const handleCancel = () => {
   
   .value {
     color: #e5e7eb;
+  }
+  
+  .expired .value {
+    color: #6b7280;
   }
   
   .progress-section {

@@ -22,7 +22,7 @@ function getLastMonthDate() {
 function formatEventDate(start, end) {
   const startDate = common_vendor.dayjs(start);
   const endDate = common_vendor.dayjs(end);
-  return `${startDate.month() + 1}月${startDate.date()}日 - ${endDate.month() + 1}月${endDate.date()}日`;
+  return `${startDate.format("M月D日 HH:mm")} - ${endDate.format("M月D日 HH:mm")}`;
 }
 function getLastYearDate() {
   const currentDate = /* @__PURE__ */ new Date();
