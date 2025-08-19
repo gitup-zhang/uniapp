@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { geteventmes, getsystemmes } from '@/new-apis/mes.js'
+import { ref, computed, warn } from 'vue'
+import { geteventmes, getsystemmes,getmesgroup } from '@/new-apis/mes.js'
+
 
 export const useMesstore = defineStore('mes', () => {
 	// 系统消息
@@ -11,8 +12,19 @@ export const useMesstore = defineStore('mes', () => {
 	const loading = ref(false)
 	// 错误状态
 	const error = ref(null)
+	// 系统或群组的消息列表
+	const MessageList=ref([])
+	// 获取到的信息结构体
+	const MseList={
+		total:0,
+		page:1,
+		page_size:10
+	}
+	
+	
 	// 最后更新时间
 	const lastUpdateTime = ref(null)
+
 
 	// 计算属性 - 总未读数量
 	const totalUnreadCount = computed(() => {
@@ -41,11 +53,12 @@ export const useMesstore = defineStore('mes', () => {
 	const groupUnreadCount = computed(() => {
 		return groupmes.value.reduce((count, msg) => {
 			// return count + (msg.unread_count || (msg.is_read === 0 ? 1 : 0))
+			console.log("群组消息数量：",msg.unread_count )
 			return count + msg.unread_count 
 		}, 0)
 	})
 
-	// 获取消息数据
+	// 获取系统和群组的消息数据
 	const getsystem = async (forceRefresh = false) => {
 		// 如果数据已存在且不是强制刷新，则跳过
 		if (!forceRefresh && systemmes.value.length > 0 && groupmes.value.length > 0) {
@@ -127,7 +140,6 @@ export const useMesstore = defineStore('mes', () => {
 		try {
 			// 这里应该调用API标记消息为已读
 			// await markSystemMessageReadAPI(messageId)
-			
 			// 更新本地状态
 			const messageIndex = systemmes.value.findIndex(msg => msg.id === messageId)
 			if (messageIndex !== -1) {
@@ -169,7 +181,7 @@ export const useMesstore = defineStore('mes', () => {
 		}
 	}
 
-	// 批量标记消息为已读
+	// // 批量标记消息为已读
 	const markMultipleAsRead = async (messageIds, messageType = 'all') => {
 		try {
 			const results = []
@@ -201,6 +213,23 @@ export const useMesstore = defineStore('mes', () => {
 			throw error
 		}
 	}
+	// 获取系统或群则的一个个消息
+	const getMessageList=async(params)=>{
+		try{
+		const res =await getmesgroup(params)
+		MseList.page=res.page
+		MseList.total=res.total
+		MessageList.value=res.data.map(msg=>({
+			...msg,
+			expanded:false
+		}))
+		console.log("获得的消息数据",MessageList.value)
+		console.log("获取到的信息结构体",MseList)
+		}catch(e){
+			console.log(e)
+		}
+		
+	}
 
 	// 根据ID获取系统消息
 	const getSystemMessageById = (messageId) => {
@@ -212,7 +241,7 @@ export const useMesstore = defineStore('mes', () => {
 		return groupmes.value.find(msg => msg.id === messageId)
 	}
 
-	// 获取最新的未读消息
+	// // 获取最新的未读消息
 	const getLatestUnreadMessages = (limit = 5) => {
 		const unreadSystemMessages = systemmes.value
 			.filter(msg => msg.is_read === 0)
@@ -241,7 +270,7 @@ export const useMesstore = defineStore('mes', () => {
 		console.log('消息数据已清空')
 	}
 
-	// 添加新的系统消息（用于实时推送）
+	// // 添加新的系统消息（用于实时推送）
 	const addSystemMessage = (message) => {
 		if (message && typeof message === 'object') {
 			// 检查是否已存在相同ID的消息
@@ -275,7 +304,7 @@ export const useMesstore = defineStore('mes', () => {
 		}
 	}
 
-	// 更新消息的未读数量
+	// // 更新消息的未读数量
 	const updateMessageUnreadCount = (messageId, messageType, unreadCount) => {
 		if (messageType === 'system') {
 			const messageIndex = systemmes.value.findIndex(msg => msg.id === messageId)
@@ -327,6 +356,7 @@ export const useMesstore = defineStore('mes', () => {
 		systemUnreadCount,
 		groupUnreadCount,
 		hasNewMessages,
+		MessageList,
 		
 		// 方法
 		getsystem,
@@ -341,6 +371,7 @@ export const useMesstore = defineStore('mes', () => {
 		addSystemMessage,
 		addGroupMessage,
 		updateMessageUnreadCount,
-		getDataStatus
+		getDataStatus,
+		getMessageList
 	}
 })

@@ -43,7 +43,7 @@
         <view v-else class="messages-container">
           <!-- 消息项 -->
           <view 
-            v-for="(message, index) in messages" 
+            v-for="message in MesStore.MessageList" 
             :key="message.id"
             class="message-item"
             :class="{ 'expanded': message.expanded }"
@@ -60,7 +60,7 @@
                 </view>
                 <view class="header-content">
                   <text class="message-title">{{ message.title }}</text>
-                  <text class="message-time">{{ formatTime(message.time) }}</text>
+                  <text class="message-time">{{ formatTime(message.send_time) }}</text>
                 </view>
               </view>
 
@@ -153,6 +153,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
+import { useMesstore } from '@/store/mes.js'
 
 // 响应式数据
 const statusBarHeight = ref(0)
@@ -162,6 +163,9 @@ const isLoadingMore = ref(false)
 const hasMore = ref(true)
 const currentPage = ref(1)
 const messages = ref([])
+
+// 初始化pinia
+const MesStore=useMesstore()
 
 // 内容长度配置
 const CONTENT_CONFIG = {
@@ -178,7 +182,8 @@ onMounted(async () => {
 })
 
 onLoad(async (options) => {
-  await loadMessages()
+await MesStore.getMessageList({message_type:'SYSTEM'})
+  // await loadMessages()
 })
 
 // 方法定义
@@ -296,13 +301,13 @@ const getPreviewText = (content) => {
 }
 
 const toggleContent = (index) => {
-  messages.value[index].expanded = !messages.value[index].expanded
+ messages.value[index].expanded = !messages.value[index].expanded
 }
 
 const viewFullContent = (message) => {
   // 跳转到消息详情页
   uni.navigateTo({
-    url: `/pages/message-detail/index?id=${message.id}&title=${encodeURIComponent(message.title)}`
+    url: `/pages/detail/SystemMesDetail?id=${message.id}&title=${encodeURIComponent(message.title)}`
   })
 }
 

@@ -16,6 +16,11 @@ const _sfc_main = {
         type: "group"
       })
     },
+    messageType: {
+      type: String,
+      default: "group",
+      validator: (value) => ["system", "group"].includes(value)
+    },
     loading: {
       type: Boolean,
       default: false
@@ -34,23 +39,32 @@ const _sfc_main = {
     });
     const displayContent = common_vendor.computed(() => {
       const content = props.message.latest_content || props.message.content || props.message.message || "";
-      return content || "暂无内容";
+      return content || (props.messageType === "system" ? "系统通知消息" : "暂无消息内容");
     });
     const formattedTime = common_vendor.computed(() => {
       return formatTime(props.message.latest_time || props.message.created_at || props.message.updated_at);
     });
+    const getDefaultGroupName = () => {
+      return props.messageType === "system" ? "系统通知" : "未知群组";
+    };
     const getAvatarText = () => {
       const name = props.message.group_name || "未知";
       const firstChar = name.charAt(0);
       return firstChar.toUpperCase();
     };
     const getAvatarStyle = () => {
+      if (props.messageType === "system") {
+        return {
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          color: "#ffffff"
+        };
+      }
       const name = props.message.group_name || "default";
       let hash = 0;
       for (let i = 0; i < name.length; i++) {
         hash = name.charCodeAt(i) + ((hash << 5) - hash);
       }
-      const colors = [
+      const gradients = [
         "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
         "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
@@ -60,17 +74,18 @@ const _sfc_main = {
         "linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)",
         "linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)"
       ];
-      const colorIndex = Math.abs(hash) % colors.length;
+      const colorIndex = Math.abs(hash) % gradients.length;
       return {
-        background: colors[colorIndex]
+        background: gradients[colorIndex],
+        color: "#ffffff"
       };
     };
     const handleCardTap = () => {
       if (props.loading)
         return;
-      emit("tap", props.message);
+      emit("tap", props.message, props.messageType);
       if (hasUnreadMessages.value) {
-        emit("markAsRead", props.message);
+        emit("markAsRead", props.message, props.messageType);
       }
     };
     const formatTime = (time) => {
@@ -122,18 +137,26 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.t(getAvatarText()),
-        b: common_vendor.s(getAvatarStyle()),
-        c: hasUnreadMessages.value
-      }, hasUnreadMessages.value ? {
-        d: common_vendor.t(displayUnreadCount.value)
-      } : {}, {
-        e: common_vendor.t(__props.message.group_name || "未知群组"),
+        a: __props.messageType === "system"
+      }, __props.messageType === "system" ? {} : {
+        b: common_vendor.t(getAvatarText())
+      }, {
+        c: common_vendor.s(getAvatarStyle()),
+        d: common_vendor.t(__props.message.group_name || getDefaultGroupName()),
+        e: common_vendor.t(__props.messageType === "system" ? "系统" : "群聊"),
         f: common_vendor.t(formattedTime.value),
-        g: common_vendor.t(displayContent.value),
-        h: hasUnreadMessages.value ? 1 : "",
-        i: __props.loading ? 1 : "",
-        j: common_vendor.o(handleCardTap)
+        g: hasUnreadMessages.value
+      }, hasUnreadMessages.value ? {
+        h: common_vendor.t(displayUnreadCount.value)
+      } : {}, {
+        i: common_vendor.t(displayContent.value),
+        j: hasUnreadMessages.value
+      }, hasUnreadMessages.value ? {} : {}, {
+        k: hasUnreadMessages.value ? 1 : "",
+        l: __props.loading ? 1 : "",
+        m: __props.messageType === "system" ? 1 : "",
+        n: __props.messageType === "group" ? 1 : "",
+        o: common_vendor.o(handleCardTap)
       });
     };
   }

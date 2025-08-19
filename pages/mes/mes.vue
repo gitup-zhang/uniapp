@@ -77,23 +77,39 @@
       >
         <view class="message-list-content">
           <!-- 加载状态 -->
-          <view v-if="isLoading && filteredMessages.length === 0" class="loading-state">
+          <view v-if="isLoading && !hasLoadedOnce" class="loading-state">
             <view class="loading-spinner"></view>
             <text class="loading-text">加载中...</text>
           </view>
           
-          <!-- 使用MessageCard组件 -->
-          <MessageCard
-            v-for="msg in filteredMessages"
-            :key="getMessageKey(msg)"
-            :message="msg"
-            :loading="isLoading"
-            @tap="handleMessageTap"
-            @markAsRead="handleMarkAsRead"
-          />
+          <!-- 系统消息卡片列表 - 仅在全部或系统消息标签下显示 -->
+          <template v-if="activeTab === 'all' || activeTab === 'system'">
+            <MessageCard
+              v-for="msg in systemMessages"
+              :key="msg.event_id"
+              :message="msg"
+              :message-type="'system'"
+              :loading="isLoading"
+              @tap="handleMessageTap"
+              @markAsRead="handleMarkAsRead"
+            />
+          </template>
+          
+          <!-- 群组消息卡片列表 - 仅在全部或群组消息标签下显示 -->
+          <template v-if="activeTab === 'all' || activeTab === 'group'">
+            <MessageCard
+              v-for="msg in groupMessages"
+              :key="msg.event_id"
+              :message="msg"
+              :message-type="'group'"
+              :loading="isLoading"
+              @tap="handleMessageTap"
+              @markAsRead="handleMarkAsRead"
+            />
+          </template>
           
           <!-- 空状态 -->
-          <view v-if="!isLoading && filteredMessages.length === 0" class="empty-state">
+          <view v-if="!isLoading && shouldShowEmpty" class="empty-state">
             <view class="empty-animation">
               <view class="empty-icon">💬</view>
               <view class="empty-waves">
@@ -144,83 +160,28 @@ const totalUnreadCount = computed(() => mesStore.totalUnreadCount)
 const systemUnreadCount = computed(() => mesStore.systemUnreadCount)
 const groupUnreadCount = computed(() => mesStore.groupUnreadCount)
 
-// 格式化消息数据的函数
-const formatMessageData = (rawMessage, type) => {
-  if (!rawMessage) return null
-
-  // 统一的消息数据格式
-  const baseMessage = {
-    id: rawMessage.id || `${type}-${Date.now()}`,
-    type: type,
-    original_data: rawMessage
-  }
-
-  if (type === 'system') {
-    return {
-      ...baseMessage,
-      group_name: rawMessage.title || rawMessage.group_name || '系统通知',
-      unread_count: rawMessage.unread_count || (rawMessage.is_read === 0 ? 1 : 0),
-      is_read: rawMessage.is_read || 0,
-      latest_content: rawMessage.content || rawMessage.message || rawMessage.latest_content || '系统消息',
-      latest_time: rawMessage.latest_time || rawMessage.created_at || rawMessage.time || new Date().toISOString(),
-      created_at: rawMessage.created_at,
-      updated_at: rawMessage.updated_at
-    }
-  } else {
-    return {
-      ...baseMessage,
-      group_name: rawMessage.group_name || rawMessage.event_name || rawMessage.title || '群组消息',
-      unread_count: rawMessage.unread_count || (rawMessage.is_read === 0 ? 1 : 0),
-      is_read: rawMessage.is_read || 0,
-      latest_content: rawMessage.latest_message || rawMessage.content || rawMessage.description || rawMessage.latest_content || '群组消息',
-      latest_time: rawMessage.latest_time || rawMessage.last_message_time || rawMessage.updated_at || rawMessage.created_at || new Date().toISOString(),
-      created_at: rawMessage.created_at,
-      updated_at: rawMessage.updated_at
-    }
-  }
-}
-
-// 格式化所有消息
-const allFormattedMessages = computed(() => {
-  const systemMessages = (mesStore.systemmes || [])
-    .map(msg => formatMessageData(msg, 'system'))
-    .filter(Boolean)
-  
-  const groupMessages = (mesStore.groupmes || [])
-    .map(msg => formatMessageData(msg, 'group'))
-    .filter(Boolean)
-  
-  return [...systemMessages, ...groupMessages]
+// 系统消息列表
+const systemMessages = computed(() => {
+  if (!isLoggedIn.value) return []
+  return mesStore.systemmes || []
 })
 
-// 筛选后的消息数据
-const filteredMessages = computed(() => {
+// 群组消息列表  
+const groupMessages = computed(() => {
   if (!isLoggedIn.value) return []
-  
-  let filtered = []
-  
+  return mesStore.groupmes || []
+})
+
+// 是否显示空状态
+const shouldShowEmpty = computed(() => {
   if (activeTab.value === 'all') {
-    filtered = allFormattedMessages.value
+    return systemMessages.value.length === 0 && groupMessages.value.length === 0
   } else if (activeTab.value === 'system') {
-    filtered = allFormattedMessages.value.filter(msg => msg.type === 'system')
+    return systemMessages.value.length === 0
   } else if (activeTab.value === 'group') {
-    filtered = allFormattedMessages.value.filter(msg => msg.type === 'group')
+    return groupMessages.value.length === 0
   }
-  
-  // 排序：未读消息在前，然后按时间排序
-  return filtered.sort((a, b) => {
-    // 先按未读状态排序
-    const aHasUnread = a.unread_count > 0 || a.is_read === 0
-    const bHasUnread = b.unread_count > 0 || b.is_read === 0
-    
-    if (aHasUnread && !bHasUnread) return -1
-    if (!aHasUnread && bHasUnread) return 1
-    
-    // 再按时间排序（最新的在前）
-    const timeA = new Date(a.latest_time || a.updated_at || a.created_at || 0)
-    const timeB = new Date(b.latest_time || b.updated_at || b.created_at || 0)
-    return timeB - timeA
-  })
+  return false
 })
 
 // 生命周期
@@ -263,11 +224,6 @@ watch(isLoggedIn, async (newVal) => {
     hasLoadedOnce.value = false
   }
 })
-
-// 获取消息唯一键
-const getMessageKey = (msg) => {
-  return `${msg.type}-${msg.id || msg.group_name || Date.now()}`
-}
 
 // 获取当前标签的未读数量
 const getCurrentUnreadCount = () => {
@@ -385,20 +341,21 @@ const switchTab = (tab) => {
 }
 
 // 处理消息卡片点击事件
-const handleMessageTap = (msg) => {
+// 处理消息卡片点击事件
+const handleMessageTap = (msg, messageType) => {
   if (!isLoggedIn.value || !msg) return
   
-  console.log('点击消息:', msg)
+  console.log('点击消息:', msg, '消息类型:', messageType)
   
   try {
     // 根据消息类型跳转到相应的详情页面
-    if (msg.type === 'system') {
-      // 系统消息详情页
+    if (messageType === 'system') {
+      console.log("系统消息跳转")
       uni.navigateTo({
-        url: `/pages/detail/ChatSystem?id=${msg.id}&groupName=${encodeURIComponent(msg.group_name || '系统消息')}`
+        url: `/pages/detail/ChatSystem`
       })
-    } else if (msg.type === 'group') {
-      // 群组消息详情页
+    } else if (messageType === 'group') {
+      console.log("群组消息跳转")
       uni.navigateTo({
         url: `/pages/detail/ChatGroup?id=${msg.id}&groupName=${encodeURIComponent(msg.group_name || '群组消息')}`
       })
@@ -414,16 +371,16 @@ const handleMessageTap = (msg) => {
 }
 
 // 处理单个消息标记已读
-const handleMarkAsRead = async (msg) => {
+const handleMarkAsRead = async (msg, messageType) => {
   if (!msg || (!msg.unread_count && msg.is_read === 1)) return
   
   try {
-    console.log('标记消息已读:', msg.group_name)
+    console.log('标记消息已读ID:', msg.event_id, '消息类型:', messageType)
     
-    if (msg.type === 'system') {
+    if (messageType === 'system') {
       await mesStore.markSystemMessageAsRead(msg.id)
     } else {
-      await mesStore.markGroupMessageAsRead(msg.id)
+      // await mesStore.markGroupMessageAsRead(msg.id)
     }
   } catch (error) {
     console.error('标记消息已读失败:', error)
@@ -459,10 +416,18 @@ const getEmptyDesc = () => {
 const markAllAsRead = async () => {
   if (!isLoggedIn.value) return
   
-  const currentMessages = filteredMessages.value
-  const unreadMessages = currentMessages.filter(msg => 
-    msg.unread_count > 0 || msg.is_read === 0
-  )
+  let unreadMessages = []
+  
+  // 根据当前标签页获取未读消息
+  if (activeTab.value === 'all') {
+    const systemUnread = systemMessages.value.filter(msg => msg.unread_count > 0 || msg.is_read === 0)
+    const groupUnread = groupMessages.value.filter(msg => msg.unread_count > 0 || msg.is_read === 0)
+    unreadMessages = [...systemUnread, ...groupUnread]
+  } else if (activeTab.value === 'system') {
+    unreadMessages = systemMessages.value.filter(msg => msg.unread_count > 0 || msg.is_read === 0)
+  } else if (activeTab.value === 'group') {
+    unreadMessages = groupMessages.value.filter(msg => msg.unread_count > 0 || msg.is_read === 0)
+  }
   
   if (unreadMessages.length === 0) {
     uni.showToast({
@@ -491,21 +456,16 @@ const markAllAsRead = async () => {
       mask: true
     })
     
-    // 按类型分组处理
-    const systemIds = unreadMessages.filter(msg => msg.type === 'system').map(msg => msg.id)
-    const groupIds = unreadMessages.filter(msg => msg.type === 'group').map(msg => msg.id)
-    
     const promises = []
     
-    // 批量标记系统消息
-    if (systemIds.length > 0) {
-      promises.push(...systemIds.map(id => mesStore.markSystemMessageAsRead(id)))
-    }
-    
-    // 批量标记群组消息
-    if (groupIds.length > 0) {
-      promises.push(...groupIds.map(id => mesStore.markGroupMessageAsRead(id)))
-    }
+    // 分别处理系统消息和群组消息
+    unreadMessages.forEach(msg => {
+      if (msg.type === 'system') {
+        promises.push(mesStore.markSystemMessageAsRead(msg.id))
+      } else {
+        promises.push(mesStore.markGroupMessageAsRead(msg.id))
+      }
+    })
     
     await Promise.allSettled(promises)
     

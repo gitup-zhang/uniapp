@@ -1,244 +1,347 @@
 
+/* 主卡片容器 */
 .message-card.data-v-d00e46f1 {
-  background: #ffffff;
-  border-radius: 16rpx;
-  margin-bottom: 16rpx;
-  padding: 24rpx;
-  display: flex;
-  align-items: center;
-  gap: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  background: #ffffff;
+  border-radius: 24rpx;
+  margin: 0 0 24rpx 0;
   overflow: hidden;
-  border-left: 4rpx solid transparent;
-}
-.message-card.data-v-d00e46f1::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  transition: all 0.3s ease;
-  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 
+    0 4rpx 20rpx rgba(0, 0, 0, 0.04),
+    0 1rpx 3rpx rgba(0, 0, 0, 0.08);
 }
 .message-card.data-v-d00e46f1:active {
-  transform: translateY(-2rpx);
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
-}
-.message-card.has-unread.data-v-d00e46f1 {
-  background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%);
-  border-left-color: #3b82f6;
-  box-shadow: 0 2rpx 16rpx rgba(59, 130, 246, 0.15);
-}
-.message-card.has-unread.data-v-d00e46f1::before {
-  background: linear-gradient(90deg, rgba(59, 130, 246, 0.02) 0%, transparent 100%);
+  transform: translateY(-4rpx) scale(0.996);
+  box-shadow: 
+    0 12rpx 40rpx rgba(0, 0, 0, 0.08),
+    0 4rpx 8rpx rgba(0, 0, 0, 0.12);
 }
 
-/* 头像区域 */
-.avatar-wrapper.data-v-d00e46f1 {
-  position: relative;
-  flex-shrink: 0;
+/* 背景装饰 */
+.card-decoration.data-v-d00e46f1 {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 120rpx;
+  height: 120rpx;
+  background: radial-gradient(circle, rgba(0, 123, 255, 0.05) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(40rpx, -40rpx);
 }
-.group-avatar.data-v-d00e46f1 {
-  width: 96rpx;
-  height: 96rpx;
-  border-radius: 24rpx;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+.system-message .card-decoration.data-v-d00e46f1 {
+  background: radial-gradient(circle, rgba(255, 107, 107, 0.08) 0%, transparent 70%);
+}
+
+/* 未读消息装饰 */
+.has-unread .card-decoration.data-v-d00e46f1 {
+  background: radial-gradient(circle, rgba(255, 107, 107, 0.12) 0%, transparent 70%);
+  animation: pulse-d00e46f1 2s infinite;
+}
+@keyframes pulse-d00e46f1 {
+0%, 100% { opacity: 1;
+}
+50% { opacity: 0.7;
+}
+}
+
+/* 卡片主体 */
+.card-body.data-v-d00e46f1 {
+  padding: 32rpx 28rpx;
+  position: relative;
+  z-index: 2;
+}
+
+/* 顶部信息区 */
+.top-section.data-v-d00e46f1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24rpx;
+}
+.info-section.data-v-d00e46f1 {
+  display: flex;
+  align-items: flex-start;
+  gap: 24rpx;
+  flex: 1;
+  min-width: 0;
+}
+
+/* 头像样式 */
+.avatar.data-v-d00e46f1 {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 20rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4rpx 16rpx rgba(99, 102, 241, 0.25);
-  position: relative;
-  overflow: hidden;
-}
-.group-avatar.data-v-d00e46f1::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
-  transform: rotate(45deg);
-  transition: all 0.6s ease;
-}
-.message-card:active .group-avatar.data-v-d00e46f1::before {
-  transform: rotate(45deg) translate(20%, 20%);
+  font-weight: 600;
+  flex-shrink: 0;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
+  border: 3rpx solid rgba(255, 255, 255, 0.9);
 }
 .avatar-text.data-v-d00e46f1 {
-  font-size: 40rpx;
+  font-size: 32rpx;
+  color: inherit;
   font-weight: 700;
-  color: #ffffff;
-  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
-  z-index: 1;
+}
+.avatar-icon.data-v-d00e46f1 {
+  font-size: 32rpx;
+}
+
+/* 标题区域 */
+.title-section.data-v-d00e46f1 {
+  flex: 1;
+  min-width: 0;
+}
+.title.data-v-d00e46f1 {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1a202c;
+  line-height: 1.3;
+  margin-bottom: 8rpx;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: -0.5rpx;
+}
+.system-message .title.data-v-d00e46f1 {
+  color: #2d3748;
+}
+.has-unread .title.data-v-d00e46f1 {
+  color: #2b6cb0;
+}
+.system-message.has-unread .title.data-v-d00e46f1 {
+  color: #c53030;
+}
+
+/* 元信息 */
+.meta-info.data-v-d00e46f1 {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.type-tag.data-v-d00e46f1 {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #718096;
+  background: #f7fafc;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid #e2e8f0;
+}
+.system-message .type-tag.data-v-d00e46f1 {
+  background: #fed7d7;
+  color: #c53030;
+  border-color: #feb2b2;
+}
+.group-message .type-tag.data-v-d00e46f1 {
+  background: #bee3f8;
+  color: #2b6cb0;
+  border-color: #90cdf4;
+}
+.timestamp.data-v-d00e46f1 {
+  font-size: 24rpx;
+  color: #a0aec0;
+  font-weight: 500;
+}
+.has-unread .timestamp.data-v-d00e46f1 {
+  color: #4299e1;
+  font-weight: 600;
+}
+
+/* 状态区域 */
+.status-section.data-v-d00e46f1 {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex-shrink: 0;
+}
+
+/* 未读指示器 */
+.unread-indicator.data-v-d00e46f1 {
   position: relative;
 }
-.unread-badge.data-v-d00e46f1 {
-  position: absolute;
-  top: -8rpx;
-  right: -8rpx;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+.unread-count.data-v-d00e46f1 {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
   color: #ffffff;
-  font-size: 20rpx;
-  font-weight: 700;
-  padding: 6rpx 12rpx;
+  font-size: 22rpx;
+  font-weight: 800;
+  padding: 8rpx 16rpx;
   border-radius: 24rpx;
   min-width: 32rpx;
   height: 32rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3rpx solid #ffffff;
-  box-shadow: 0 2rpx 8rpx rgba(239, 68, 68, 0.4);
-  animation: pulse-badge-d00e46f1 2s infinite;
+  box-shadow: 
+    0 4rpx 12rpx rgba(66, 153, 225, 0.4),
+    0 2rpx 4rpx rgba(66, 153, 225, 0.3);
+  animation: bounce-d00e46f1 0.6s ease-in-out;
 }
-@keyframes pulse-badge-d00e46f1 {
-0%, 100% {
-    transform: scale(1);
+.system-message .unread-count.data-v-d00e46f1 {
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+  box-shadow: 
+    0 4rpx 12rpx rgba(245, 101, 101, 0.4),
+    0 2rpx 4rpx rgba(245, 101, 101, 0.3);
 }
-50% {
-    transform: scale(1.05);
+@keyframes bounce-d00e46f1 {
+0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0);
 }
+40%, 43% { transform: translate3d(0,-8rpx,0);
+}
+70% { transform: translate3d(0,-4rpx,0);
+}
+}
+
+/* 箭头图标 */
+.arrow-icon.data-v-d00e46f1 {
+  padding: 12rpx;
+  border-radius: 50%;
+  background: rgba(113, 128, 150, 0.1);
+  transition: all 0.3s ease;
+}
+.arrow.data-v-d00e46f1 {
+  font-size: 28rpx;
+  color: #718096;
+  font-weight: 300;
+}
+.has-unread .arrow-icon.data-v-d00e46f1 {
+  background: rgba(66, 153, 225, 0.15);
+}
+.has-unread .arrow.data-v-d00e46f1 {
+  color: #4299e1;
+}
+.system-message.has-unread .arrow-icon.data-v-d00e46f1 {
+  background: rgba(245, 101, 101, 0.15);
+}
+.system-message.has-unread .arrow.data-v-d00e46f1 {
+  color: #f56565;
+}
+.message-card:active .arrow.data-v-d00e46f1 {
+  transform: translateX(4rpx);
 }
 
 /* 内容区域 */
-.content-wrapper.data-v-d00e46f1 {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12rpx;
+.content-section.data-v-d00e46f1 {
+  padding-left: 104rpx;
 }
-
-/* 分组名和时间行 */
-.header-row.data-v-d00e46f1 {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16rpx;
-}
-.group-name.data-v-d00e46f1 {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #1f2937;
-  line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
-  min-width: 0;
-}
-.has-unread .group-name.data-v-d00e46f1 {
-  color: #1e40af;
-  font-weight: 700;
-}
-.time-text.data-v-d00e46f1 {
-  font-size: 24rpx;
-  color: #9ca3af;
-  flex-shrink: 0;
-  font-weight: 500;
-}
-.has-unread .time-text.data-v-d00e46f1 {
-  color: #3b82f6;
-  font-weight: 600;
-}
-
-/* 最新消息内容 */
-.latest-content.data-v-d00e46f1 {
-  font-size: 28rpx;
-  color: #6b7280;
-  line-height: 1.5;
+.message-preview.data-v-d00e46f1 {
+  font-size: 30rpx;
+  color: #4a5568;
+  line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: break-word;
+  font-weight: 400;
+  letter-spacing: 0.5rpx;
 }
-.has-unread .latest-content.data-v-d00e46f1 {
-  color: #374151;
+.system-message .message-preview.data-v-d00e46f1 {
+  color: #2d3748;
+}
+.has-unread .message-preview.data-v-d00e46f1 {
+  color: #2d3748;
   font-weight: 500;
 }
 
-/* 右侧箭头 */
-.arrow-wrapper.data-v-d00e46f1 {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  padding: 8rpx;
+/* 未读强调条 */
+.unread-accent.data-v-d00e46f1 {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8rpx;
+  height: 60rpx;
+  background: linear-gradient(to bottom, #4299e1, #3182ce);
+  border-radius: 0 8rpx 8rpx 0;
+  box-shadow: 2rpx 0 8rpx rgba(66, 153, 225, 0.3);
 }
-.arrow-icon.data-v-d00e46f1 {
-  font-size: 32rpx;
-  color: #d1d5db;
-  font-weight: 300;
-  transition: all 0.3s ease;
-}
-.has-unread .arrow-icon.data-v-d00e46f1 {
-  color: #3b82f6;
-  font-weight: 400;
-}
-.message-card:active .arrow-icon.data-v-d00e46f1 {
-  transform: translateX(4rpx);
-  color: #1d4ed8;
+.system-message .unread-accent.data-v-d00e46f1 {
+  background: linear-gradient(to bottom, #f56565, #e53e3e);
+  box-shadow: 2rpx 0 8rpx rgba(245, 101, 101, 0.3);
 }
 
 /* 加载状态 */
 .message-card.loading.data-v-d00e46f1 {
-  opacity: 0.7;
+  opacity: 0.6;
   pointer-events: none;
+  position: relative;
 }
-.message-card.loading.data-v-d00e46f1::after {
+.message-card.loading.data-v-d00e46f1::before {
   content: '';
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  animation: loading-shimmer-d00e46f1 1.5s infinite;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.6), 
+    transparent
+  );
+  animation: shimmer-d00e46f1 2s infinite;
+  z-index: 10;
 }
-@keyframes loading-shimmer-d00e46f1 {
-0% {
-    left: -100%;
+@keyframes shimmer-d00e46f1 {
+0% { left: -100%;
 }
-100% {
-    left: 100%;
+100% { left: 100%;
 }
+}
+
+/* 特殊卡片样式 */
+.has-unread.data-v-d00e46f1 {
+  background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+  border: 1rpx solid rgba(66, 153, 225, 0.1);
+}
+.system-message.has-unread.data-v-d00e46f1 {
+  background: linear-gradient(135deg, #ffffff 0%, #fffafa 100%);
+  border: 1rpx solid rgba(245, 101, 101, 0.1);
 }
 
 /* 深色模式适配 */
 @media (prefers-color-scheme: dark) {
 .message-card.data-v-d00e46f1 {
-    background: #1f2937;
-    box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.3);
+    background: #2d3748;
+    box-shadow: 
+      0 4rpx 20rpx rgba(0, 0, 0, 0.2),
+      0 1rpx 3rpx rgba(0, 0, 0, 0.3);
 }
-.message-card.has-unread.data-v-d00e46f1 {
-    background: linear-gradient(135deg, #1f2937 0%, #1e3a8a 100%);
+.title.data-v-d00e46f1 {
+    color: #f7fafc;
 }
-.group-name.data-v-d00e46f1 {
-    color: #f9fafb;
+.system-message .title.data-v-d00e46f1 {
+    color: #fed7d7;
 }
-.latest-content.data-v-d00e46f1 {
-    color: #d1d5db;
+.has-unread .title.data-v-d00e46f1 {
+    color: #90cdf4;
 }
-.time-text.data-v-d00e46f1 {
-    color: #9ca3af;
+.system-message.has-unread .title.data-v-d00e46f1 {
+    color: #feb2b2;
 }
-.arrow-icon.data-v-d00e46f1 {
-    color: #6b7280;
+.type-tag.data-v-d00e46f1 {
+    background: #4a5568;
+    color: #cbd5e0;
+    border-color: #718096;
 }
-.has-unread .group-name.data-v-d00e46f1 {
-    color: #60a5fa;
+.message-preview.data-v-d00e46f1 {
+    color: #cbd5e0;
 }
-.has-unread .latest-content.data-v-d00e46f1 {
-    color: #e5e7eb;
+.timestamp.data-v-d00e46f1 {
+    color: #718096;
 }
-.has-unread .time-text.data-v-d00e46f1 {
-    color: #60a5fa;
+.arrow.data-v-d00e46f1 {
+    color: #a0aec0;
 }
-.has-unread .arrow-icon.data-v-d00e46f1 {
-    color: #60a5fa;
+.has-unread.data-v-d00e46f1 {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    border-color: rgba(66, 153, 225, 0.2);
+}
+.system-message.has-unread.data-v-d00e46f1 {
+    background: linear-gradient(135deg, #2d3748 0%, #2c1810 100%);
+    border-color: rgba(245, 101, 101, 0.2);
 }
 }

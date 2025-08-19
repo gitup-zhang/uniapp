@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const store_mes = require("../../store/mes.js");
 const _sfc_main = {
   __name: "ChatSystem",
   setup(__props) {
@@ -10,6 +11,7 @@ const _sfc_main = {
     const hasMore = common_vendor.ref(true);
     const currentPage = common_vendor.ref(1);
     const messages = common_vendor.ref([]);
+    const MesStore = store_mes.useMesstore();
     const CONTENT_CONFIG = {
       SHORT_LIMIT: 80,
       // 短内容限制（字符数）
@@ -25,7 +27,7 @@ const _sfc_main = {
       statusBarHeight.value = sysInfo.statusBarHeight || 0;
     });
     common_vendor.onLoad(async (options) => {
-      await loadMessages();
+      await MesStore.getMessageList({ message_type: "SYSTEM" });
     });
     const loadMessages = async (page = 1) => {
       if (page === 1) {
@@ -130,7 +132,7 @@ const _sfc_main = {
     };
     const viewFullContent = (message) => {
       common_vendor.index.navigateTo({
-        url: `/pages/message-detail/index?id=${message.id}&title=${encodeURIComponent(message.title)}`
+        url: `/pages/detail/SystemMesDetail?id=${message.id}&title=${encodeURIComponent(message.title)}`
       });
     };
     const formatTime = (timeStr) => {
@@ -200,10 +202,10 @@ const _sfc_main = {
       }, messages.value.length > 0 ? {} : {}, {
         d: isLoading.value && messages.value.length === 0
       }, isLoading.value && messages.value.length === 0 ? {} : common_vendor.e({
-        e: common_vendor.f(messages.value, (message, index, i0) => {
+        e: common_vendor.f(common_vendor.unref(MesStore).MessageList, (message, k0, i0) => {
           return common_vendor.e({
             a: common_vendor.t(message.title),
-            b: common_vendor.t(formatTime(message.time)),
+            b: common_vendor.t(formatTime(message.send_time)),
             c: getContentType(message.content) === "short"
           }, getContentType(message.content) === "short" ? {
             d: common_vendor.t(message.content)
@@ -214,7 +216,7 @@ const _sfc_main = {
           }, !message.expanded ? {} : {}, {
             i: common_vendor.t(message.expanded ? "收起" : "展开"),
             j: message.expanded ? 1 : "",
-            k: common_vendor.o(($event) => toggleContent(index), message.id)
+            k: common_vendor.o(($event) => toggleContent(_ctx.index), message.id)
           }) : {
             l: common_vendor.t(getPreviewText(message.content)),
             m: common_vendor.o(($event) => viewFullContent(message), message.id)

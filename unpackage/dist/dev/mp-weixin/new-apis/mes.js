@@ -6,5 +6,9 @@ function getsystemmes(params) {
 function geteventmes() {
   return utils_request.http.get("/message/byEventGroups");
 }
+function getmesgroup(params) {
+  return utils_request.http.get("/message/byGroups", params);
+}
 exports.geteventmes = geteventmes;
+exports.getmesgroup = getmesgroup;
 exports.getsystemmes = getsystemmes;

@@ -135,28 +135,23 @@ const _sfc_main = {
         g: common_vendor.t(props.activityData.event_address),
         h: common_vendor.n(statusClass.value),
         i: common_vendor.t(common_vendor.unref(utils_data.formatEventDate)(props.activityData.event_start_time, props.activityData.event_end_time)),
-        j: common_vendor.n(statusClass.value),
-        k: common_vendor.n(statusClass.value),
-        l: common_vendor.n(statusClass.value),
-        m: common_vendor.t(isExpired.value ? "共102人参与过" : "已有102人参与"),
-        n: common_vendor.n(statusClass.value),
-        o: !isExpired.value
+        j: !isExpired.value
       }, !isExpired.value ? {
-        p: common_vendor.t(checkInButtonConfig.value.icon),
-        q: common_vendor.t(checkInButtonConfig.value.text),
-        r: common_vendor.n(checkInButtonConfig.value.class),
-        s: checkInButtonConfig.value.disabled,
-        t: common_vendor.o(handleAction),
-        v: common_vendor.o(handleCancel)
+        k: common_vendor.t(checkInButtonConfig.value.icon),
+        l: common_vendor.t(checkInButtonConfig.value.text),
+        m: common_vendor.n(checkInButtonConfig.value.class),
+        n: checkInButtonConfig.value.disabled,
+        o: common_vendor.o(handleAction),
+        p: common_vendor.o(handleCancel)
       } : {
-        w: common_vendor.o(handleViewDetails),
-        x: common_vendor.o(handleArchive)
+        q: common_vendor.o(handleViewDetails),
+        r: common_vendor.o(handleArchive)
       }, {
-        y: common_vendor.n(statusClass.value),
-        z: activityProgress.value + "%",
-        A: common_vendor.t(isExpired.value ? "活动已完成 100%" : `活动进度 ${activityProgress.value}%`),
-        B: common_vendor.n(statusClass.value),
-        C: common_vendor.n(statusClass.value)
+        s: common_vendor.n(statusClass.value),
+        t: activityProgress.value + "%",
+        v: common_vendor.t(isExpired.value ? "活动已完成 100%" : `活动进度 ${activityProgress.value}%`),
+        w: common_vendor.n(statusClass.value),
+        x: common_vendor.n(statusClass.value)
       });
     };
   }

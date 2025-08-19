@@ -15,7 +15,9 @@
     "pages/detail/activityjoined",
     "pages/detail/noticedetail",
     "pages/detail/ChatGroup",
-    "pages/detail/ChatSystem"
+    "pages/detail/ChatSystem",
+    "pages/detail/SystemMesDetail",
+    "pages/detail/GroupMesDetail"
   ],
   "window": {
     "navigationBarTextStyle": "white",

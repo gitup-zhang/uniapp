@@ -326,7 +326,7 @@ const goBack = () => {
 const handleMessageClick = (message) => {
   // 处理消息点击事件 - 跳转到详情页
   uni.navigateTo({
-    url: `/pages/admin-message/detail?id=${message.id}&title=${encodeURIComponent(message.title || '管理员通知')}`
+    url: `/pages/detail/GroupMesDetail?id=${message.id}&title=${encodeURIComponent(message.title || '管理员通知')}`
   })
 }
 

@@ -6,6 +6,12 @@ const useMesstore = common_vendor.defineStore("mes", () => {
   const groupmes = common_vendor.ref([]);
   const loading = common_vendor.ref(false);
   const error = common_vendor.ref(null);
+  const MessageList = common_vendor.ref([]);
+  const MseList = {
+    total: 0,
+    page: 1,
+    page_size: 10
+  };
   const lastUpdateTime = common_vendor.ref(null);
   const totalUnreadCount = common_vendor.computed(() => {
     const systemUnread = systemmes.value.reduce((count, msg) => {
@@ -25,6 +31,7 @@ const useMesstore = common_vendor.defineStore("mes", () => {
   });
   const groupUnreadCount = common_vendor.computed(() => {
     return groupmes.value.reduce((count, msg) => {
+      console.log("群组消息数量：", msg.unread_count);
       return count + msg.unread_count;
     }, 0);
   });
@@ -147,6 +154,21 @@ const useMesstore = common_vendor.defineStore("mes", () => {
       throw error2;
     }
   };
+  const getMessageList = async (params) => {
+    try {
+      const res = await newApis_mes.getmesgroup(params);
+      MseList.page = res.page;
+      MseList.total = res.total;
+      MessageList.value = res.data.map((msg) => ({
+        ...msg,
+        expanded: false
+      }));
+      console.log("获得的消息数据", MessageList.value);
+      console.log("获取到的信息结构体", MseList);
+    } catch (e) {
+      console.log(e);
+    }
+  };
   const getSystemMessageById = (messageId) => {
     return systemmes.value.find((msg) => msg.id === messageId);
   };
@@ -239,6 +261,7 @@ const useMesstore = common_vendor.defineStore("mes", () => {
     systemUnreadCount,
     groupUnreadCount,
     hasNewMessages,
+    MessageList,
     // 方法
     getsystem,
     refreshMessages,
@@ -252,7 +275,8 @@ const useMesstore = common_vendor.defineStore("mes", () => {
     addSystemMessage,
     addGroupMessage,
     updateMessageUnreadCount,
-    getDataStatus
+    getDataStatus,
+    getMessageList
   };
 });
 exports.useMesstore = useMesstore;

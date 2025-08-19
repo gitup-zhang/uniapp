@@ -207,7 +207,7 @@ const _sfc_main = {
     };
     const handleMessageClick = (message) => {
       common_vendor.index.navigateTo({
-        url: `/pages/admin-message/detail?id=${message.id}&title=${encodeURIComponent(message.title || "管理员通知")}`
+        url: `/pages/detail/GroupMesDetail?id=${message.id}&title=${encodeURIComponent(message.title || "管理员通知")}`
       });
     };
     const handleActionClick = (action, message) => {

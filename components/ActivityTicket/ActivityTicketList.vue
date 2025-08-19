@@ -43,7 +43,7 @@
         </view>
         
         <!-- 参与人数信息 -->
-        <view :class="['participants-info', statusClass]">
+        <!-- <view :class="['participants-info', statusClass]">
           <view class="avatars">
             <view :class="['avatar', statusClass]"></view>
             <view :class="['avatar', statusClass]"></view>
@@ -51,7 +51,7 @@
             <text class="more">+99</text>
           </view>
           <text class="participants-text">{{ isExpired ? '共102人参与过' : '已有102人参与' }}</text>
-        </view>
+        </view> -->
       </view>
       
       <!-- 右侧按钮区 -->
