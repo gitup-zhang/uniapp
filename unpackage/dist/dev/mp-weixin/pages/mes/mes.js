@@ -180,7 +180,7 @@ const _sfc_main = {
         } else if (messageType === "group") {
           console.log("群组消息跳转");
           common_vendor.index.navigateTo({
-            url: `/pages/detail/ChatGroup?id=${msg.id}&groupName=${encodeURIComponent(msg.group_name || "群组消息")}`
+            url: `/pages/detail/ChatGroup?id=${msg.event_id}&groupName=${encodeURIComponent(msg.group_name || "群组消息")}`
           });
         }
       } catch (error) {
@@ -198,7 +198,6 @@ const _sfc_main = {
       try {
         console.log("标记消息已读ID:", msg.event_id, "消息类型:", messageType);
         if (messageType === "system") {
-          await mesStore.markSystemMessageAsRead(msg.id);
         } else {
         }
       } catch (error) {

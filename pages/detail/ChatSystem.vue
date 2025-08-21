@@ -13,9 +13,9 @@
           <text class="nav-title">系统消息</text>
         </view>
         <view class="nav-right">
-          <view class="message-count" v-if="messages.length > 0">
-            <text class="count-text"></text>
-          </view>
+          <!-- <view class="message-count" v-if="MesStore.MessageList.length > 0">
+            <text class="count-text">{{ MesStore.MessageList.length }}</text>
+          </view> -->
         </view>
       </view>
     </view>
@@ -27,14 +27,15 @@
       scroll-y="true"
       :bounces="true"
       :refresher-enabled="true"
-      :refresher-triggered="isRefreshing"
+      :refresher-triggered="MesStore.refreshing"
       @refresherrefresh="handleRefresh"
       @refresherrestore="handleRefreshRestore"
-      @scrolltolower="loadMore"
+      @scrolltolower="handleLoadMore"
+      :lower-threshold="100"
     >
       <view class="list-wrapper">
-        <!-- 加载状态 -->
-        <view v-if="isLoading && messages.length === 0" class="loading-container">
+        <!-- 初始加载状态 -->
+        <view v-if="MesStore.loading && MesStore.MessageList.length === 0" class="loading-container">
           <view class="loading-spinner"></view>
           <text class="loading-text">正在加载消息...</text>
         </view>
@@ -43,13 +44,13 @@
         <view v-else class="messages-container">
           <!-- 消息项 -->
           <view 
-            v-for="message in MesStore.MessageList" 
+            v-for="(message, index) in MesStore.MessageList" 
             :key="message.id"
             class="message-item"
             :class="{ 'expanded': message.expanded }"
           >
             <!-- 消息卡片 -->
-            <view class="message-card">
+            <view class="message-card" @tap="handleMessageClick(message, index)">
               <!-- 装饰线条 -->
               <view class="decoration-line"></view>
               
@@ -59,8 +60,15 @@
                   <text class="icon-text">📢</text>
                 </view>
                 <view class="header-content">
-                  <text class="message-title">{{ message.title }}</text>
-                  <text class="message-time">{{ formatTime(message.send_time) }}</text>
+                  <view class="title-line">
+                    <text class="message-title">{{ message.title || '系统通知' }}</text>
+                    <!-- 时间移到右上角 -->
+                    <text class="message-time">{{ formatTime(message.send_time || message.created_at) }}</text>
+                  </view>
+                  <!-- 发送者信息（如果有） -->
+                  <view v-if="message.sender_name" class="sender-info">
+                    <text class="sender-name">{{ message.sender_name }}</text>
+                  </view>
                 </view>
               </view>
 
@@ -83,7 +91,7 @@
                   <!-- 折叠/展开控制 -->
                   <view class="toggle-section">
                     <view class="fade-mask" v-if="!message.expanded"></view>
-                    <view class="toggle-btn" @tap="toggleContent(index)">
+                    <view class="toggle-btn" @tap.stop="toggleContent(index)">
                       <text class="toggle-text">{{ message.expanded ? '收起' : '展开' }}</text>
                       <view class="toggle-icon" :class="{ 'rotated': message.expanded }">
                         <text class="icon-arrow">▼</text>
@@ -97,7 +105,7 @@
                   <text class="content-preview">{{ getPreviewText(message.content) }}</text>
                   
                   <view class="action-section">
-                    <view class="detail-btn" @tap="viewFullContent(message)">
+                    <view class="detail-btn" @tap.stop="viewFullContent(message)">
                       <view class="btn-content">
                         <text class="btn-text">查看完整内容</text>
                         <view class="btn-arrow">
@@ -107,28 +115,33 @@
                     </view>
                   </view>
                 </view>
-              </view>
-            </view>
-          </view>
 
-          <!-- 加载更多 -->
-          <view v-if="hasMore" class="load-more-section">
-            <view v-if="isLoadingMore" class="loading-more">
-              <view class="loading-spinner small"></view>
-              <text class="loading-text">加载更多消息...</text>
-            </view>
-            <view v-else class="load-more-trigger" @tap="loadMore">
-              <view class="load-trigger-btn">
-                <text class="trigger-text">加载更多消息</text>
-                <view class="trigger-icon">
-                  <text class="icon-plus">+</text>
+                <!-- 消息状态栏 -->
+                <view class="message-status" v-if="message.priority || message.category">
+                  <view v-if="message.priority" class="priority-tag" :class="`priority-${message.priority}`">
+                    <text class="priority-text">{{ getPriorityText(message.priority) }}</text>
+                  </view>
+                  <view v-if="message.category" class="category-tag">
+                    <text class="category-text">{{ message.category }}</text>
+                  </view>
                 </view>
               </view>
             </view>
           </view>
 
+          <!-- 加载更多状态 -->
+          <view v-if="MesStore.hasMoreData && MesStore.MessageList.length > 0" class="load-more-section">
+            <view v-if="MesStore.loadingMore" class="loading-more">
+              <view class="loading-spinner small"></view>
+              <text class="loading-text">加载更多消息...</text>
+            </view>
+            <view v-else class="load-more-tip">
+              <text class="tip-text">上拉加载更多</text>
+            </view>
+          </view>
+
           <!-- 无更多数据 -->
-          <view v-else-if="messages.length > 0" class="no-more-section">
+          <view v-else-if="MesStore.MessageList.length > 0 && !MesStore.hasMoreData" class="no-more-section">
             <view class="no-more-line"></view>
             <text class="no-more-text">已显示全部消息</text>
             <view class="no-more-line"></view>
@@ -136,7 +149,7 @@
         </view>
 
         <!-- 空状态 -->
-        <view v-if="!isLoading && messages.length === 0" class="empty-state">
+        <view v-if="!MesStore.loading && MesStore.MessageList.length === 0" class="empty-state">
           <view class="empty-illustration">
             <view class="empty-circle">
               <text class="empty-icon">📭</text>
@@ -144,6 +157,20 @@
           </view>
           <text class="empty-title">暂无系统消息</text>
           <text class="empty-desc">系统重要通知会在这里显示</text>
+          <view class="retry-btn" v-if="MesStore.error" @tap="handleRetry">
+            <text class="retry-text">重新加载</text>
+          </view>
+        </view>
+
+        <!-- 错误提示 -->
+        <view v-if="MesStore.error && MesStore.MessageList.length > 0" class="error-banner">
+          <view class="error-content">
+            <text class="error-icon">⚠️</text>
+            <text class="error-text">{{ MesStore.error }}</text>
+            <view class="retry-small-btn" @tap="handleRetry">
+              <text class="retry-small-text">重试</text>
+            </view>
+          </view>
         </view>
       </view>
     </scroll-view>
@@ -151,21 +178,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { onLoad, onShow } from '@dcloudio/uni-app'
+import { ref, onMounted, computed, nextTick } from 'vue'
+import { onLoad, onShow, onHide } from '@dcloudio/uni-app'
 import { useMesstore } from '@/store/mes.js'
 
 // 响应式数据
 const statusBarHeight = ref(0)
-const isLoading = ref(false)
-const isRefreshing = ref(false)
-const isLoadingMore = ref(false)
-const hasMore = ref(true)
-const currentPage = ref(1)
-const messages = ref([])
+const pageSize = ref(10)
+const loadThrottle = ref(false) // 加载节流
 
 // 初始化pinia
-const MesStore=useMesstore()
+const MesStore = useMesstore()
 
 // 内容长度配置
 const CONTENT_CONFIG = {
@@ -175,6 +198,14 @@ const CONTENT_CONFIG = {
   COLLAPSE_HEIGHT: 3   // 折叠时显示行数
 }
 
+// 优先级文本映射
+const PRIORITY_MAP = {
+  'high': '重要',
+  'medium': '普通',
+  'low': '一般',
+  'urgent': '紧急'
+}
+
 // 生命周期
 onMounted(async () => {
   const sysInfo = uni.getSystemInfoSync()
@@ -182,104 +213,119 @@ onMounted(async () => {
 })
 
 onLoad(async (options) => {
-await MesStore.getMessageList({message_type:'SYSTEM'})
-  // await loadMessages()
+  await loadInitialMessages()
 })
 
-// 方法定义
-const loadMessages = async (page = 1) => {
-  if (page === 1) {
-    isLoading.value = true
-  } else {
-    isLoadingMore.value = true
+onShow(() => {
+  // 页面显示时可以做一些操作，比如刷新数据状态检查
+  console.log('系统消息页面显示')
+})
+
+onHide(() => {
+  // 页面隐藏时清除错误状态
+  if (MesStore.error) {
+    MesStore.error = null
+  }
+})
+
+// 初始加载消息
+const loadInitialMessages = async () => {
+  try {
+    await MesStore.getMessageList({
+      message_type: 'SYSTEM',
+      page: 1,
+      page_size: pageSize.value
+    })
+  } catch (error) {
+    console.error('初始加载消息失败:', error)
+    uni.showToast({
+      title: '加载失败，请重试',
+      icon: 'none',
+      duration: 2000
+    })
+  }
+}
+
+// 优化的触底加载更多
+const handleLoadMore = async () => {
+  // 防抖处理
+  if (loadThrottle.value || MesStore.loadingMore || !MesStore.hasMoreData) {
+    console.log('加载条件不满足:', {
+      throttle: loadThrottle.value,
+      loading: MesStore.loadingMore,
+      hasMore: MesStore.hasMoreData
+    })
+    return
   }
 
+  loadThrottle.value = true
+  
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 800)) // 模拟网络延迟
-    const mockMessages = generateMockMessages(page)
+    const result = await MesStore.loadMoreMessages({
+      message_type: 'SYSTEM',
+      page_size: pageSize.value
+    })
     
-    if (page === 1) {
-      messages.value = mockMessages.map(msg => ({
-        ...msg,
-        expanded: false
-      }))
-    } else {
-      messages.value.push(...mockMessages.map(msg => ({
-        ...msg,
-        expanded: false
-      })))
+    if (result.success) {
+      console.log(`加载更多成功: 新增${result.data.length}条消息`)
+      
+      // 如果返回数据少于请求数量，说明已经到底了
+      if (result.data.length < pageSize.value) {
+        console.log('已加载所有数据')
+      }
     }
-
-    hasMore.value = page < 3
-    currentPage.value = page
-
   } catch (error) {
-    console.error('加载消息失败:', error)
+    console.error('加载更多失败:', error)
     uni.showToast({
       title: '加载失败，请重试',
       icon: 'none',
       duration: 2000
     })
   } finally {
-    isLoading.value = false
-    isLoadingMore.value = false
+    // 延迟重置节流状态，避免频繁触发
+    setTimeout(() => {
+      loadThrottle.value = false
+    }, 1000)
   }
 }
 
-const generateMockMessages = (page) => {
-  const messages = []
-  const baseId = (page - 1) * 8
-
-  const messageTemplates = [
-    {
-      title: '系统维护通知',
-      shortContent: '系统将于今晚23:00进行维护升级，预计2小时完成。',
-      mediumContent: '尊敬的用户，系统将于今晚23:00-次日01:00进行例行维护升级。维护期间，部分功能可能暂时无法使用，包括登录、支付、数据同步等。我们建议您提前保存工作进度，避免数据丢失。维护完成后，系统性能将得到显著提升，感谢您的理解与支持。如有紧急问题，请联系在线客服。',
-      longContent: '尊敬的用户，为了给您提供更优质的服务体验，我们将于今晚23:00至次日01:00进行系统全面维护升级。本次维护涉及服务器硬件升级、数据库性能优化、安全系统更新、新功能模块部署等多个方面。维护期间，以下功能将暂时无法使用：用户登录注册、在线支付交易、文件上传下载、实时消息推送、数据报表生成、第三方接口调用等核心服务。为确保您的数据安全，我们强烈建议您在维护开始前及时保存所有工作进度，备份重要数据，并退出系统。维护完成后，系统将实现以下改进：响应速度提升60%以上、并发处理能力增强3倍、数据安全等级提升至金融级标准、新增智能推荐功能、优化移动端用户体验。预计维护将按时完成，如遇特殊情况需要延长维护时间，我们会第一时间通过短信、邮件等方式通知您。维护期间给您带来的不便，我们深表歉意。如有任何紧急问题或疑问，请通过以下方式联系我们：24小时客服热线400-888-6666、紧急邮箱emergency@example.com、官方微信客服。感谢您一直以来的信任与支持！'
-    },
-    {
-      title: '安全提醒通知',
-      shortContent: '检测到您的账户存在异常登录行为，请及时检查。',
-      mediumContent: '安全提醒：我们的风控系统检测到您的账户在北京地区有异常登录记录，时间为今日14:30。如果这是您本人操作，请忽略此消息。如果不是您本人操作，请立即修改密码，启用双重验证，并检查账户资金安全。我们建议定期更换密码，使用复杂密码组合，不在公共场所登录账户。',
-      longContent: '重要安全提醒：我们的智能风控系统在今日14:30:25检测到您的账户出现异常登录行为。具体信息如下：登录地点：北京市朝阳区（IP:120.244.xxx.xxx）、设备信息：Windows 10专业版Chrome浏览器、登录状态：成功登录并进行了部分操作。系统同时检测到以下异常特征：登录地点与您常用地点不符、设备指纹信息陌生、登录时间段异常、操作行为模式与平时差异较大。如果这是您本人的正常操作，请点击确认安全按钮，系统将记录此次登录为安全行为。如果这不是您本人操作，说明您的账户可能已被他人盗用，请立即采取以下安全措施：1.立即修改账户密码，建议使用包含大小写字母、数字、特殊符号的强密码；2.启用双重验证功能，绑定手机号码和邮箱；3.检查并清除可疑登录设备；4.修改密保问题和答案；5.检查账户资金变动和重要信息修改记录；6.如发现任何损失，请立即联系客服进行处理。为了您的账户安全，我们建议：定期更换密码（建议每3个月一次）、不要在公共网络或设备上登录、开启登录短信提醒功能、定期查看账户安全报告。如需帮助，请联系7×24小时安全专线：400-666-8888。'
-    },
-    {
-      title: '新功能上线公告',
-      shortContent: '全新的智能推荐功能已正式上线，快来体验吧！',
-      mediumContent: '好消息！经过3个月的精心开发，全新的AI智能推荐系统现已正式上线！新功能基于深度学习算法，能够根据您的使用习惯和偏好，为您推荐最相关的内容和服务。同时，我们还优化了界面设计，提升了系统响应速度，增加了夜间模式等实用功能。赶快更新到最新版本，体验更智能、更便捷的服务吧！',
-      longContent: '重大更新公告！经过我们产品团队3个月的潜心研发和精心打磨，基于最新AI技术的智能推荐系统现已正式发布上线！本次更新是我们产品历史上最重要的里程碑之一，将为您带来前所未有的个性化体验。核心功能亮点：1.AI智能推荐引擎：采用先进的深度学习和神经网络算法，通过分析您的浏览历史、操作习惯、兴趣标签等多维度数据，实现99.7%准确率的个性化内容推荐；2.实时学习能力：系统会根据您的每一次点击、停留时间、分享行为等实时调整推荐策略，越用越懂您；3.多场景适配：支持首页推荐、搜索联想、相关推荐、跨品类推荐等多种场景，全方位提升使用体验；4.隐私保护：所有个性化分析均在本地进行，绝不上传个人隐私数据，确保信息安全。界面体验升级：全新Material You设计语言、支持深色/浅色主题自动切换、优化动画效果和交互反馈、提升页面加载速度50%、新增手势操作和快捷键支持。功能增强：新增批量操作、增强搜索功能、支持多格式文件预览、优化移动端适配、增加无障碍支持。立即更新：您可以通过应用商店搜索更新，或在设置中检查版本更新。首次使用时，系统会引导您完成个性化设置，整个过程仅需3分钟。我们相信这次更新将为您带来全新的使用体验，如有任何问题或建议，欢迎通过意见反馈渠道与我们联系。感谢您的支持与信任！'
-    }
-  ]
-
-  for (let i = 0; i < 8; i++) {
-    const template = messageTemplates[i % messageTemplates.length]
-    const contentType = i % 3 // 0: short, 1: medium, 2: long
+// 优化的下拉刷新
+const handleRefresh = async () => {
+  try {
+    const result = await MesStore.refreshMessageList({
+      message_type: 'SYSTEM',
+      page_size: pageSize.value
+    })
     
-    let content = ''
-    switch (contentType) {
-      case 0:
-        content = template.shortContent
-        break
-      case 1:
-        content = template.mediumContent
-        break
-      case 2:
-        content = template.longContent
-        break
+    if (result.success) {
+      console.log('刷新成功:', result.data.length, '条消息')
+      uni.showToast({
+        title: '刷新成功',
+        icon: 'success',
+        duration: 1500
+      })
     }
-
-    messages.push({
-      id: `msg_${baseId + i + 1}`,
-      title: template.title,
-      content: content,
-      time: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+  } catch (error) {
+    console.error('刷新失败:', error)
+    uni.showToast({
+      title: '刷新失败',
+      icon: 'error',
+      duration: 2000
     })
   }
-
-  return messages
 }
 
+const handleRefreshRestore = () => {
+  console.log('刷新完成')
+}
+
+// 重试加载
+const handleRetry = async () => {
+  MesStore.error = null
+  await loadInitialMessages()
+}
+
+// 获取内容类型
 const getContentType = (content) => {
   if (!content) return 'short'
   
@@ -293,6 +339,7 @@ const getContentType = (content) => {
   }
 }
 
+// 获取预览文本
 const getPreviewText = (content) => {
   if (!content) return ''
   return content.length > CONTENT_CONFIG.PREVIEW_LENGTH 
@@ -300,17 +347,35 @@ const getPreviewText = (content) => {
     : content
 }
 
-const toggleContent = (index) => {
- messages.value[index].expanded = !messages.value[index].expanded
+// 获取优先级文本
+const getPriorityText = (priority) => {
+  return PRIORITY_MAP[priority] || priority
 }
 
-const viewFullContent = (message) => {
+// 消息点击处理
+const handleMessageClick = async (message, index) => {
+  // 可以在这里添加其他点击处理逻辑
+  console.log('点击消息:', message.title)
+}
+
+// 切换内容展开/折叠
+const toggleContent = async (index) => {
+  const message = MesStore.MessageList[index]
+  if (!message) return
+
+  // 切换展开状态
+  MesStore.toggleMessageExpanded(message.id)
+}
+
+// 查看完整内容
+const viewFullContent = async (message) => {
   // 跳转到消息详情页
   uni.navigateTo({
-    url: `/pages/detail/SystemMesDetail?id=${message.id}&title=${encodeURIComponent(message.title)}`
+    url: `/pages/detail/SystemMesDetail?id=${message.id}&title=${encodeURIComponent(message.title || '系统消息')}`
   })
 }
 
+// 格式化时间
 const formatTime = (timeStr) => {
   if (!timeStr) return ''
   
@@ -344,34 +409,7 @@ const formatTime = (timeStr) => {
   }
 }
 
-const handleRefresh = async () => {
-  isRefreshing.value = true
-  try {
-    await loadMessages(1)
-    uni.showToast({
-      title: '刷新成功',
-      icon: 'success',
-      duration: 1500
-    })
-  } catch (error) {
-    uni.showToast({
-      title: '刷新失败',
-      icon: 'error'
-    })
-  } finally {
-    isRefreshing.value = false
-  }
-}
-
-const handleRefreshRestore = () => {
-  isRefreshing.value = false
-}
-
-const loadMore = async () => {
-  if (!hasMore.value || isLoadingMore.value) return
-  await loadMessages(currentPage.value + 1)
-}
-
+// 返回上一页
 const goBack = () => {
   uni.navigateBack()
 }
@@ -402,7 +440,7 @@ const goBack = () => {
 }
 
 .nav-left, .nav-right {
-  width: 80rpx;
+  width: 120rpx;
   display: flex;
   align-items: center;
 }
@@ -469,7 +507,7 @@ const goBack = () => {
 }
 
 .list-wrapper {
-  padding: 32rpx 24rpx 100rpx;
+  padding: 32rpx 24rpx 140rpx;
 }
 
 /* 加载状态 */
@@ -545,9 +583,9 @@ const goBack = () => {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.message-card:hover {
-  transform: translateY(-4rpx);
-  box-shadow: 0 16rpx 48rpx rgba(239, 68, 68, 0.15);
+.message-card:active {
+  transform: translateY(-2rpx);
+  box-shadow: 0 12rpx 40rpx rgba(239, 68, 68, 0.12);
   border-color: rgba(239, 68, 68, 0.1);
 }
 
@@ -560,8 +598,9 @@ const goBack = () => {
 /* 消息头部 */
 .message-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   padding: 32rpx 32rpx 16rpx;
+  position: relative;
 }
 
 .message-icon {
@@ -574,6 +613,7 @@ const goBack = () => {
   justify-content: center;
   margin-right: 24rpx;
   border: 3rpx solid rgba(239, 68, 68, 0.1);
+  flex-shrink: 0;
 }
 
 .icon-text {
@@ -584,16 +624,36 @@ const goBack = () => {
   flex: 1;
 }
 
+.title-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16rpx;
+  margin-bottom: 8rpx;
+}
+
 .message-title {
   font-size: 32rpx;
   font-weight: 700;
   color: #1f2937;
   line-height: 1.4;
-  margin-bottom: 8rpx;
   letter-spacing: 0.5rpx;
+  flex: 1;
 }
 
 .message-time {
+  font-size: 22rpx;
+  color: #9ca3af;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.sender-info {
+  margin-top: 4rpx;
+}
+
+.sender-name {
   font-size: 24rpx;
   color: #6b7280;
   font-weight: 500;
@@ -625,37 +685,36 @@ const goBack = () => {
   position: relative;
 }
 
-/* 渐变遮罩 */
-.fade-mask {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60rpx;
-  background: linear-gradient(transparent, white);
-  pointer-events: none;
-}
+/* ====== 优化后的展开收起按钮样式 ====== */
 
 /* 切换按钮区域 */
 .toggle-section {
   position: relative;
-  margin-top: 24rpx;
+  margin-top: 32rpx;
 }
 
 .toggle-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12rpx;
-  padding: 16rpx 24rpx;
+  gap: 16rpx;
+  width: 100%;
   background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-  border-radius: 50rpx;
-  border: 2rpx solid rgba(239, 68, 68, 0.1);
-  transition: all 0.3s ease;
+  backdrop-filter: blur(10rpx);
+  border: 2rpx solid rgba(239, 68, 68, 0.2);
+  padding: 24rpx 32rpx;
+  border-radius: 40rpx;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 8rpx 24rpx rgba(239, 68, 68, 0.15),
+    0 2rpx 6rpx rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
+  transform: translateZ(0); /* 硬件加速 */
 }
 
+/* 悬浮态光效 */
 .toggle-btn::before {
   content: '';
   position: absolute;
@@ -663,7 +722,12 @@ const goBack = () => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.1), transparent);
+  background: linear-gradient(
+    90deg, 
+    transparent, 
+    rgba(239, 68, 68, 0.1), 
+    transparent
+  );
   transition: left 0.6s ease;
 }
 
@@ -671,29 +735,104 @@ const goBack = () => {
   left: 100%;
 }
 
+/* 点击态效果 */
 .toggle-btn:active {
-  transform: scale(0.98);
+  transform: translateY(2rpx) scale(0.98);
+  box-shadow: 
+    0 4rpx 12rpx rgba(239, 68, 68, 0.2),
+    0 1rpx 3rpx rgba(0, 0, 0, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
   background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
 }
 
+/* 文字样式 */
 .toggle-text {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #ef4444;
   font-weight: 600;
+  letter-spacing: 0.5rpx;
+  z-index: 2;
+  position: relative;
+  transition: all 0.3s ease;
 }
 
+.toggle-btn:active .toggle-text {
+  color: #dc2626;
+}
+
+/* 图标容器 */
 .toggle-icon {
-  transition: transform 0.3s ease;
+  width: 44rpx;
+  height: 44rpx;
+  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+  position: relative;
+  box-shadow: 0 4rpx 12rpx rgba(239, 68, 68, 0.3);
 }
 
+/* 旋转动画 */
 .toggle-icon.rotated {
   transform: rotate(180deg);
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
 }
 
+/* 箭头图标 */
 .icon-arrow {
-  font-size: 20rpx;
-  color: #ef4444;
+  color: white;
+  font-size: 24rpx;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+  line-height: 1;
 }
+
+/* 激活态图标效果 */
+.toggle-btn:active .toggle-icon {
+  transform: scale(0.9);
+  box-shadow: 0 2rpx 8rpx rgba(239, 68, 68, 0.4);
+}
+
+.toggle-btn:active .toggle-icon.rotated {
+  transform: rotate(180deg) scale(0.9);
+}
+
+/* 微动画增强 */
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: rgba(239, 68, 68, 0.2);
+  }
+  50% {
+    border-color: rgba(239, 68, 68, 0.35);
+  }
+}
+
+.toggle-btn:hover {
+  animation: pulse-border 2s ease-in-out infinite;
+}
+
+/* 渐变遮罩优化 */
+.fade-mask {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80rpx;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 30%,
+    rgba(255, 255, 255, 0.8) 70%,
+    white 100%
+  );
+  pointer-events: none;
+  border-radius: 0 0 12rpx 12rpx;
+}
+
+/* ====== 原有样式继续 ====== */
 
 /* 预览内容 */
 .content-preview {
@@ -716,23 +855,6 @@ const goBack = () => {
   padding: 20rpx 32rpx;
   box-shadow: 0 8rpx 24rpx rgba(239, 68, 68, 0.3);
   transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.detail-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s ease;
-}
-
-.detail-btn:active::before {
-  left: 100%;
 }
 
 .detail-btn:active {
@@ -766,6 +888,51 @@ const goBack = () => {
   font-weight: bold;
 }
 
+/* 消息状态栏 */
+.message-status {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 20rpx;
+  flex-wrap: wrap;
+}
+
+.priority-tag {
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+}
+
+.priority-high, .priority-urgent {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1rpx solid #fecaca;
+}
+
+.priority-medium {
+  background: #fef3c7;
+  color: #d97706;
+  border: 1rpx solid #fed7aa;
+}
+
+.priority-low {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1rpx solid #a7f3d0;
+}
+
+.category-tag {
+  background: #f3f4f6;
+  color: #6b7280;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid #e5e7eb;
+}
+
+.priority-text, .category-text {
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
 /* 加载更多区域 */
 .load-more-section {
   display: flex;
@@ -779,49 +946,17 @@ const goBack = () => {
   gap: 20rpx;
 }
 
-.load-more-trigger {
-  display: flex;
-  justify-content: center;
-}
-
-.load-trigger-btn {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  padding: 20rpx 40rpx;
-  background: white;
-  border: 3rpx solid #fee2e2;
+.load-more-tip {
+  padding: 16rpx 32rpx;
+  background: rgba(239, 68, 68, 0.05);
   border-radius: 50rpx;
-  transition: all 0.3s ease;
-  box-shadow: 0 4rpx 16rpx rgba(239, 68, 68, 0.1);
+  border: 2rpx solid rgba(239, 68, 68, 0.1);
 }
 
-.load-trigger-btn:active {
-  transform: scale(0.95);
-  border-color: #fca5a5;
-  background: #fef2f2;
-}
-
-.trigger-text {
-  font-size: 28rpx;
-  color: #ef4444;
-  font-weight: 600;
-}
-
-.trigger-icon {
-  width: 32rpx;
-  height: 32rpx;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-plus {
-  font-size: 20rpx;
-  color: white;
-  font-weight: bold;
+.tip-text {
+  font-size: 26rpx;
+  color: #9ca3af;
+  font-weight: 500;
 }
 
 /* 无更多数据 */
@@ -844,6 +979,52 @@ const goBack = () => {
   color: #9ca3af;
   font-weight: 500;
   white-space: nowrap;
+}
+
+/* 错误提示 */
+.error-banner {
+  background: #fee2e2;
+  border: 2rpx solid #fecaca;
+  border-radius: 16rpx;
+  margin: 24rpx 0;
+  overflow: hidden;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  gap: 16rpx;
+}
+
+.error-icon {
+  font-size: 32rpx;
+}
+
+.error-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.retry-small-btn {
+  background: #dc2626;
+  color: white;
+  padding: 12rpx 24rpx;
+  border-radius: 20rpx;
+  transition: all 0.3s ease;
+}
+
+.retry-small-btn:active {
+  transform: scale(0.95);
+  background: #b91c1c;
+}
+
+.retry-small-text {
+  font-size: 24rpx;
+  color: white;
+  font-weight: 600;
 }
 
 /* 空状态 */
@@ -918,10 +1099,30 @@ const goBack = () => {
   max-width: 400rpx;
 }
 
+.retry-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-radius: 50rpx;
+  padding: 20rpx 40rpx;
+  box-shadow: 0 8rpx 24rpx rgba(239, 68, 68, 0.3);
+  transition: all 0.3s ease;
+  margin-top: 16rpx;
+}
+
+.retry-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 4rpx 16rpx rgba(239, 68, 68, 0.4);
+}
+
+.retry-text {
+  font-size: 28rpx;
+  color: white;
+  font-weight: 600;
+}
+
 /* 响应式设计 */
 @media (max-width: 750rpx) {
   .list-wrapper {
-    padding: 24rpx 16rpx 100rpx;
+    padding: 24rpx 16rpx 140rpx;
   }
   
   .message-header {
@@ -958,6 +1159,28 @@ const goBack = () => {
   .empty-icon {
     font-size: 64rpx;
   }
+  
+  /* 响应式按钮 */
+  .toggle-btn {
+    padding: 20rpx 24rpx;
+  }
+  
+  .toggle-text {
+    font-size: 26rpx;
+  }
+  
+  .toggle-icon {
+    width: 36rpx;
+    height: 36rpx;
+  }
+  
+  .icon-arrow {
+    font-size: 20rpx;
+  }
+  
+  .fade-mask {
+    height: 60rpx;
+  }
 }
 
 /* 暗黑模式支持 */
@@ -972,11 +1195,6 @@ const goBack = () => {
     box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.3);
   }
   
-  .message-card:hover {
-    box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.4);
-    border-color: rgba(239, 68, 68, 0.3);
-  }
-  
   .message-title {
     color: #f9fafb;
   }
@@ -985,36 +1203,13 @@ const goBack = () => {
     color: #d1d5db;
   }
   
-  .message-time {
+  .message-time, .sender-name {
     color: #9ca3af;
   }
   
   .message-icon {
     background: linear-gradient(135deg, #2d1b1b 0%, #3c2626 100%);
     border-color: rgba(239, 68, 68, 0.2);
-  }
-  
-  .toggle-btn {
-    background: linear-gradient(135deg, #2d1b1b 0%, #3c2626 100%);
-    border-color: rgba(239, 68, 68, 0.2);
-  }
-  
-  .toggle-btn:active {
-    background: linear-gradient(135deg, #3c2626 0%, #4a2c2c 100%);
-  }
-  
-  .fade-mask {
-    background: linear-gradient(transparent, #1f2937);
-  }
-  
-  .load-trigger-btn {
-    background: #1f2937;
-    border-color: rgba(239, 68, 68, 0.2);
-  }
-  
-  .load-trigger-btn:active {
-    background: #2d1b1b;
-    border-color: rgba(239, 68, 68, 0.3);
   }
   
   .empty-circle {
@@ -1025,53 +1220,38 @@ const goBack = () => {
     color: #f9fafb;
   }
   
-  .empty-desc {
-    color: #9ca3af;
+  .error-banner {
+    background: #2d1b1b;
+    border-color: #3c2626;
   }
   
-  .no-more-line {
-    background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.2), transparent);
+  .error-text {
+    color: #f87171;
   }
-}
-
-/* 高级动画效果 */
-.message-card {
-  position: relative;
-  overflow: hidden;
-}
-
-.message-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg, 
-    transparent, 
-    rgba(239, 68, 68, 0.03), 
-    transparent
-  );
-  transition: left 0.8s ease;
-}
-
-.message-card:hover::before {
-  left: 100%;
-}
-
-/* 平滑滚动 */
-.message-list {
-  scroll-behavior: smooth;
-}
-
-/* 触摸优化 */
-.back-btn,
-.toggle-btn,
-.detail-btn,
-.load-trigger-btn {
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
+  
+  /* 暗黑模式按钮 */
+  .toggle-btn {
+    background: linear-gradient(135deg, #2d1b1b 0%, #3c2626 100%);
+    border-color: rgba(239, 68, 68, 0.3);
+    box-shadow: 
+      0 8rpx 24rpx rgba(0, 0, 0, 0.3),
+      0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+  }
+  
+  .toggle-btn:active {
+    background: linear-gradient(135deg, #3c2626 0%, #4a2c2c 100%);
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+  
+  .fade-mask {
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(31, 41, 55, 0.3) 30%,
+      rgba(31, 41, 55, 0.8) 70%,
+      #1f2937 100%
+    );
+  }
 }
 
 /* 无障碍支持 */
@@ -1083,36 +1263,38 @@ const goBack = () => {
   }
   
   .message-card,
-  .toggle-btn,
   .detail-btn {
     transition: none;
   }
+  
+  /* 按钮无障碍 */
+  .toggle-btn,
+  .toggle-icon,
+  .toggle-text,
+  .icon-arrow {
+    transition: none;
+  }
+  
+  .toggle-btn::before {
+    display: none;
+  }
+  
+  .toggle-btn:hover {
+    animation: none;
+  }
 }
 
-/* 高分辨率屏幕优化 */
-@media (-webkit-min-device-pixel-ratio: 2) {
-  .decoration-line {
-    height: 3px;
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .toggle-btn {
+    border-width: 4rpx;
+    border-color: #ef4444;
+    background: #fef2f2;
   }
   
-  .message-card {
-    border-width: 1px;
-  }
-}
-
-/* 横屏适配 */
-@media (orientation: landscape) and (max-height: 500px) {
-  .empty-state {
-    height: 40vh;
-  }
-  
-  .empty-circle {
-    width: 120rpx;
-    height: 120rpx;
-  }
-  
-  .empty-icon {
-    font-size: 48rpx;
+  .toggle-text {
+    color: #dc2626;
+    font-weight: 700;
   }
 }
 </style>

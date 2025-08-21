@@ -13,3 +13,7 @@ export function geteventmes(){
 export function getmesgroup(params){
 	return http.get('/message/byGroups',params)
 }
+// 一键已读
+export function markAllAsRead(){
+	return http.put('/message/markAllAsRead')
+}

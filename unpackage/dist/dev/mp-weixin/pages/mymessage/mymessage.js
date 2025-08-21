@@ -3,6 +3,7 @@ const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const store_Info = require("../../store/Info.js");
 const newApis_events = require("../../new-apis/events.js");
+require("../../store/Event.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
@@ -509,9 +510,9 @@ const _sfc_main = {
         }),
         as: common_vendor.o(goToProfile),
         at: common_assets._imports_1$1,
-        av: common_vendor.t(common_vendor.unref(userInfo).info.newsViews || 0),
-        aw: common_vendor.t(common_vendor.unref(userInfo).info.policyViews || 0),
-        ax: common_vendor.t(common_vendor.unref(userInfo).info.field || 3),
+        av: common_vendor.t(common_vendor.unref(userInfo).eventcount.Eventbefore || 0),
+        aw: common_vendor.t(common_vendor.unref(userInfo).eventcount.Eventing || 0),
+        ax: common_vendor.t(common_vendor.unref(userInfo).eventcount.Evented || 0),
         ay: common_vendor.p({
           type: "right",
           size: "14",

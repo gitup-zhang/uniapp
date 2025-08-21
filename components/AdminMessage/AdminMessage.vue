@@ -4,7 +4,7 @@
     <view class="admin-message">
       <!-- 管理员头像 -->
       <view class="avatar-wrapper">
-        <view class="admin-avatar" :class="{ important: message.priority === 'high' }">
+        <view class="admin-avatar">
           <text class="avatar-text">管</text>
         </view>
         <view class="admin-badge">
@@ -17,7 +17,7 @@
         <!-- 消息头部 -->
         <view class="message-header">
           <text class="sender-name">{{ message.sender_name || '系统管理员' }}</text>
-          <text class="message-time">{{ formatMessageTime(message.created_at) }}</text>
+          <text class="message-time">{{ formatMessageTime(message.send_time) }}</text>
         </view>
 
         <!-- 消息气泡 -->
@@ -31,9 +31,9 @@
           <!-- 消息标题 -->
           <view v-if="message.title" class="message-title">
             <text class="title-text">{{ message.title }}</text>
-            <view v-if="message.priority === 'high'" class="priority-badge">
+            <!-- <view v-if="message.priority === 'high'" class="priority-badge">
               <text class="priority-text">重要</text>
-            </view>
+            </view> -->
           </view>
 
           <!-- 消息内容 -->
@@ -96,11 +96,11 @@
           </view>
 
           <!-- 消息类型标签 -->
-          <view v-if="message.type && message.type !== 'normal'" class="message-tags">
+         <!-- <view v-if="message.type && message.type !== 'normal'" class="message-tags">
             <view class="tag-item" :class="`tag-${message.type}`">
               <text class="tag-text">{{ getTypeLabel(message.type) }}</text>
             </view>
-          </view>
+          </view> -->
 
           <!-- 点击查看详情提示（长内容） -->
           <view v-if="contentLevel === 'long'" class="view-detail-hint">

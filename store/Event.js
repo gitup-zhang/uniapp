@@ -5,10 +5,17 @@ import {getEventList,getEventDetail} from '@/new-apis/events.js'
 export const useEventstore=defineStore('event',()=>{
 	const eventing=ref([])
 	const eventoutdate=ref([])
+	const eventcount=ref({
+		Eventbefore:0,
+		Eventing:0,
+		Evented:0
+	})
 	
 	// 获取的活动详情
 	const eventdetail=ref({})
 	
+	
+	// 获取正在进行中的活动
 	const getlisting=async(num)=>{
 		uni.showLoading({
 		  title: '加载中...',
@@ -33,10 +40,12 @@ export const useEventstore=defineStore('event',()=>{
 		})
 		try{
 		const res=await getEventList({page_size:num,event_status:"Completed"})
-		eventoutdate.value=res.data		 
+		eventoutdate.value=res.data	
+		eventcount.Evented=res.total
+		console.log("过期活动数量：",eventcount.Evented)
 					 
 		}catch(error){
-					  console.log(error)
+			console.log(error)
 		}finally{
 			uni.hideLoading()		
 		}
@@ -67,7 +76,8 @@ export const useEventstore=defineStore('event',()=>{
 		getlisting,
 		getlisoutdate,
 		geteventdetail,
-		eventdetail
+		eventdetail,
+		eventcount
 	}
 	
 	

@@ -4,6 +4,11 @@ const newApis_events = require("../new-apis/events.js");
 const useEventstore = common_vendor.defineStore("event", () => {
   const eventing = common_vendor.ref([]);
   const eventoutdate = common_vendor.ref([]);
+  const eventcount = common_vendor.ref({
+    Eventbefore: 0,
+    Eventing: 0,
+    Evented: 0
+  });
   const eventdetail = common_vendor.ref({});
   const getlisting = async (num) => {
     common_vendor.index.showLoading({
@@ -27,6 +32,8 @@ const useEventstore = common_vendor.defineStore("event", () => {
     try {
       const res = await newApis_events.getEventList({ page_size: num, event_status: "Completed" });
       eventoutdate.value = res.data;
+      eventcount.Evented = res.total;
+      console.log("过期活动数量：", eventcount.Evented);
     } catch (error) {
       console.log(error);
     } finally {
@@ -54,7 +61,8 @@ const useEventstore = common_vendor.defineStore("event", () => {
     getlisting,
     getlisoutdate,
     geteventdetail,
-    eventdetail
+    eventdetail,
+    eventcount
   };
 });
 exports.useEventstore = useEventstore;

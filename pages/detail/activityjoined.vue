@@ -117,7 +117,7 @@ onMounted(() => {
 // 加载活动数据
 const loadActivityData = async () => {
   try {
-    await useinfo.userapply()
+     await useinfo.userapply()
     activityList.value = useinfo.applyactivity
     expiredActivityList.value = useinfo.applyactivityhistory
   } catch (error) {

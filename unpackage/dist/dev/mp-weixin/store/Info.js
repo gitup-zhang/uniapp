@@ -9,6 +9,11 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
   const isapply = common_vendor.ref(false);
   const applyactivity = common_vendor.ref([]);
   const applyactivityhistory = common_vendor.ref([]);
+  const eventcount = common_vendor.ref({
+    Eventbefore: 0,
+    Eventing: 0,
+    Evented: 0
+  });
   const setToken = (t) => {
     token.value = t;
     signal.value = true;
@@ -121,9 +126,24 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
     try {
       const res = await newApis_events.userRegisteredEvents({ event_status: "InProgress" });
       applyactivity.value = Array.isArray(res.data) ? res.data : [];
+      const now = /* @__PURE__ */ new Date();
+      let enting = 0;
+      let ented = 0;
+      applyactivity.value.forEach((event) => {
+        const start = new Date(event.event_start_time);
+        const end = new Date(event.event_end_time);
+        if (now >= start && now <= end) {
+          enting++;
+        } else if (now < start) {
+          ented++;
+        }
+        eventcount.value.Eventing = enting;
+        eventcount.value.Eventbefore = ented;
+      });
       const reshistory = await newApis_events.userRegisteredEvents({ event_status: "Completed" });
       applyactivityhistory.value = Array.isArray(reshistory.data) ? reshistory.data : [];
-      console.log("已经报名的活动有", res);
+      eventcount.value.Evented = reshistory.total;
+      console.log("活动数量信息：", eventcount);
     } catch (e) {
       console.log(e);
     }
@@ -134,6 +154,7 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
     signal,
     getinfo,
     deleteinfo,
+    eventcount,
     loginWithWeChat,
     getUserProfile,
     updateinfo,

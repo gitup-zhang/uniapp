@@ -117,12 +117,6 @@ const _sfc_main = {
     const handleCancel = () => {
       emit("cancel", props.activityData);
     };
-    const handleViewDetails = () => {
-      emit("viewDetails", props.activityData);
-    };
-    const handleArchive = () => {
-      emit("archive", props.activityData);
-    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.n(statusClass.value),
@@ -143,15 +137,12 @@ const _sfc_main = {
         n: checkInButtonConfig.value.disabled,
         o: common_vendor.o(handleAction),
         p: common_vendor.o(handleCancel)
-      } : {
-        q: common_vendor.o(handleViewDetails),
-        r: common_vendor.o(handleArchive)
-      }, {
-        s: common_vendor.n(statusClass.value),
-        t: activityProgress.value + "%",
-        v: common_vendor.t(isExpired.value ? "活动已完成 100%" : `活动进度 ${activityProgress.value}%`),
-        w: common_vendor.n(statusClass.value),
-        x: common_vendor.n(statusClass.value)
+      } : {}, {
+        q: common_vendor.n(statusClass.value),
+        r: activityProgress.value + "%",
+        s: common_vendor.t(isExpired.value ? "活动已完成 100%" : `活动进度 ${activityProgress.value}%`),
+        t: common_vendor.n(statusClass.value),
+        v: common_vendor.n(statusClass.value)
       });
     };
   }

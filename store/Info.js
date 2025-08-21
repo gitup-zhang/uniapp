@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { getinfologin,getinfoprofile,updateprofile,IsUserRegistered } from '@/new-apis/info.js'
 import {userRegisteredEvents} from '@/new-apis/events.js'
+//import { EAnimationBlendType } from 'XrFrame'
 
 export const useInfoStore=defineStore('peopleinfo',()=>{
 	// 个人信息
@@ -15,6 +16,11 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	// 已经报名的活动
 	const applyactivity=ref([])
 	const applyactivityhistory=ref([])
+	const eventcount=ref({
+		Eventbefore:0,
+		Eventing:0,
+		Evented:0
+	})
 	
 	// 持久化存储个人信息
 	const setToken = (t) => {
@@ -165,9 +171,33 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 		try{
 			const res=await userRegisteredEvents({event_status:"InProgress"})
 			applyactivity.value = Array.isArray(res.data) ? res.data : [];
+			
+			// 统计未开始和已开始的数量
+			const now = new Date();
+			 //eventcount.value = { Eventbefore: 0, Eventing: 0, Evented: 0 }
+			 let enting=0
+			 let ented=0
+			applyactivity.value.forEach(event => {
+			  const start = new Date(event.event_start_time);
+			  const end = new Date(event.event_end_time);
+			
+			  if (now >= start && now <= end) {
+			    //eventcount.value.Eventing++;
+				enting++
+			  } else if (now < start) {
+			     //eventcount.value.Eventbefore++;
+				ented++
+			  }
+			   eventcount.value.Eventing=enting
+			   eventcount.value.Eventbefore=ented
+			});
+			
+			
 			const reshistory=await userRegisteredEvents({event_status:"Completed"})
 			applyactivityhistory.value=Array.isArray(reshistory.data) ? reshistory.data : [];
-			console.log("已经报名的活动有",res)
+			eventcount.value.Evented=reshistory.total
+			
+			console.log("活动数量信息：",eventcount)
 		}catch(e){
 			console.log(e)
 		}
@@ -181,6 +211,7 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 		signal,
 		getinfo,
 		deleteinfo,
+		eventcount,
 		loginWithWeChat,
 		getUserProfile,
 		updateinfo,

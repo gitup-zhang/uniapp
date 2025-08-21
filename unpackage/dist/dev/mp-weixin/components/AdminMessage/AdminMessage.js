@@ -79,17 +79,6 @@ const _sfc_main = {
         return `${time.getMonth() + 1}-${time.getDate()} ${String(time.getHours()).padStart(2, "0")}:${String(time.getMinutes()).padStart(2, "0")}`;
       }
     };
-    const getTypeLabel = (type) => {
-      const labels = {
-        "announcement": "公告",
-        "maintenance": "维护",
-        "event": "活动",
-        "security": "安全",
-        "update": "更新",
-        "normal": "通知"
-      };
-      return labels[type] || "通知";
-    };
     const getAllImageUrls = () => {
       return mediaItems.filter((item) => item.type === "image").map((item) => item.url);
     };
@@ -107,23 +96,21 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: __props.message.priority === "high" ? 1 : "",
-        b: common_vendor.t(__props.message.sender_name || "系统管理员"),
-        c: common_vendor.t(formatMessageTime(__props.message.created_at)),
-        d: __props.message.title
-      }, __props.message.title ? common_vendor.e({
-        e: common_vendor.t(__props.message.title),
-        f: __props.message.priority === "high"
-      }, __props.message.priority === "high" ? {} : {}) : {}, {
-        g: common_vendor.unref(textContent)
-      }, common_vendor.unref(textContent) ? {
-        h: common_vendor.t(getDisplayText()),
-        i: isExpanded.value ? 1 : "",
-        j: contentLevel.value === "medium" && !isExpanded.value ? 1 : ""
+        a: common_vendor.t(__props.message.sender_name || "系统管理员"),
+        b: common_vendor.t(formatMessageTime(__props.message.send_time)),
+        c: __props.message.title
+      }, __props.message.title ? {
+        d: common_vendor.t(__props.message.title)
       } : {}, {
-        k: common_vendor.unref(mediaItems).length > 0
+        e: common_vendor.unref(textContent)
+      }, common_vendor.unref(textContent) ? {
+        f: common_vendor.t(getDisplayText()),
+        g: isExpanded.value ? 1 : "",
+        h: contentLevel.value === "medium" && !isExpanded.value ? 1 : ""
+      } : {}, {
+        i: common_vendor.unref(mediaItems).length > 0
       }, common_vendor.unref(mediaItems).length > 0 ? {
-        l: common_vendor.f(common_vendor.unref(mediaItems), (media, index, i0) => {
+        j: common_vendor.f(common_vendor.unref(mediaItems), (media, index, i0) => {
           return common_vendor.e({
             a: media.type === "image"
           }, media.type === "image" ? {
@@ -140,21 +127,16 @@ const _sfc_main = {
           });
         })
       } : {}, {
-        m: contentLevel.value === "medium"
+        k: contentLevel.value === "medium"
       }, contentLevel.value === "medium" ? {
-        n: common_vendor.t(isExpanded.value ? "收起" : "查看全部"),
-        o: isExpanded.value ? 1 : "",
-        p: common_vendor.o(toggleExpand)
+        l: common_vendor.t(isExpanded.value ? "收起" : "查看全部"),
+        m: isExpanded.value ? 1 : "",
+        n: common_vendor.o(toggleExpand)
       } : {}, {
-        q: __props.message.type && __props.message.type !== "normal"
-      }, __props.message.type && __props.message.type !== "normal" ? {
-        r: common_vendor.t(getTypeLabel(__props.message.type)),
-        s: common_vendor.n(`tag-${__props.message.type}`)
-      } : {}, {
-        t: contentLevel.value === "long"
+        o: contentLevel.value === "long"
       }, contentLevel.value === "long" ? {} : {}, {
-        v: contentLevel.value === "long" ? 1 : "",
-        w: common_vendor.o(handleMessageTap)
+        p: contentLevel.value === "long" ? 1 : "",
+        q: common_vendor.o(handleMessageTap)
       });
     };
   }

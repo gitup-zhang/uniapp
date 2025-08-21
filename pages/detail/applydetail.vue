@@ -290,7 +290,9 @@ const initFormData = () => {
   
   // 只处理行业索引
   if (userInfo.industry) {
+	  console.log("获取到的行业信息：",userInfo.industry)
     const industryIndex = fieldstore.industory.findIndex(option => option === userInfo.industry)
+	console.log("industryIndex")
     formData.industryIndex = industryIndex !== -1 ? industryIndex : -1
   }
   
@@ -551,9 +553,10 @@ const handleSubmit = async() => {
 }
 
 // 在组件挂载时调用初始化函数
-onMounted(() => {
+onMounted(async() => {
+	await  fieldstore.getindustory()
   initFormData()
-  fieldstore.getindustory()
+  
 })
 
 onLoad(async(option) => {

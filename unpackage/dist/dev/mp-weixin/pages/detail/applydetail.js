@@ -67,7 +67,9 @@ const _sfc_main = {
       formData.career = userInfo.position || "";
       originalPhone.value = formData.phone;
       if (userInfo.industry) {
+        console.log("获取到的行业信息：", userInfo.industry);
         const industryIndex = fieldstore.industory.findIndex((option) => option === userInfo.industry);
+        console.log("industryIndex");
         formData.industryIndex = industryIndex !== -1 ? industryIndex : -1;
       }
       isSubmitted.value = !!(userInfo.name && userInfo.phone_number && userInfo.email);
@@ -268,9 +270,9 @@ const _sfc_main = {
       }
       isSubmitted.value = true;
     };
-    common_vendor.onMounted(() => {
+    common_vendor.onMounted(async () => {
+      await fieldstore.getindustory();
       initFormData();
-      fieldstore.getindustory();
     });
     common_vendor.onLoad(async (option) => {
       console.log("申请详细option:", option);

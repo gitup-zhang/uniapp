@@ -218,28 +218,28 @@
               <image class="stats-icon" src="/static/icon/fire.png" mode="aspectFit"/>
             </view>
            <view class="stats-info">
-              <text class="stats-title">我的数据统计</text>
+              <text class="stats-title">我的活动信息</text>
             </view>
           </view>
           
           <view class="stats-grid">
             <view class="stat-item">
-              <text class="stat-number">{{ userInfo.info.newsViews || 0 }}</text>
-              <text class="stat-label">新闻阅读</text>
+              <text class="stat-number">{{ userInfo.eventcount.Eventbefore || 0 }}</text>
+              <text class="stat-label">未开始</text>
             </view>
             
             <view class="stat-divider"></view>
             
             <view class="stat-item">
-              <text class="stat-number">{{ userInfo.info.policyViews || 0 }}</text>
-              <text class="stat-label">政策查看</text>
+              <text class="stat-number">{{ userInfo.eventcount.Eventing || 0 }}</text>
+              <text class="stat-label">进行中</text>
             </view>
             
             <view class="stat-divider"></view>
             
             <view class="stat-item">
-              <text class="stat-number">{{ userInfo.info.field || 3 }}</text>
-              <text class="stat-label">关注领域</text>
+              <text class="stat-number">{{ userInfo.eventcount.Evented || 0 }}</text>
+              <text class="stat-label">已过期</text>
             </view>
           </view>
         </view>
@@ -315,6 +315,7 @@ import { onLoad,onShow } from '@dcloudio/uni-app'
 import { useInfoStore } from '@/store/Info.js'
 import ActivityTicket from '../../components/ActivityTicket/ActivityTicket.vue'
 import {cancelapply} from '@/new-apis/events.js'
+import {useEventstore} from '@/store/Event.js'
 
 // Store 和基础数据
 const userInfo = useInfoStore()

@@ -70,7 +70,7 @@
             <text class="btn-text">取消报名</text>
           </button>
         </template>
-        <template v-else>
+       <!-- <template v-else>
           <button class="action-btn expired" @click="handleViewDetails">
             <text class="btn-icon">👁</text>
             <text class="btn-text">查看详情</text>
@@ -79,7 +79,7 @@
             <text class="btn-icon">📁</text>
             <text class="btn-text">归档</text>
           </button>
-        </template>
+        </template> -->
       </view>
     </view>
     
