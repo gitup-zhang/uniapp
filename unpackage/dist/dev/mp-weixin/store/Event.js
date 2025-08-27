@@ -9,36 +9,116 @@ const useEventstore = common_vendor.defineStore("event", () => {
     Eventing: 0,
     Evented: 0
   });
+  const currentPage = common_vendor.ref(1);
+  const pageSize = common_vendor.ref(10);
+  const hasMoreData = common_vendor.ref(true);
+  const isLoading = common_vendor.ref(false);
+  const outdateCurrentPage = common_vendor.ref(1);
+  const outdatePageSize = common_vendor.ref(10);
+  const outdateHasMoreData = common_vendor.ref(true);
+  const outdateIsLoading = common_vendor.ref(false);
   const eventdetail = common_vendor.ref({});
-  const getlisting = async (num) => {
-    common_vendor.index.showLoading({
-      title: "加载中...",
-      mask: true
-    });
+  const getlisting = async (num, loadMore = false) => {
+    if (isLoading.value)
+      return;
+    isLoading.value = true;
+    if (!loadMore) {
+      common_vendor.index.showLoading({
+        title: "加载中...",
+        mask: true
+      });
+    }
     try {
-      const res = await newApis_events.getEventList({ page_size: num, event_status: "InProgress" });
-      eventing.value = res.data;
+      const page = loadMore ? currentPage.value + 1 : 1;
+      const res = await newApis_events.getEventList({
+        page,
+        page_size: num || pageSize.value,
+        event_status: "InProgress"
+      });
+      if (loadMore) {
+        eventing.value = [...eventing.value, ...res.data];
+        currentPage.value = page;
+      } else {
+        eventing.value = res.data;
+        currentPage.value = 1;
+      }
+      eventcount.value.Eventing = res.total;
+      hasMoreData.value = eventing.value.length < res.total;
+      console.log(`已加载 ${eventing.value.length}/${res.total} 条活动数据`);
     } catch (error) {
       console.log(error);
+      common_vendor.index.showToast({
+        title: "加载失败",
+        icon: "error"
+      });
     } finally {
-      common_vendor.index.hideLoading();
+      isLoading.value = false;
+      if (!loadMore) {
+        common_vendor.index.hideLoading();
+      }
     }
   };
-  const getlisoutdate = async (num) => {
-    common_vendor.index.showLoading({
-      title: "加载中...",
-      mask: true
-    });
+  const loadMoreEvents = async () => {
+    if (!hasMoreData.value || isLoading.value) {
+      return;
+    }
+    await getlisting(pageSize.value, true);
+  };
+  const refreshEvents = async () => {
+    currentPage.value = 1;
+    hasMoreData.value = true;
+    await getlisting(pageSize.value, false);
+  };
+  const getlisoutdate = async (num, loadMore = false) => {
+    if (outdateIsLoading.value)
+      return;
+    outdateIsLoading.value = true;
+    if (!loadMore) {
+      common_vendor.index.showLoading({
+        title: "加载中...",
+        mask: true
+      });
+    }
     try {
-      const res = await newApis_events.getEventList({ page_size: num, event_status: "Completed" });
-      eventoutdate.value = res.data;
-      eventcount.Evented = res.total;
-      console.log("过期活动数量：", eventcount.Evented);
+      const page = loadMore ? outdateCurrentPage.value + 1 : 1;
+      const res = await newApis_events.getEventList({
+        page,
+        page_size: num || outdatePageSize.value,
+        event_status: "Completed"
+      });
+      if (loadMore) {
+        eventoutdate.value = [...eventoutdate.value, ...res.data];
+        outdateCurrentPage.value = page;
+      } else {
+        eventoutdate.value = res.data;
+        outdateCurrentPage.value = 1;
+      }
+      eventcount.value.Evented = res.total;
+      outdateHasMoreData.value = eventoutdate.value.length < res.total;
+      console.log(`已加载历史活动 ${eventoutdate.value.length}/${res.total} 条`);
     } catch (error) {
       console.log(error);
+      common_vendor.index.showToast({
+        title: "加载失败",
+        icon: "error"
+      });
     } finally {
-      common_vendor.index.hideLoading();
+      outdateIsLoading.value = false;
+      if (!loadMore) {
+        common_vendor.index.hideLoading();
+      }
     }
+  };
+  const loadMoreOutdateEvents = async () => {
+    if (!outdateHasMoreData.value || outdateIsLoading.value) {
+      return;
+    }
+    await getlisoutdate(outdatePageSize.value, true);
+  };
+  const refreshOutdateEvents = async () => {
+    outdateCurrentPage.value = 1;
+    outdateHasMoreData.value = true;
+    await getlisoutdate(outdatePageSize.value, false);
   };
   const geteventdetail = async (id) => {
     common_vendor.index.showLoading({
@@ -62,7 +142,21 @@ const useEventstore = common_vendor.defineStore("event", () => {
     getlisoutdate,
     geteventdetail,
     eventdetail,
-    eventcount
+    eventcount,
+    // 进行中活动的分页相关
+    currentPage,
+    pageSize,
+    hasMoreData,
+    isLoading,
+    loadMoreEvents,
+    refreshEvents,
+    // 历史活动的分页相关
+    outdateCurrentPage,
+    outdatePageSize,
+    outdateHasMoreData,
+    outdateIsLoading,
+    loadMoreOutdateEvents,
+    refreshOutdateEvents
   };
 });
 exports.useEventstore = useEventstore;

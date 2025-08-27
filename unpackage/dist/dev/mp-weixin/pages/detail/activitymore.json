@@ -5,6 +5,7 @@
     "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar",
     "uni-grid-item": "../../uni_modules/uni-grid/components/uni-grid-item/uni-grid-item",
     "uni-grid": "../../uni_modules/uni-grid/components/uni-grid/uni-grid",
+    "uni-load-more": "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more",
     "activity-card": "../../components/ActivityCard/ActivityCard"
   }
 }

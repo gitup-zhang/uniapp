@@ -6,19 +6,22 @@ if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_grid_item2 = common_vendor.resolveComponent("uni-grid-item");
   const _easycom_uni_grid2 = common_vendor.resolveComponent("uni-grid");
-  (_easycom_uni_nav_bar2 + _easycom_uni_grid_item2 + _easycom_uni_grid2)();
+  const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
+  (_easycom_uni_nav_bar2 + _easycom_uni_grid_item2 + _easycom_uni_grid2 + _easycom_uni_load_more2)();
 }
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_grid_item = () => "../../uni_modules/uni-grid/components/uni-grid-item/uni-grid-item.js";
 const _easycom_uni_grid = () => "../../uni_modules/uni-grid/components/uni-grid/uni-grid.js";
+const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + ActivityCard + _easycom_uni_grid_item + _easycom_uni_grid)();
+  (_easycom_uni_nav_bar + ActivityCard + _easycom_uni_grid_item + _easycom_uni_grid + _easycom_uni_load_more)();
 }
 const ActivityCard = () => "../../components/ActivityCard/ActivityCard.js";
 const _sfc_main = {
   __name: "activitymore",
   setup(__props) {
     const EventStore = store_Event.useEventstore();
+    const refreshing = common_vendor.ref(false);
     function change(e) {
       const clickedIndex = e.detail.index;
       console.log("点击了第", clickedIndex, "个宫格");
@@ -30,11 +33,25 @@ const _sfc_main = {
     function onBack() {
       common_vendor.index.navigateBack();
     }
+    const onReachBottom = async () => {
+      console.log("触底了，开始加载更多");
+      if (EventStore.hasMoreData && !EventStore.isLoading) {
+        await EventStore.loadMoreEvents();
+      }
+    };
+    const onRefresh = async () => {
+      refreshing.value = true;
+      try {
+        await EventStore.refreshEvents();
+      } finally {
+        refreshing.value = false;
+      }
+    };
     common_vendor.onLoad(() => {
       EventStore.getlisting(10);
     });
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: common_vendor.o(onBack),
         b: common_vendor.p({
           statusBar: "true",
@@ -67,8 +84,23 @@ const _sfc_main = {
           highlight: false,
           ["show-border"]: false,
           square: false
+        }),
+        f: common_vendor.unref(EventStore).isLoading && common_vendor.unref(EventStore).eventing.length > 0
+      }, common_vendor.unref(EventStore).isLoading && common_vendor.unref(EventStore).eventing.length > 0 ? {
+        g: common_vendor.p({
+          status: "loading"
         })
-      };
+      } : !common_vendor.unref(EventStore).hasMoreData && common_vendor.unref(EventStore).eventing.length > 0 ? {
+        i: common_vendor.p({
+          status: "noMore"
+        })
+      } : common_vendor.unref(EventStore).eventing.length === 0 && !common_vendor.unref(EventStore).isLoading ? {} : {}, {
+        h: !common_vendor.unref(EventStore).hasMoreData && common_vendor.unref(EventStore).eventing.length > 0,
+        j: common_vendor.unref(EventStore).eventing.length === 0 && !common_vendor.unref(EventStore).isLoading,
+        k: common_vendor.o(onReachBottom),
+        l: refreshing.value,
+        m: common_vendor.o(onRefresh)
+      });
     };
   }
 };

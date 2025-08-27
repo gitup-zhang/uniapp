@@ -3,6 +3,7 @@
   "navigationStyle": "custom",
   "usingComponents": {
     "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar",
-    "horizontal-activity-card": "../../components/HorizontalActivityCard/HorizontalActivityCard"
+    "horizontal-activity-card": "../../components/HorizontalActivityCard/HorizontalActivityCard",
+    "uni-load-more": "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more"
   }
 }
