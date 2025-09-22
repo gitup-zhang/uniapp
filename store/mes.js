@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { geteventmes, getsystemmes, getmesgroup } from '@/new-apis/mes.js'
+import {  getsystemmes, getmesgroup } from '@/new-apis/mes.js'
 
 export const useMesstore = defineStore('mes', () => {
 	// 系统消息
@@ -31,34 +31,42 @@ export const useMesstore = defineStore('mes', () => {
 	// 当前加载的消息类型和参数，用于加载更多
 	const currentLoadParams = ref(null)
 
-	// 计算属性 - 总未读数量
+	// 辅助函数 - 检查消息是否未读
+	const isMessageUnread = (msg) => {
+		// 优先使用 has_unread 字段
+		if (msg.has_unread !== undefined) {
+			return msg.has_unread === 'Y' || msg.has_unread === true
+		}
+		// 兼容旧的 unread_count 字段
+		if (msg.unread_count !== undefined) {
+			return msg.unread_count > 0
+		}
+		// 兼容 is_read 字段
+		if (msg.is_read !== undefined) {
+			return msg.is_read === 0 || msg.is_read === false
+		}
+		return false
+	}
+
+	// 计算属性 - 总未读数量 (改为统计有未读消息的条数)
 	const totalUnreadCount = computed(() => {
-		const systemUnread = systemmes.value.reduce((count, msg) => {
-			return count + (msg.unread_count || 0)
-		}, 0)
-		
-		const groupUnread = groupmes.value.reduce((count, msg) => {
-			return count + (msg.unread_count || 0)
-		}, 0)
-		
+		const systemUnread = systemmes.value.filter(msg => isMessageUnread(msg)).length
+		const groupUnread = groupmes.value.filter(msg => isMessageUnread(msg)).length
 		return systemUnread + groupUnread
 	})
 
-	// 系统消息未读数量
+	// 系统消息未读数量 (改为统计有未读消息的条数)
 	const systemUnreadCount = computed(() => {
-		return systemmes.value.reduce((count, msg) => {
-			const res = count + (msg.unread_count || 0)
-			console.log("系统消息未读数量", res)
-			return res
-		}, 0)
+		const count = systemmes.value.filter(msg => isMessageUnread(msg)).length
+		console.log("系统消息未读数量", count)
+		return count
 	})
 
-	// 群组消息未读数量
+	// 群组消息未读数量 (改为统计有未读消息的条数)
 	const groupUnreadCount = computed(() => {
-		return groupmes.value.reduce((count, msg) => {
-			console.log("群组消息数量：", msg.unread_count)
-			return count + (msg.unread_count || 0)
-		}, 0)
+		const count = groupmes.value.filter(msg => isMessageUnread(msg)).length
+		console.log("群组消息未读数量：", count)
+		return count
 	})
 
 	// 是否还有更多数据
@@ -90,8 +98,8 @@ export const useMesstore = defineStore('mes', () => {
 			
 			// 并行获取系统消息和群组消息
 			const [systemRes, groupRes] = await Promise.all([
-				getsystemmes({ type_codes: "SYSTEM" }),
-				geteventmes()
+				getsystemmes({ type_code: "SYSTEM" }),
+				getsystemmes({ type_code: "GROUP" })
 			])
 
 			// 更新系统消息
@@ -145,7 +153,7 @@ export const useMesstore = defineStore('mes', () => {
 	}
 
 	// 获取系统或群组的消息列表（优化分页支持）
-	const getMessageList = async (params) => {
+	const getMessageList = async (id,params) => {
 		const { message_type, page = 1, page_size = 10, isRefresh = false, isLoadMore = false, ...otherParams } = params || {}
 		
 		try {
@@ -173,7 +181,7 @@ export const useMesstore = defineStore('mes', () => {
 				currentLoadParams.value = { message_type, page_size, ...otherParams }
 			}
 			
-			const res = await getmesgroup(requestParams)
+			const res = await getmesgroup(id,requestParams)
 			
 			if (!res || !res.data) {
 				throw new Error('消息数据格式错误')
@@ -326,6 +334,8 @@ export const useMesstore = defineStore('mes', () => {
 			const systemMessageIndex = systemmes.value.findIndex(msg => msg.id === messageId)
 			if (systemMessageIndex !== -1) {
 				systemmes.value[systemMessageIndex].is_read = 1
+				systemmes.value[systemMessageIndex].has_unread = 'N'
+				// 兼容旧字段
 				if (systemmes.value[systemMessageIndex].unread_count !== undefined) {
 					systemmes.value[systemMessageIndex].unread_count = 0
 				}
@@ -335,6 +345,7 @@ export const useMesstore = defineStore('mes', () => {
 			const messageIndex = MessageList.value.findIndex(msg => msg.id === messageId)
 			if (messageIndex !== -1) {
 				MessageList.value[messageIndex].is_read = 1
+				MessageList.value[messageIndex].has_unread = 'N'
 				if (MessageList.value[messageIndex].unread_count !== undefined) {
 					MessageList.value[messageIndex].unread_count = 0
 				}
@@ -359,7 +370,9 @@ export const useMesstore = defineStore('mes', () => {
 			const groupMessageIndex = groupmes.value.findIndex(msg => msg.id === messageId)
 			if (groupMessageIndex !== -1) {
 				groupmes.value[groupMessageIndex].is_read = 1
-				if (groupmes.value[groupMessageIndex].unread_count) {
+				groupmes.value[groupMessageIndex].has_unread = 'N'
+				// 兼容旧字段
+				if (groupmes.value[groupMessageIndex].unread_count !== undefined) {
 					groupmes.value[groupMessageIndex].unread_count = 0
 				}
 			}
@@ -368,7 +381,8 @@ export const useMesstore = defineStore('mes', () => {
 			const messageIndex = MessageList.value.findIndex(msg => msg.id === messageId)
 			if (messageIndex !== -1) {
 				MessageList.value[messageIndex].is_read = 1
-				if (MessageList.value[messageIndex].unread_count) {
+				MessageList.value[messageIndex].has_unread = 'N'
+				if (MessageList.value[messageIndex].unread_count !== undefined) {
 					MessageList.value[messageIndex].unread_count = 0
 				}
 			}
@@ -388,9 +402,10 @@ export const useMesstore = defineStore('mes', () => {
 			const results = []
 			
 			if (messageType === 'all' || messageType === 'system') {
-				const systemIds = messageIds.filter(id => 
-					systemmes.value.some(msg => msg.id === id && !msg.is_read)
-				)
+				const systemIds = messageIds.filter(id => {
+					const msg = systemmes.value.find(msg => msg.id === id)
+					return msg && isMessageUnread(msg)
+				})
 				for (const id of systemIds) {
 					try {
 						const result = await markSystemMessageAsRead(id)
@@ -402,9 +417,10 @@ export const useMesstore = defineStore('mes', () => {
 			}
 			
 			if (messageType === 'all' || messageType === 'group') {
-				const groupIds = messageIds.filter(id => 
-					groupmes.value.some(msg => msg.id === id && (!msg.is_read || msg.unread_count > 0))
-				)
+				const groupIds = messageIds.filter(id => {
+					const msg = groupmes.value.find(msg => msg.id === id)
+					return msg && isMessageUnread(msg)
+				})
 				for (const id of groupIds) {
 					try {
 						const result = await markGroupMessageAsRead(id)
@@ -441,11 +457,11 @@ export const useMesstore = defineStore('mes', () => {
 	// 获取最新的未读消息
 	const getLatestUnreadMessages = (limit = 5) => {
 		const unreadSystemMessages = systemmes.value
-			.filter(msg => !msg.is_read)
+			.filter(msg => isMessageUnread(msg))
 			.map(msg => ({ ...msg, type: 'system' }))
 		
 		const unreadGroupMessages = groupmes.value
-			.filter(msg => !msg.is_read || (msg.unread_count && msg.unread_count > 0))
+			.filter(msg => isMessageUnread(msg))
 			.map(msg => ({ ...msg, type: 'group' }))
 		
 		const allUnread = [...unreadSystemMessages, ...unreadGroupMessages]
@@ -552,30 +568,48 @@ export const useMesstore = defineStore('mes', () => {
 		}
 	}
 
-	// 更新消息的未读数量
-	const updateMessageUnreadCount = (messageId, messageType, unreadCount) => {
+	// 更新消息的未读状态 (修改为使用 has_unread 字段)
+	const updateMessageUnreadStatus = (messageId, messageType, hasUnread) => {
+		const unreadValue = hasUnread ? 'Y' : 'N'
+		const isReadValue = hasUnread ? 0 : 1
+		
 		if (messageType === 'system') {
 			const messageIndex = systemmes.value.findIndex(msg => msg.id === messageId)
 			if (messageIndex !== -1) {
-				systemmes.value[messageIndex].is_read = unreadCount > 0 ? 0 : 1
+				systemmes.value[messageIndex].has_unread = unreadValue
+				systemmes.value[messageIndex].is_read = isReadValue
+				// 兼容旧字段
 				if (systemmes.value[messageIndex].unread_count !== undefined) {
-					systemmes.value[messageIndex].unread_count = unreadCount
+					systemmes.value[messageIndex].unread_count = hasUnread ? 1 : 0
 				}
 			}
 		} else if (messageType === 'group') {
 			const messageIndex = groupmes.value.findIndex(msg => msg.id === messageId)
 			if (messageIndex !== -1) {
-				groupmes.value[messageIndex].unread_count = unreadCount
-				groupmes.value[messageIndex].is_read = unreadCount > 0 ? 0 : 1
+				groupmes.value[messageIndex].has_unread = unreadValue
+				groupmes.value[messageIndex].is_read = isReadValue
+				// 兼容旧字段
+				if (groupmes.value[messageIndex].unread_count !== undefined) {
+					groupmes.value[messageIndex].unread_count = hasUnread ? 1 : 0
+				}
 			}
 		}
 		
 		// 同时更新MessageList中的数据
 		const listMessageIndex = MessageList.value.findIndex(msg => msg.id === messageId)
 		if (listMessageIndex !== -1) {
-			MessageList.value[listMessageIndex].unread_count = unreadCount
-			MessageList.value[listMessageIndex].is_read = unreadCount > 0 ? 0 : 1
+			MessageList.value[listMessageIndex].has_unread = unreadValue
+			MessageList.value[listMessageIndex].is_read = isReadValue
+			// 兼容旧字段
+			if (MessageList.value[listMessageIndex].unread_count !== undefined) {
+				MessageList.value[listMessageIndex].unread_count = hasUnread ? 1 : 0
+			}
 		}
+	}
+
+	// 保留旧方法名以兼容现有代码
+	const updateMessageUnreadCount = (messageId, messageType, unreadCount) => {
+		updateMessageUnreadStatus(messageId, messageType, unreadCount > 0)
 	}
 
 	// 检查是否有新消息（可用于轮询）
@@ -695,6 +729,9 @@ export const useMesstore = defineStore('mes', () => {
 		hasNewMessages,
 		hasMoreData,
 		
+		// 工具函数
+		isMessageUnread,
+		
 		// 方法
 		getsystem,
 		refreshMessages,
@@ -714,7 +751,8 @@ export const useMesstore = defineStore('mes', () => {
 		clearAllMessages,
 		addSystemMessage,
 		addGroupMessage,
-		updateMessageUnreadCount,
+		updateMessageUnreadStatus,
+		updateMessageUnreadCount, // 保留兼容性
 		getDataStatus,
 		searchMessages,
 		resetLoadingStates,

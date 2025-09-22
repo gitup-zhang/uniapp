@@ -61,6 +61,7 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 				setToken(res.token)
 			
 				console.log("登录成功")
+				return true
 			
 			}
 			
@@ -78,6 +79,7 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	    }
 	  } catch (err) {
 	    console.error("登录失败", err);
+		return false
 	  }
 	};
 	function deleteinfo(){

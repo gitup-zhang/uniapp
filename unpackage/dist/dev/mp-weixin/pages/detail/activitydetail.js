@@ -39,13 +39,13 @@ const _sfc_main = {
         disable.value = true;
       }
     });
-    const bannerImages = common_vendor.ref([
+    common_vendor.ref([
       "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
       // 替换为实际的图片路径
       "https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg",
       "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg"
     ]);
-    const eventInfo = common_vendor.reactive({
+    common_vendor.reactive({
       title: "中国大模型人才大会火热报名中！",
       location: "北京中关村",
       date: "3月15日-4月10日",
@@ -95,22 +95,21 @@ const _sfc_main = {
           border: false,
           leftIcon: "left"
         }),
-        c: common_vendor.f(bannerImages.value, (image, index, i0) => {
+        c: common_vendor.f(common_vendor.unref(EventStore).eventdetail.images, (image, k0, i0) => {
           return {
-            a: image,
-            b: index
+            a: image.url,
+            b: image.image_id
           };
         }),
         d: common_vendor.t(common_vendor.unref(EventStore).eventdetail.title),
         e: common_vendor.t(common_vendor.unref(EventStore).eventdetail.event_address),
         f: common_vendor.t(common_vendor.unref(utils_data.formatEventDate)(common_vendor.unref(EventStore).eventdetail.event_start_time, common_vendor.unref(EventStore).eventdetail.event_end_time)),
         g: common_vendor.t(common_vendor.unref(EventStore).eventdetail.registration_fee),
-        h: common_vendor.t(eventInfo.description),
-        i: common_vendor.t(eventInfo.attendeeInfo),
-        j: disable.value ? 1 : "",
-        k: common_vendor.o(handleRegister),
-        l: disable.value,
-        m: common_vendor.t(common_vendor.unref(utils_data.Dataformat)(common_vendor.unref(EventStore).eventdetail.registration_end_time))
+        h: common_vendor.unref(EventStore).eventdetail.detail,
+        i: disable.value ? 1 : "",
+        j: common_vendor.o(handleRegister),
+        k: disable.value,
+        l: common_vendor.t(common_vendor.unref(utils_data.Dataformat)(common_vendor.unref(EventStore).eventdetail.registration_end_time))
       };
     };
   }

@@ -170,17 +170,17 @@ const _sfc_main = {
     const handleMessageTap = (msg, messageType) => {
       if (!isLoggedIn.value || !msg)
         return;
-      console.log("点击消息:", msg, "消息类型:", messageType);
+      console.log("点击消息卡片:", msg, "消息类型:", messageType);
       try {
         if (messageType === "system") {
           console.log("系统消息跳转");
           common_vendor.index.navigateTo({
-            url: `/pages/detail/ChatSystem`
+            url: `/pages/detail/ChatSystem?id=${msg.msg_group_id}&groupName=${encodeURIComponent(msg.group_name || "群组消息")}`
           });
         } else if (messageType === "group") {
           console.log("群组消息跳转");
           common_vendor.index.navigateTo({
-            url: `/pages/detail/ChatGroup?id=${msg.event_id}&groupName=${encodeURIComponent(msg.group_name || "群组消息")}`
+            url: `/pages/detail/ChatGroup?id=${msg.msg_group_id}&groupName=${encodeURIComponent(msg.group_name || "群组消息")}`
           });
         }
       } catch (error) {
@@ -193,7 +193,7 @@ const _sfc_main = {
       }
     };
     const handleMarkAsRead = async (msg, messageType) => {
-      if (!msg || !msg.unread_count && msg.is_read === 1)
+      if (!msg || !mesStore.isMessageUnread(msg))
         return;
       try {
         console.log("标记消息已读ID:", msg.event_id, "消息类型:", messageType);
@@ -230,13 +230,13 @@ const _sfc_main = {
         return;
       let unreadMessages = [];
       if (activeTab.value === "all") {
-        const systemUnread = systemMessages.value.filter((msg) => msg.unread_count > 0 || msg.is_read === 0);
-        const groupUnread = groupMessages.value.filter((msg) => msg.unread_count > 0 || msg.is_read === 0);
+        const systemUnread = systemMessages.value.filter((msg) => mesStore.isMessageUnread(msg));
+        const groupUnread = groupMessages.value.filter((msg) => mesStore.isMessageUnread(msg));
         unreadMessages = [...systemUnread, ...groupUnread];
       } else if (activeTab.value === "system") {
-        unreadMessages = systemMessages.value.filter((msg) => msg.unread_count > 0 || msg.is_read === 0);
+        unreadMessages = systemMessages.value.filter((msg) => mesStore.isMessageUnread(msg));
       } else if (activeTab.value === "group") {
-        unreadMessages = groupMessages.value.filter((msg) => msg.unread_count > 0 || msg.is_read === 0);
+        unreadMessages = groupMessages.value.filter((msg) => mesStore.isMessageUnread(msg));
       }
       if (unreadMessages.length === 0) {
         common_vendor.index.showToast({

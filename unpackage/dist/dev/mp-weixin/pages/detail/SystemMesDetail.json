@@ -1,5 +1,7 @@
 {
   "navigationBarTitleText": "",
   "navigationStyle": "custom",
-  "usingComponents": {}
+  "usingComponents": {
+    "mp-html": "../../uni_modules/mp-html/components/mp-html/mp-html"
+  }
 }

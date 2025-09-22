@@ -17,27 +17,32 @@ const useMesstore = common_vendor.defineStore("mes", () => {
   });
   const lastUpdateTime = common_vendor.ref(null);
   const currentLoadParams = common_vendor.ref(null);
+  const isMessageUnread = (msg) => {
+    if (msg.has_unread !== void 0) {
+      return msg.has_unread === "Y" || msg.has_unread === true;
+    }
+    if (msg.unread_count !== void 0) {
+      return msg.unread_count > 0;
+    }
+    if (msg.is_read !== void 0) {
+      return msg.is_read === 0 || msg.is_read === false;
+    }
+    return false;
+  };
   const totalUnreadCount = common_vendor.computed(() => {
-    const systemUnread = systemmes.value.reduce((count, msg) => {
-      return count + (msg.unread_count || 0);
-    }, 0);
-    const groupUnread = groupmes.value.reduce((count, msg) => {
-      return count + (msg.unread_count || 0);
-    }, 0);
+    const systemUnread = systemmes.value.filter((msg) => isMessageUnread(msg)).length;
+    const groupUnread = groupmes.value.filter((msg) => isMessageUnread(msg)).length;
     return systemUnread + groupUnread;
   });
   const systemUnreadCount = common_vendor.computed(() => {
-    return systemmes.value.reduce((count, msg) => {
-      const res = count + (msg.unread_count || 0);
-      console.log("系统消息未读数量", res);
-      return res;
-    }, 0);
+    const count = systemmes.value.filter((msg) => isMessageUnread(msg)).length;
+    console.log("系统消息未读数量", count);
+    return count;
   });
   const groupUnreadCount = common_vendor.computed(() => {
-    return groupmes.value.reduce((count, msg) => {
-      console.log("群组消息数量：", msg.unread_count);
-      return count + (msg.unread_count || 0);
-    }, 0);
+    const count = groupmes.value.filter((msg) => isMessageUnread(msg)).length;
+    console.log("群组消息未读数量：", count);
+    return count;
   });
   const hasMoreData = common_vendor.computed(() => {
     if (!MseList.value.total)
@@ -61,8 +66,8 @@ const useMesstore = common_vendor.defineStore("mes", () => {
     try {
       console.log("开始加载消息数据...");
       const [systemRes, groupRes] = await Promise.all([
-        newApis_mes.getsystemmes({ type_codes: "SYSTEM" }),
-        newApis_mes.geteventmes()
+        newApis_mes.getsystemmes({ type_code: "SYSTEM" }),
+        newApis_mes.getsystemmes({ type_code: "GROUP" })
       ]);
       if (systemRes && systemRes.data) {
         systemmes.value = Array.isArray(systemRes.data) ? systemRes.data : [];
@@ -101,7 +106,7 @@ const useMesstore = common_vendor.defineStore("mes", () => {
   const refreshMessages = async () => {
     return await getsystem(true);
   };
-  const getMessageList = async (params) => {
+  const getMessageList = async (id, params) => {
     const { message_type, page = 1, page_size = 10, isRefresh = false, isLoadMore = false, ...otherParams } = params || {};
     try {
       if (isRefresh) {
@@ -122,7 +127,7 @@ const useMesstore = common_vendor.defineStore("mes", () => {
       if (!isLoadMore) {
         currentLoadParams.value = { message_type, page_size, ...otherParams };
       }
-      const res = await newApis_mes.getmesgroup(requestParams);
+      const res = await newApis_mes.getmesgroup(id, requestParams);
       if (!res || !res.data) {
         throw new Error("消息数据格式错误");
       }
@@ -234,6 +239,7 @@ const useMesstore = common_vendor.defineStore("mes", () => {
       const systemMessageIndex = systemmes.value.findIndex((msg) => msg.id === messageId);
       if (systemMessageIndex !== -1) {
         systemmes.value[systemMessageIndex].is_read = 1;
+        systemmes.value[systemMessageIndex].has_unread = "N";
         if (systemmes.value[systemMessageIndex].unread_count !== void 0) {
           systemmes.value[systemMessageIndex].unread_count = 0;
         }
@@ -241,6 +247,7 @@ const useMesstore = common_vendor.defineStore("mes", () => {
       const messageIndex = MessageList.value.findIndex((msg) => msg.id === messageId);
       if (messageIndex !== -1) {
         MessageList.value[messageIndex].is_read = 1;
+        MessageList.value[messageIndex].has_unread = "N";
         if (MessageList.value[messageIndex].unread_count !== void 0) {
           MessageList.value[messageIndex].unread_count = 0;
         }
@@ -257,14 +264,16 @@ const useMesstore = common_vendor.defineStore("mes", () => {
       const groupMessageIndex = groupmes.value.findIndex((msg) => msg.id === messageId);
       if (groupMessageIndex !== -1) {
         groupmes.value[groupMessageIndex].is_read = 1;
-        if (groupmes.value[groupMessageIndex].unread_count) {
+        groupmes.value[groupMessageIndex].has_unread = "N";
+        if (groupmes.value[groupMessageIndex].unread_count !== void 0) {
           groupmes.value[groupMessageIndex].unread_count = 0;
         }
       }
       const messageIndex = MessageList.value.findIndex((msg) => msg.id === messageId);
       if (messageIndex !== -1) {
         MessageList.value[messageIndex].is_read = 1;
-        if (MessageList.value[messageIndex].unread_count) {
+        MessageList.value[messageIndex].has_unread = "N";
+        if (MessageList.value[messageIndex].unread_count !== void 0) {
           MessageList.value[messageIndex].unread_count = 0;
         }
       }
@@ -279,9 +288,10 @@ const useMesstore = common_vendor.defineStore("mes", () => {
     try {
       const results = [];
       if (messageType === "all" || messageType === "system") {
-        const systemIds = messageIds.filter(
-          (id) => systemmes.value.some((msg) => msg.id === id && !msg.is_read)
-        );
+        const systemIds = messageIds.filter((id) => {
+          const msg = systemmes.value.find((msg2) => msg2.id === id);
+          return msg && isMessageUnread(msg);
+        });
         for (const id of systemIds) {
           try {
             const result = await markSystemMessageAsRead(id);
@@ -292,9 +302,10 @@ const useMesstore = common_vendor.defineStore("mes", () => {
         }
       }
       if (messageType === "all" || messageType === "group") {
-        const groupIds = messageIds.filter(
-          (id) => groupmes.value.some((msg) => msg.id === id && (!msg.is_read || msg.unread_count > 0))
-        );
+        const groupIds = messageIds.filter((id) => {
+          const msg = groupmes.value.find((msg2) => msg2.id === id);
+          return msg && isMessageUnread(msg);
+        });
         for (const id of groupIds) {
           try {
             const result = await markGroupMessageAsRead(id);
@@ -321,8 +332,8 @@ const useMesstore = common_vendor.defineStore("mes", () => {
     return MessageList.value.find((msg) => msg.id === messageId);
   };
   const getLatestUnreadMessages = (limit = 5) => {
-    const unreadSystemMessages = systemmes.value.filter((msg) => !msg.is_read).map((msg) => ({ ...msg, type: "system" }));
-    const unreadGroupMessages = groupmes.value.filter((msg) => !msg.is_read || msg.unread_count && msg.unread_count > 0).map((msg) => ({ ...msg, type: "group" }));
+    const unreadSystemMessages = systemmes.value.filter((msg) => isMessageUnread(msg)).map((msg) => ({ ...msg, type: "system" }));
+    const unreadGroupMessages = groupmes.value.filter((msg) => isMessageUnread(msg)).map((msg) => ({ ...msg, type: "group" }));
     const allUnread = [...unreadSystemMessages, ...unreadGroupMessages].sort((a, b) => {
       const timeA = new Date(a.created_at || a.updated_at || a.latest_time || a.send_time || 0);
       const timeB = new Date(b.created_at || b.updated_at || b.latest_time || b.send_time || 0);
@@ -404,27 +415,39 @@ const useMesstore = common_vendor.defineStore("mes", () => {
       console.log("新增/更新群组消息:", message.group_name || message.id);
     }
   };
-  const updateMessageUnreadCount = (messageId, messageType, unreadCount) => {
+  const updateMessageUnreadStatus = (messageId, messageType, hasUnread) => {
+    const unreadValue = hasUnread ? "Y" : "N";
+    const isReadValue = hasUnread ? 0 : 1;
     if (messageType === "system") {
       const messageIndex = systemmes.value.findIndex((msg) => msg.id === messageId);
       if (messageIndex !== -1) {
-        systemmes.value[messageIndex].is_read = unreadCount > 0 ? 0 : 1;
+        systemmes.value[messageIndex].has_unread = unreadValue;
+        systemmes.value[messageIndex].is_read = isReadValue;
         if (systemmes.value[messageIndex].unread_count !== void 0) {
-          systemmes.value[messageIndex].unread_count = unreadCount;
+          systemmes.value[messageIndex].unread_count = hasUnread ? 1 : 0;
         }
       }
     } else if (messageType === "group") {
       const messageIndex = groupmes.value.findIndex((msg) => msg.id === messageId);
       if (messageIndex !== -1) {
-        groupmes.value[messageIndex].unread_count = unreadCount;
-        groupmes.value[messageIndex].is_read = unreadCount > 0 ? 0 : 1;
+        groupmes.value[messageIndex].has_unread = unreadValue;
+        groupmes.value[messageIndex].is_read = isReadValue;
+        if (groupmes.value[messageIndex].unread_count !== void 0) {
+          groupmes.value[messageIndex].unread_count = hasUnread ? 1 : 0;
+        }
       }
     }
     const listMessageIndex = MessageList.value.findIndex((msg) => msg.id === messageId);
     if (listMessageIndex !== -1) {
-      MessageList.value[listMessageIndex].unread_count = unreadCount;
-      MessageList.value[listMessageIndex].is_read = unreadCount > 0 ? 0 : 1;
+      MessageList.value[listMessageIndex].has_unread = unreadValue;
+      MessageList.value[listMessageIndex].is_read = isReadValue;
+      if (MessageList.value[listMessageIndex].unread_count !== void 0) {
+        MessageList.value[listMessageIndex].unread_count = hasUnread ? 1 : 0;
+      }
     }
+  };
+  const updateMessageUnreadCount = (messageId, messageType, unreadCount) => {
+    updateMessageUnreadStatus(messageId, messageType, unreadCount > 0);
   };
   const hasNewMessages = common_vendor.computed(() => {
     return totalUnreadCount.value > 0;
@@ -516,6 +539,8 @@ const useMesstore = common_vendor.defineStore("mes", () => {
     groupUnreadCount,
     hasNewMessages,
     hasMoreData,
+    // 工具函数
+    isMessageUnread,
     // 方法
     getsystem,
     refreshMessages,
@@ -535,7 +560,9 @@ const useMesstore = common_vendor.defineStore("mes", () => {
     clearAllMessages,
     addSystemMessage,
     addGroupMessage,
+    updateMessageUnreadStatus,
     updateMessageUnreadCount,
+    // 保留兼容性
     getDataStatus,
     searchMessages,
     resetLoadingStates,

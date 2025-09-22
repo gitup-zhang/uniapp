@@ -288,7 +288,7 @@ const _sfc_main = {
           border: false,
           leftIcon: "left"
         }),
-        c: common_vendor.unref(EventStore).eventdetail.images[0],
+        c: common_vendor.unref(EventStore).eventdetail.cover_image_url,
         d: common_vendor.t(common_vendor.unref(EventStore).eventdetail.title),
         e: common_vendor.t(common_vendor.unref(utils_data.formatEventDate)(common_vendor.unref(EventStore).eventdetail.event_start_time, common_vendor.unref(EventStore).eventdetail.event_end_time)),
         f: common_vendor.t(common_vendor.unref(EventStore).eventdetail.event_address),

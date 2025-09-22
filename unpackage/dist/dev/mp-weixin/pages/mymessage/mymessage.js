@@ -243,8 +243,12 @@ const _sfc_main = {
     };
     const wechatlogin = async () => {
       try {
-        await userInfo.loginWithWeChat();
-        initPage();
+        isLogging.value = true;
+        const res = await userInfo.loginWithWeChat();
+        isLogging.value = false;
+        if (res) {
+          initPage();
+        }
       } catch (e) {
         console.log(e);
       }
@@ -471,83 +475,72 @@ const _sfc_main = {
         ad: isLogging.value
       }) : {}, {
         ae: loginType.value === "wechat"
-      }, loginType.value === "wechat" ? common_vendor.e({
+      }, loginType.value === "wechat" ? {
         af: common_vendor.p({
           type: "weixin",
           size: "60",
           color: "#1aad19"
         }),
-        ag: isLogging.value
-      }, isLogging.value ? {
-        ah: common_vendor.p({
-          status: "loading",
-          color: "#fff",
-          ["content-text"]: {
-            contentnomore: ""
-          }
-        })
-      } : {
-        ai: common_vendor.p({
+        ag: common_vendor.p({
           type: "weixin",
           size: "20",
           color: "#fff"
-        })
-      }, {
-        aj: common_vendor.o((...args) => _ctx.handlePhoneAuth && _ctx.handlePhoneAuth(...args)),
-        ak: isLogging.value,
-        al: common_vendor.o(wechatlogin)
-      }) : {}, {
-        am: common_vendor.o(showUserAgreement),
-        an: common_vendor.o(showPrivacyPolicy)
+        }),
+        ah: common_vendor.o((...args) => _ctx.handlePhoneAuth && _ctx.handlePhoneAuth(...args)),
+        ai: isLogging.value,
+        aj: common_vendor.o(wechatlogin)
+      } : {}, {
+        ak: common_vendor.o(showUserAgreement),
+        al: common_vendor.o(showPrivacyPolicy)
       }) : common_vendor.e({
-        ao: common_vendor.unref(userInfo).info.avatar_url || "/static/icon/empty.png",
-        ap: common_vendor.t(common_vendor.unref(userInfo).info.nickname || "用户"),
-        aq: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
-        ar: common_vendor.p({
+        am: common_vendor.unref(userInfo).info.avatar_url || "/static/icon/empty.png",
+        an: common_vendor.t(common_vendor.unref(userInfo).info.nickname || "用户"),
+        ao: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
+        ap: common_vendor.p({
           type: "right",
           size: "18",
           color: "rgba(255,255,255,0.8)"
         }),
-        as: common_vendor.o(goToProfile),
-        at: common_assets._imports_1$1,
-        av: common_vendor.t(common_vendor.unref(userInfo).eventcount.Eventbefore || 0),
-        aw: common_vendor.t(common_vendor.unref(userInfo).eventcount.Eventing || 0),
-        ax: common_vendor.t(common_vendor.unref(userInfo).eventcount.Evented || 0),
-        ay: common_vendor.p({
+        aq: common_vendor.o(goToProfile),
+        ar: common_assets._imports_1$1,
+        as: common_vendor.t(common_vendor.unref(userInfo).eventcount.Eventbefore || 0),
+        at: common_vendor.t(common_vendor.unref(userInfo).eventcount.Eventing || 0),
+        av: common_vendor.t(common_vendor.unref(userInfo).eventcount.Evented || 0),
+        aw: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        az: common_vendor.o(viewAllActivities),
-        aA: hasActivities.value
+        ax: common_vendor.o(viewAllActivities),
+        ay: hasActivities.value
       }, hasActivities.value ? {
-        aB: common_vendor.o(onAction),
-        aC: common_vendor.o(onCancel),
-        aD: common_vendor.p({
+        az: common_vendor.o(onAction),
+        aA: common_vendor.o(onCancel),
+        aB: common_vendor.p({
           activityData: myActivityData.value
         })
       } : {
-        aE: common_vendor.p({
+        aC: common_vendor.p({
           type: "search",
           size: "16",
           color: "#fff"
         }),
-        aF: common_vendor.o(discoverActivities),
-        aG: common_vendor.p({
+        aD: common_vendor.o(discoverActivities),
+        aE: common_vendor.p({
           type: "refresh",
           size: "16",
           color: "#667eea"
         }),
-        aH: common_vendor.o(refreshActivities)
+        aF: common_vendor.o(refreshActivities)
       }), {
-        aI: common_vendor.p({
+        aG: common_vendor.p({
           status: "loading",
           ["content-text"]: loadingText.value
         }),
-        aJ: common_vendor.sr(loadingPopup, "a5a8e0a1-14", {
+        aH: common_vendor.sr(loadingPopup, "a5a8e0a1-13", {
           "k": "loadingPopup"
         }),
-        aK: common_vendor.p({
+        aI: common_vendor.p({
           type: "center"
         })
       });

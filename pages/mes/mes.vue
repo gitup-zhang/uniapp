@@ -3,7 +3,7 @@
     <!-- 未登录状态 -->
     <view v-if="!isLoggedIn" class="login-required">
       <view class="login-card">
-        <view class="login-icon">🔐</view>
+        <view class="login-icon">🔒</view>
         <text class="login-title">请先登录</text>
         <text class="login-desc">登录后即可查看和管理您的消息</text>
         <button class="login-btn" @tap="goToLogin">
@@ -341,23 +341,22 @@ const switchTab = (tab) => {
 }
 
 // 处理消息卡片点击事件
-// 处理消息卡片点击事件
 const handleMessageTap = (msg, messageType) => {
   if (!isLoggedIn.value || !msg) return
   
-  console.log('点击消息:', msg, '消息类型:', messageType)
+  console.log('点击消息卡片:', msg, '消息类型:', messageType)
   
   try {
     // 根据消息类型跳转到相应的详情页面
     if (messageType === 'system') {
       console.log("系统消息跳转")
       uni.navigateTo({
-        url: `/pages/detail/ChatSystem`
+        url: `/pages/detail/ChatSystem?id=${msg.msg_group_id}&groupName=${encodeURIComponent(msg.group_name || '群组消息')}`
       })
     } else if (messageType === 'group') {
       console.log("群组消息跳转")
       uni.navigateTo({
-        url: `/pages/detail/ChatGroup?id=${msg.event_id}&groupName=${encodeURIComponent(msg.group_name || '群组消息')}`
+        url: `/pages/detail/ChatGroup?id=${msg.msg_group_id}&groupName=${encodeURIComponent(msg.group_name || '群组消息')}`
       })
     }
   } catch (error) {
@@ -372,7 +371,8 @@ const handleMessageTap = (msg, messageType) => {
 
 // 处理单个消息标记已读
 const handleMarkAsRead = async (msg, messageType) => {
-  if (!msg || (!msg.unread_count && msg.is_read === 1)) return
+  // 使用新的未读判断逻辑
+  if (!msg || !mesStore.isMessageUnread(msg)) return
   
   try {
     console.log('标记消息已读ID:', msg.event_id, '消息类型:', messageType)
@@ -420,13 +420,13 @@ const markAllAsRead = async () => {
   
   // 根据当前标签页获取未读消息
   if (activeTab.value === 'all') {
-    const systemUnread = systemMessages.value.filter(msg => msg.unread_count > 0 || msg.is_read === 0)
-    const groupUnread = groupMessages.value.filter(msg => msg.unread_count > 0 || msg.is_read === 0)
+    const systemUnread = systemMessages.value.filter(msg => mesStore.isMessageUnread(msg))
+    const groupUnread = groupMessages.value.filter(msg => mesStore.isMessageUnread(msg))
     unreadMessages = [...systemUnread, ...groupUnread]
   } else if (activeTab.value === 'system') {
-    unreadMessages = systemMessages.value.filter(msg => msg.unread_count > 0 || msg.is_read === 0)
+    unreadMessages = systemMessages.value.filter(msg => mesStore.isMessageUnread(msg))
   } else if (activeTab.value === 'group') {
-    unreadMessages = groupMessages.value.filter(msg => msg.unread_count > 0 || msg.is_read === 0)
+    unreadMessages = groupMessages.value.filter(msg => mesStore.isMessageUnread(msg))
   }
   
   if (unreadMessages.length === 0) {

@@ -66,7 +66,7 @@ const _sfc_main = {
         }),
         h: common_vendor.f(common_vendor.unref(usenotice).notice, (item, k0, i0) => {
           return {
-            a: common_vendor.t(item.content),
+            a: common_vendor.t(item.title),
             b: common_vendor.o(($event) => noticeclick(item.id), item.id),
             c: item.id
           };

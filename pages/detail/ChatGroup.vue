@@ -218,7 +218,7 @@ const loadInitialMessages = async () => {
       page_size: 20
     }
     
-    await MesStore.getMessageList(params)
+    await MesStore.getMessageList(groupId.value,params)
     
     if (MesStore.MessageList.length > 0) {
       setTimeout(() => {
@@ -254,7 +254,7 @@ const onRefresherRefresh = async () => {
       page_size: 20
     }
     
-    await MesStore.getMessageList(params)
+    await MesStore.getMessageList(groupId.value,params)
     
     // 显示刷新成功提示
     uni.showToast({
@@ -357,8 +357,10 @@ const goBack = () => {
 // 事件处理方法
 const handleMessageClick = (message) => {
   try {
+    // 先把 message 对象存储到本地缓存
+    uni.setStorageSync('currentMessage', message)
     uni.navigateTo({
-      url: `/pages/detail/GroupMesDetail?id=${message.id}&title=${encodeURIComponent(message.title || '管理员通知')}`
+      url: '/pages/detail/GroupMesDetail'
     })
   } catch (error) {
     console.error('跳转详情页失败:', error)
@@ -368,6 +370,8 @@ const handleMessageClick = (message) => {
     })
   }
 }
+
+
 
 const handleActionClick = async (action, message) => {
   try {

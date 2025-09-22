@@ -83,7 +83,7 @@ const _sfc_main = {
           page: 1,
           page_size: 20
         };
-        await MesStore.getMessageList(params);
+        await MesStore.getMessageList(groupId.value, params);
         if (MesStore.MessageList.length > 0) {
           setTimeout(() => {
             scrollToTop();
@@ -109,7 +109,7 @@ const _sfc_main = {
           page: 1,
           page_size: 20
         };
-        await MesStore.getMessageList(params);
+        await MesStore.getMessageList(groupId.value, params);
         common_vendor.index.showToast({
           title: "刷新成功",
           icon: "success",
@@ -191,8 +191,9 @@ const _sfc_main = {
     };
     const handleMessageClick = (message) => {
       try {
+        common_vendor.index.setStorageSync("currentMessage", message);
         common_vendor.index.navigateTo({
-          url: `/pages/detail/GroupMesDetail?id=${message.id}&title=${encodeURIComponent(message.title || "管理员通知")}`
+          url: "/pages/detail/GroupMesDetail"
         });
       } catch (error) {
         console.error("跳转详情页失败:", error);

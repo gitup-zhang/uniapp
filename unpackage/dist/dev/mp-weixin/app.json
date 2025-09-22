@@ -17,7 +17,8 @@
     "pages/detail/ChatGroup",
     "pages/detail/ChatSystem",
     "pages/detail/SystemMesDetail",
-    "pages/detail/GroupMesDetail"
+    "pages/detail/GroupMesDetail",
+    "pages/detail/Login"
   ],
   "window": {
     "navigationBarTextStyle": "white",

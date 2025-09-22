@@ -18,8 +18,8 @@
     <!-- 顶部图片轮播区域 -->
     <view class="banner-section">
       <swiper class="banner-swiper" indicator-dots="true" autoplay="true" interval="3000" duration="500">
-        <swiper-item v-for="(image, index) in bannerImages" :key="index">
-          <image class="banner-image" :src="image" mode="aspectFill"></image>
+        <swiper-item v-for="image in EventStore.eventdetail.images" :key="image.image_id">
+          <image class="banner-image" :src="image.url" mode="aspectFill"></image>
         </swiper-item>
       </swiper>
     </view>
@@ -55,14 +55,14 @@
       <view class="section-title">活动详情</view>
       
       <!-- 活动描述 -->
-      <view class="description">
-{{ eventInfo.description}}
+      <view class="description" v-html="EventStore.eventdetail.detail">
+		
       </view>
       
       <!-- 参会说明 -->
-     <view class="attendee-info">
+<!--     <view class="attendee-info">
         {{ eventInfo.attendeeInfo }}
-      </view>
+      </view> -->
 
       <!-- 报名按钮 -->
       <view class="register-section">

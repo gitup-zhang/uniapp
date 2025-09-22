@@ -41,10 +41,12 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
           signal.value = true;
           setToken(res.token);
           console.log("登录成功");
+          return true;
         }
       }
     } catch (err) {
       console.error("登录失败", err);
+      return false;
     }
   };
   function deleteinfo() {

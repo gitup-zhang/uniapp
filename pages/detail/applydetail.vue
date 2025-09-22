@@ -17,7 +17,7 @@
   <view class="container">
     <!-- 顶部banner -->
     <view class="banner-section">
-      <image class="banner-image" :src="EventStore.eventdetail.images[0]" mode="aspectFill"></image>
+      <image class="banner-image" :src="EventStore.eventdetail.cover_image_url" mode="aspectFill"></image>
       <view class="banner-overlay">
         <view class="event-title">{{EventStore.eventdetail.title}}</view>
         <view class="event-date">{{ formatEventDate(EventStore.eventdetail.event_start_time,EventStore.eventdetail.event_end_time)}}</view>

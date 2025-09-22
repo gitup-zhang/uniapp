@@ -1,5 +1,7 @@
 {
   "navigationBarTitleText": "",
   "navigationStyle": "custom",
-  "usingComponents": {}
+  "usingComponents": {
+    "message-card": "../../components/MessageCardUser/MessageCardUser"
+  }
 }

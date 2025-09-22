@@ -21,6 +21,7 @@ if (!Math) {
   "./pages/detail/ChatSystem.js";
   "./pages/detail/SystemMesDetail.js";
   "./pages/detail/GroupMesDetail.js";
+  "./pages/detail/Login.js";
 }
 const _sfc_main = {
   __name: "App",

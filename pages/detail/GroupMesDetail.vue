@@ -36,7 +36,7 @@
                 <text class="badge-text">管理员</text>
               </view>
             </view>
-            <text class="send-time">{{ formatDetailTime(message.created_at) }}</text>
+            <text class="send-time">{{ Dataformat(message.send_time) }}</text>
           </view>
           <view v-if="message.priority === 'high'" class="priority-indicator">
             <text class="priority-text">重要</text>
@@ -51,52 +51,24 @@
           </view>
 
           <!-- 消息类型标签 -->
-          <view v-if="message.type && message.type !== 'normal'" class="message-type-section">
+       <!--   <view v-if="message.type && message.type !== 'normal'" class="message-type-section">
             <view class="type-tag" :class="`tag-${message.type}`">
               <text class="type-text">{{ getTypeLabel(message.type) }}</text>
             </view>
-          </view>
+          </view> -->
 
           <!-- 消息内容 -->
           <view class="message-body">
             <!-- 文本内容 -->
-            <view v-if="textContent" class="text-section">
-              <text class="content-text">{{ textContent }}</text>
+            <view  class="text-section">
+              <!-- <view class="content-text" v-html="message.content"/> -->
+			  <mp-html :content="message.content" :container-style="style"/>
             </view>
 
             <!-- 媒体内容 -->
-            <view v-if="mediaItems.length > 0" class="media-section">
-              <view 
-                v-for="(media, index) in mediaItems" 
-                :key="index"
-                class="media-item"
-              >
-                <!-- 图片 -->
-                <view v-if="media.type === 'image'" class="image-container">
-                  <image 
-                    :src="media.url"
-                    class="media-image"
-                    mode="widthFix"
-                    @tap="previewImage(media.url, getAllImageUrls())"
-                    @load="onImageLoad"
-                    @error="onImageError"
-                  />
-                </view>
-                
-                <!-- 视频 -->
-                <view v-if="media.type === 'video'" class="video-container">
-                  <video 
-                    :src="media.url"
-                    :poster="media.poster"
-                    class="media-video"
-                    controls
-                    :show-center-play-btn="true"
-                    :show-play-btn="true"
-                    object-fit="contain"
-                  />
-                </view>
-              </view>
-            </view>
+            
+              
+            
           </view>
         </view>
 
@@ -108,157 +80,35 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted,nextTick  } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
+import {Dataformat} from '@/utils/data.js'
+import mpHtml from '@/uni_modules/mp-html/components/mp-html/mp-html.vue'
 
 // 页面状态
 const statusBarHeight = ref(0)
 
 // 消息数据
-const message = ref({
-  id: '1',
-  sender_name: '系统管理员',
-  title: '重要系统维护通知',
-  content: `尊敬的用户：
-
-为了提升系统性能和用户体验，我们将于本周末进行重要的系统维护升级。具体安排如下：
-
-🕐 维护时间：2025年8月21日 02:00 - 06:00
-🔧 影响范围：全平台服务暂停
-⏰ 预计恢复：当日上午6点前完全恢复
-
-维护期间，您可能遇到以下情况：
-• 无法正常登录和使用平台服务
-• 数据同步可能出现延迟  
-• 部分功能临时不可用
-
-[img:https://fuss10.elemecdn.com/3/28/bbf893f792f03a54408b3b7a7ebf0jpeg.jpeg]
-
-本次升级将带来以下改进：
-✨ 全新的用户界面设计
-🚀 更快的响应速度（提升40%）
-🔒 增强的安全防护机制
-📱 优化移动端体验
-
-[video:https://media.w3.org/2010/05/sintel/trailer.mp4]
-
-为了确保您的数据安全，建议您：
-1. 提前保存重要工作内容
-2. 避免在维护期间进行重要操作
-3. 关注我们的官方公告获取最新进展
-
-感谢您的理解与支持！如有紧急问题，请联系客服热线：400-123-4567
-
-祝您使用愉快！`,
-  type: 'maintenance',
-  priority: 'high',
-  created_at: '2025-08-19T14:30:00.000Z'
-})
+const message = ref({})
 
 // 解析消息内容
-const { textContent, mediaItems } = parseMessageContent(message.value.content || '')
+// const { textContent, mediaItems } = parseMessageContent(message.value.content || '')
 
 // 生命周期
 onMounted(() => {
   const sysInfo = uni.getSystemInfoSync()
   statusBarHeight.value = sysInfo.statusBarHeight || 0
+   try {
+      // 直接从缓存获取整个对象
+      message.value = uni.getStorageSync('currentMessage') || null
+      console.log('接收到的 message:', message.value)
+    } catch (error) {
+      console.error('读取 message 失败', error)
+    }
+	  
 })
 
-onLoad((options) => {
-  // 这里可以根据传入的参数加载具体消息
-  if (options.id) {
-    // loadMessageDetail(options.id)
-  }
-})
 
-// 解析消息内容，分离文本和媒体
-function parseMessageContent(content) {
-  if (!content) return { textContent: '', mediaItems: [] }
-  
-  const mediaItems = []
-  let textContent = content
-  
-  // 匹配图片
-  const imageRegex = /\[(?:img|image):([^\]]+)\]/g
-  textContent = textContent.replace(imageRegex, (match, url) => {
-    mediaItems.push({
-      type: 'image',
-      url: url.trim()
-    })
-    return ''
-  })
-  
-  // 匹配视频
-  const videoRegex = /\[(?:video|vid):([^\]]+)(?:\|poster:([^\]]+))?\]/g
-  textContent = textContent.replace(videoRegex, (match, url, poster) => {
-    mediaItems.push({
-      type: 'video',
-      url: url.trim(),
-      poster: poster ? poster.trim() : ''
-    })
-    return ''
-  })
-  
-  // 清理多余的空行
-  textContent = textContent.replace(/\n\s*\n\s*\n/g, '\n\n').trim()
-  
-  return { textContent, mediaItems }
-}
-
-// 格式化详细时间
-const formatDetailTime = (timeStr) => {
-  if (!timeStr) return ''
-  
-  const time = new Date(timeStr)
-  const year = time.getFullYear()
-  const month = String(time.getMonth() + 1).padStart(2, '0')
-  const day = String(time.getDate()).padStart(2, '0')
-  const hours = String(time.getHours()).padStart(2, '0')
-  const minutes = String(time.getMinutes()).padStart(2, '0')
-  
-  return `${year}年${month}月${day}日 ${hours}:${minutes}`
-}
-
-// 获取类型标签
-const getTypeLabel = (type) => {
-  const labels = {
-    'announcement': '公告',
-    'maintenance': '维护',
-    'event': '活动',
-    'security': '安全',
-    'update': '更新',
-    'normal': '通知'
-  }
-  return labels[type] || '通知'
-}
-
-// 获取所有图片URL
-const getAllImageUrls = () => {
-  return mediaItems.filter(item => item.type === 'image').map(item => item.url)
-}
-
-// 预览图片
-const previewImage = (current, urls) => {
-  uni.previewImage({
-    current,
-    urls
-  })
-}
-
-// 图片加载成功
-const onImageLoad = (e) => {
-  console.log('图片加载成功', e)
-}
-
-// 图片加载失败
-const onImageError = (e) => {
-  console.log('图片加载失败', e)
-  uni.showToast({
-    title: '图片加载失败',
-    icon: 'none',
-    duration: 2000
-  })
-}
 
 // 返回上一页
 const goBack = () => {
@@ -266,7 +116,7 @@ const goBack = () => {
 }
 </script>
 
-<style scoped>
+<style >
 .message-detail-page {
   min-height: 100vh;
   background: #f8fafc;
@@ -533,10 +383,18 @@ const goBack = () => {
 
 /* 文本内容 */
 .text-section {
-  margin-bottom: 24rpx;
+  margin-bottom: 24rpx
+  }
+.content-text  img{
+  width: 50%;
+  max-width: 50%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
 }
 
-.content-text {
+.content-text{
   font-size: 30rpx;
   line-height: 1.7;
   color: #334155;

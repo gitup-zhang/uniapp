@@ -42,7 +42,7 @@
 	    <view class="notice-content">
 	      <swiper class="notice-swiper" autoplay="true" vertical="true" interval="4000" circular="true">
 	        <swiper-item v-for="item in usenotice.notice" :key="item.id">
-	          <text class="notice-text" @click="noticeclick(item.id)">{{item.content}}</text>
+	          <text class="notice-text" @click="noticeclick(item.id)">{{item.title}}</text>
 	        </swiper-item>
 	      </swiper>
 	    </view>

@@ -155,8 +155,8 @@
             :disabled="isLogging"
 			@click="wechatlogin"
           >
-            <uni-load-more v-if="isLogging" status="loading" color="#fff" :content-text="{ contentnomore: '' }"/>
-            <view v-else class="btn-content">
+            <!-- <uni-load-more v-if="isLogging" status="loading" color="#fff" :content-text="{ contentnomore: '' }"/> -->
+            <view  class="btn-content">
               <uni-icons type="weixin" size="20" color="#fff"/>
               <text>微信授权登录</text>
             </view>
@@ -301,7 +301,7 @@
     </view>
 
     <!-- 加载提示 -->
-    <uni-popup ref="loadingPopup" type="center">
+   <uni-popup ref="loadingPopup" type="center">
       <view class="loading-container">
         <uni-load-more status="loading" :content-text="loadingText"/>
       </view>
@@ -610,8 +610,13 @@ const handleSmsLogin = async () => {
 
 const wechatlogin = async () => {
   try{
-    await userInfo.loginWithWeChat()
-    initPage()
+	  isLogging.value=true
+    const res=await userInfo.loginWithWeChat()
+	isLogging.value=false
+	if(res){
+		initPage()
+	}
+    
   } catch(e) {
     console.log(e)
   }

@@ -35,7 +35,7 @@
         </view>
 
         <!-- 详情卡片 -->
-        <view v-else-if="messageDetail" class="detail-card">
+        <view v-else-if="message.content" class="detail-card">
           <!-- 装饰线条 -->
           <view class="decoration-line"></view>
           
@@ -49,132 +49,33 @@
             </view>
             
             <view class="header-info">
-              <text class="message-title">{{ messageDetail.title }}</text>
+              <text class="message-title">{{ message.title }}</text>
               <view class="meta-info">
                 <view class="meta-item">
                   <text class="meta-label">发布时间</text>
-                  <text class="meta-value">{{ formatTime(messageDetail.time) }}</text>
+                  <text class="meta-value">{{ formatTime(message.send_time) }}</text>
                 </view>
-                <view class="meta-item" v-if="messageDetail.sender">
+                <view class="meta-item" >
                   <text class="meta-label">发送方</text>
-                  <text class="meta-value">{{ messageDetail.sender }}</text>
+                  <text class="meta-value">系统管理员</text>
                 </view>
-                <view class="meta-item" v-if="messageDetail.category">
-                  <text class="meta-label">类别</text>
-                  <view class="category-tag">
-                    <text class="category-text">{{ messageDetail.category }}</text>
-                  </view>
-                </view>
+                
               </view>
             </view>
           </view>
 
-          <!-- 重要性标识 -->
-          <view v-if="messageDetail.priority" class="priority-section">
-            <view class="priority-indicator" :class="`priority-${messageDetail.priority}`">
-              <view class="priority-icon">
-                <text class="priority-text">{{ getPriorityIcon(messageDetail.priority) }}</text>
-              </view>
-              <text class="priority-label">{{ getPriorityLabel(messageDetail.priority) }}</text>
-            </view>
-          </view>
+        
 
           <!-- 消息正文 -->
           <view class="message-body">
             <view class="content-section">
-              <text class="content-text" :class="{ 'large-text': isLargeText }">{{ messageDetail.content }}</text>
+              <mp-html :content="message.content" :container-style="style"/>
             </view>
 
-            <!-- 附件信息 -->
-           <!-- <view v-if="messageDetail.attachments && messageDetail.attachments.length > 0" class="attachments-section">
-              <view class="section-title">
-                <text class="title-text">相关附件</text>
-              </view>
-              <view class="attachments-list">
-                <view 
-                  v-for="(attachment, index) in messageDetail.attachments" 
-                  :key="index"
-                  class="attachment-item"
-                  @tap="previewAttachment(attachment)"
-                >
-                  <view class="attachment-icon">
-                    <text class="attachment-type">{{ getFileIcon(attachment.type) }}</text>
-                  </view>
-                  <view class="attachment-info">
-                    <text class="attachment-name">{{ attachment.name }}</text>
-                    <text class="attachment-size">{{ formatFileSize(attachment.size) }}</text>
-                  </view>
-                  <view class="attachment-action">
-                    <text class="action-text">预览</text>
-                  </view>
-                </view>
-              </view>
-            </view> -->
-
-            <!-- 相关链接 -->
-            <!-- <view v-if="messageDetail.links && messageDetail.links.length > 0" class="links-section">
-              <view class="section-title">
-                <text class="title-text">相关链接</text>
-              </view>
-              <view class="links-list">
-                <view 
-                  v-for="(link, index) in messageDetail.links" 
-                  :key="index"
-                  class="link-item"
-                  @tap="openLink(link.url)"
-                >
-                  <view class="link-icon">
-                    <text class="link-symbol">🔗</text>
-                  </view>
-                  <view class="link-info">
-                    <text class="link-title">{{ link.title }}</text>
-                    <text class="link-desc">{{ link.description }}</text>
-                  </view>
-                  <view class="link-arrow">
-                    <text class="arrow-icon">→</text>
-                  </view>
-                </view>
-              </view>
-            </view> -->
+           
           </view>
 
-          <!-- 操作按钮区域 -->
-          <!-- <view class="action-section">
-            <view class="action-buttons">
-              <view class="action-btn-item" @tap="markAsRead">
-                <view class="btn-icon">
-                  <text class="btn-icon-text">✓</text>
-                </view>
-                <text class="btn-text">标记已读</text>
-              </view>
-              
-              <view class="action-btn-item" @tap="collectMessage">
-                <view class="btn-icon">
-                  <text class="btn-icon-text">⭐</text>
-                </view>
-                <text class="btn-text">收藏消息</text>
-              </view>
-              
-              <view class="action-btn-item" @tap="shareMessage">
-                <view class="btn-icon">
-                  <text class="btn-icon-text">↗</text>
-                </view>
-                <text class="btn-text">分享消息</text>
-              </view>
-            </view> -->
-    <!--      </view> -->
-
-          <!-- 底部信息 -->
-          <!-- <view class="footer-info">
-            <view class="info-item">
-              <text class="info-label">消息ID：</text>
-              <text class="info-value">{{ messageDetail.id }}</text>
-            </view>
-            <view class="info-item" v-if="messageDetail.readCount">
-              <text class="info-label">阅读次数：</text>
-              <text class="info-value">{{ messageDetail.readCount }}</text>
-            </view>
-          </view> -->
+        
         </view>
 
         <!-- 错误状态 -->
@@ -205,109 +106,40 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
+import mpHtml from '@/uni_modules/mp-html/components/mp-html/mp-html.vue'
 
 // 响应式数据
 const statusBarHeight = ref(0)
-const isLoading = ref(false)
-const messageDetail = ref(null)
-const messageId = ref('')
-const messageTitle = ref('')
+const isLoading = ref(true)
+const message=ref({})
 
-// 计算属性
-const isLargeText = computed(() => {
-  return messageDetail.value?.content?.length > 500
-})
+
+
 
 // 生命周期
 onMounted(() => {
   const sysInfo = uni.getSystemInfoSync()
   statusBarHeight.value = sysInfo.statusBarHeight || 0
-})
-
-onLoad((options) => {
-  messageId.value = options.id || ''
-  messageTitle.value = decodeURIComponent(options.title || '')
-  loadMessageDetail()
-})
-
-// 方法定义
-const loadMessageDetail = async () => {
-  isLoading.value = true
-  
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // 模拟详情数据
-    messageDetail.value = {
-      id: messageId.value || 'msg_001',
-      title: messageTitle.value || '系统维护通知',
-      content: `尊敬的用户，为了给您提供更优质的服务体验，我们将于今晚23:00至次日01:00进行系统全面维护升级。本次维护涉及服务器硬件升级、数据库性能优化、安全系统更新、新功能模块部署等多个方面。
+	  isLoading.value=true
+     // 直接从缓存获取整个对象
+     message.value = uni.getStorageSync('SystemMessage') || null
+     console.log('接收到的 message:', message.value)
+   } catch (error) {
+     console.error('读取 message 失败', error)
+   }finally{
+	   isLoading.value=false
+   }
+})
 
-维护期间，以下功能将暂时无法使用：
-• 用户登录注册
-• 在线支付交易  
-• 文件上传下载
-• 实时消息推送
-• 数据报表生成
-• 第三方接口调用
+// onLoad((options) => {
+// 	console.log("123跳转的系统消息信息：",options)
+//   messageId.value = options.id || ''
+//   messageTitle.value = decodeURIComponent(options.title || '')
+//   loadMessageDetail()
+// })
 
-为确保您的数据安全，我们强烈建议您在维护开始前及时保存所有工作进度，备份重要数据，并退出系统。
 
-维护完成后，系统将实现以下改进：
-✓ 响应速度提升60%以上
-✓ 并发处理能力增强3倍
-✓ 数据安全等级提升至金融级标准
-✓ 新增智能推荐功能
-✓ 优化移动端用户体验
-
-预计维护将按时完成，如遇特殊情况需要延长维护时间，我们会第一时间通过短信、邮件等方式通知您。维护期间给您带来的不便，我们深表歉意。
-
-如有任何紧急问题或疑问，请通过以下方式联系我们：
-• 24小时客服热线：400-888-6666
-• 紧急邮箱：emergency@example.com  
-• 官方微信客服
-
-感谢您一直以来的信任与支持！`,
-      time: new Date().toISOString(),
-      sender: '系统管理员',
-      category: '系统通知',
-      priority: 'high',
-      readCount: 1247,
-      actionText: '确认知悉',
-      attachments: [
-        {
-          name: '维护详细计划.pdf',
-          type: 'pdf',
-          size: 2048000
-        },
-        {
-          name: '功能更新说明.docx',
-          type: 'doc',
-          size: 1536000
-        }
-      ],
-      links: [
-        {
-          title: '官方帮助中心',
-          description: '查看更多常见问题解答',
-          url: 'https://help.example.com'
-        },
-        {
-          title: '服务状态页面',
-          description: '实时监控系统运行状态',
-          url: 'https://status.example.com'
-        }
-      ]
-    }
-
-  } catch (error) {
-    console.error('加载消息详情失败:', error)
-    messageDetail.value = null
-  } finally {
-    isLoading.value = false
-  }
-}
 
 const formatTime = (timeStr) => {
   if (!timeStr) return ''
@@ -327,114 +159,13 @@ const formatTime = (timeStr) => {
   }
 }
 
-const getPriorityIcon = (priority) => {
-  const icons = {
-    low: '📘',
-    medium: '📙', 
-    high: '📕',
-    urgent: '🚨'
-  }
-  return icons[priority] || '📘'
-}
 
-const getPriorityLabel = (priority) => {
-  const labels = {
-    low: '一般',
-    medium: '重要',
-    high: '紧急',
-    urgent: '特急'
-  }
-  return labels[priority] || '一般'
-}
-
-const getFileIcon = (type) => {
-  const icons = {
-    pdf: '📄',
-    doc: '📝',
-    docx: '📝',
-    xls: '📊',
-    xlsx: '📊',
-    ppt: '📺',
-    pptx: '📺',
-    txt: '📃',
-    image: '🖼️',
-    zip: '📦'
-  }
-  return icons[type] || '📁'
-}
-
-const formatFileSize = (bytes) => {
-  if (!bytes) return '0 B'
-  
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
-}
 
 const goBack = () => {
   uni.navigateBack()
 }
 
-const shareMessage = () => {
-  uni.showActionSheet({
-    itemList: ['复制链接', '分享到微信', '分享到QQ'],
-    success: (res) => {
-      const actions = ['复制链接', '分享到微信', '分享到QQ']
-      uni.showToast({
-        title: `${actions[res.tapIndex]}成功`,
-        icon: 'success'
-      })
-    }
-  })
-}
 
-const markAsRead = () => {
-  uni.showToast({
-    title: '已标记为已读',
-    icon: 'success'
-  })
-}
-
-const collectMessage = () => {
-  uni.showToast({
-    title: '已收藏消息',
-    icon: 'success'
-  })
-}
-
-const previewAttachment = (attachment) => {
-  uni.showToast({
-    title: `预览 ${attachment.name}`,
-    icon: 'none'
-  })
-}
-
-const openLink = (url) => {
-  uni.showToast({
-    title: '正在跳转...',
-    icon: 'loading'
-  })
-}
-
-const handlePrimaryAction = () => {
-  uni.showModal({
-    title: '确认操作',
-    content: '确认已阅读并知悉此消息内容？',
-    success: (res) => {
-      if (res.confirm) {
-        uni.showToast({
-          title: '操作成功',
-          icon: 'success'
-        })
-        setTimeout(() => {
-          goBack()
-        }, 1500)
-      }
-    }
-  })
-}
 </script>
 
 <style scoped>

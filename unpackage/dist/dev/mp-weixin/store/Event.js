@@ -127,8 +127,8 @@ const useEventstore = common_vendor.defineStore("event", () => {
     });
     try {
       const res = await newApis_events.getEventDetail(id);
-      eventdetail.value = res;
-      console.log(eventdetail.value);
+      eventdetail.value = res.data;
+      console.log("活动详情", eventdetail.value);
     } catch (error) {
       console.log(error);
     } finally {
