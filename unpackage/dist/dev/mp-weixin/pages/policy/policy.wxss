@@ -1,11 +1,10 @@
 
+/* 原有样式保持不变 */
 .page {
   height: 100vh;
   overflow: hidden;
   position: relative;
 }
-
-/* 固定顶部区域（搜索 + 筛选） */
 .fixed-top {
   position: fixed;
   top: 178rpx;
@@ -16,8 +15,6 @@
   padding-bottom: 20rpx;
   box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.05);
 }
-
-/* 滚动区域 */
 .news-scroll {
   position: fixed;
   top: calc(178rpx + 260rpx);
@@ -28,15 +25,11 @@
   padding: 5rpx;
   background-color: #f5f5f5;
 }
-
-/* 导航栏标题 */
 .navbar-title {
   font-size: 20px;
   font-weight: bold;
   color: white;
 }
-
-/* 筛选区域 */
 .filter-wrapper {
   position: relative;
   z-index: 1;
@@ -86,8 +79,6 @@
 .arrow.open {
   transform: rotate(180deg);
 }
-
-/* 下拉遮罩 */
 .dropdown-overlay {
   position: fixed;
   top: 0;
@@ -97,8 +88,6 @@
   background: rgba(0, 0, 0, 0.3);
   z-index: 98;
 }
-
-/* 下拉列表 */
 .dropdown-list {
   position: absolute;
   top: 100%;
@@ -148,8 +137,6 @@
   color: #667eea;
   font-weight: 700;
 }
-
-/* 空状态样式 */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -191,8 +178,6 @@
 .empty-action:active {
   transform: scale(0.95);
 }
-
-/* 初始加载状态 */
 .initial-loading {
   display: flex;
   flex-direction: column;
@@ -214,13 +199,9 @@
   color: #666;
   margin-top: 20rpx;
 }
-
-/* 底部加载更多容器 */
 .load-more-container {
   padding: 20rpx;
 }
-
-/* 加载更多状态 */
 .loading-more {
   display: flex;
   align-items: center;
@@ -238,8 +219,6 @@
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
-
-/* 没有更多内容 */
 .no-more {
   display: flex;
   align-items: center;
@@ -255,8 +234,6 @@
   background: #e5e5e5;
   max-width: 120rpx;
 }
-
-/* 旋转动画 */
 @keyframes spin {
 0% { transform: rotate(0deg);
 }

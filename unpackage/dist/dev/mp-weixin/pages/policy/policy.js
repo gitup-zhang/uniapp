@@ -22,68 +22,57 @@ const _sfc_main = {
     const listarticles = store_Articles.useArticlesStore();
     const field = store_field.usefieldstore();
     const activeTab = common_vendor.ref("policy");
-    const searchbar = common_vendor.ref("");
+    const searchKeyword = common_vendor.ref("");
     const currentDropdown = common_vendor.ref(null);
-    const isselected = common_vendor.ref(0);
     const initialLoading = common_vendor.ref(false);
     const refreshTriggered = common_vendor.ref(false);
     const selectedDomain = common_vendor.ref({ field_id: 0, field_code: "", field_name: "全部" });
-    const selectedTime = common_vendor.ref("发布时间");
+    const selectedTime = common_vendor.ref("全部");
     const timeList = ["全部", "最近一周", "最近一月", "最近一年"];
-    const Params = {
-      field_type: "",
-      page: 0,
-      is_selection: 0,
-      article_title: "",
-      release_time: "",
-      article_type: activeTab.value.toUpperCase()
-    };
-    common_vendor.watch(activeTab, (newVal, oldVal) => {
-      console.log("Tab 变化:", oldVal, "=>", newVal);
-      if (newVal === "news") {
-        listarticles.resetpage(1);
-        resetFilters();
-        Params.article_type = "NEWS";
-      } else if (newVal === "policy") {
-        listarticles.resetpage(1);
-        resetFilters();
-        Params.article_type = "POLICY";
-      }
+    const isPageInitialized = common_vendor.ref(false);
+    const currentList = common_vendor.computed(() => {
+      return activeTab.value === "policy" ? listarticles.listpolicy : listarticles.listnew;
     });
-    function getEmptyMessage() {
-      if (searchbar.value) {
-        return `未找到与"${searchbar.value}"相关的内容，试试其他关键词吧`;
+    const buildQueryParams = (overrides = {}) => {
+      const baseParams = {
+        field_type: selectedDomain.value.field_code || "",
+        page: 1,
+        is_selection: 0,
+        article_title: searchKeyword.value || "",
+        release_time: getTimeParam(),
+        article_type: activeTab.value.toUpperCase(),
+        ...overrides
+      };
+      console.log("构建查询参数:", baseParams);
+      return baseParams;
+    };
+    const getTimeParam = () => {
+      switch (selectedTime.value) {
+        case "最近一周":
+          return utils_data.getLastWeekDate();
+        case "最近一月":
+          return utils_data.getLastMonthDate();
+        case "最近一年":
+          return utils_data.getLastYearDate();
+        default:
+          return "";
       }
-      if (selectedDomain.value.field_id !== 0 || selectedTime.value !== "全部") {
-        return "当前筛选条件下暂无内容，试试调整筛选条件";
-      }
-      return "暂时还没有内容，请稍后再来看看";
-    }
-    function resetFilters() {
-      searchbar.value = "";
-      selectedDomain.value = { field_id: 0, field_code: "", field_name: "全部" };
-      selectedTime.value = "全部";
-      Params.article_title = "";
-      Params.field_type = "";
-      Params.release_time = "";
-      Params.page = 1;
-      loadData();
-    }
-    async function onRefresh() {
-      refreshTriggered.value = true;
-      Params.page = 1;
+    };
+    const loadData = async (isRefresh = false, showLoading = true) => {
       try {
-        await listarticles.getlistpolicy(Params);
-      } catch (error) {
-        console.error("刷新失败:", error);
-      } finally {
-        refreshTriggered.value = false;
-      }
-    }
-    async function loadData() {
-      initialLoading.value = true;
-      try {
-        await listarticles.getlistpolicy(Params);
+        if (!isRefresh && showLoading) {
+          initialLoading.value = true;
+        }
+        const params = buildQueryParams({
+          page: 1,
+          isRefresh
+        });
+        console.log("开始加载数据:", { activeTab: activeTab.value, params });
+        await listarticles.getlistpolicy(params);
+        console.log("数据加载完成:", {
+          type: activeTab.value,
+          count: currentList.value.length
+        });
       } catch (error) {
         console.error("加载数据失败:", error);
         common_vendor.index.showToast({
@@ -91,96 +80,127 @@ const _sfc_main = {
           icon: "none"
         });
       } finally {
-        initialLoading.value = false;
+        if (!isRefresh && showLoading) {
+          initialLoading.value = false;
+        }
       }
-    }
-    function search() {
-      Params.article_title = searchbar.value;
-      Params.page = 1;
-      loadData();
-      console.log("搜索关键词:", searchbar.value);
-    }
-    function cancel() {
-      searchbar.value = "";
-      Params.page = 1;
-      Params.article_title = searchbar.value;
-      loadData();
-    }
-    function loadMore() {
+    };
+    common_vendor.watch(activeTab, async (newTab, oldTab) => {
+      if (!isPageInitialized.value)
+        return;
+      console.log("Tab 切换:", oldTab, "=>", newTab);
+      listarticles.resetpage(1);
+      await common_vendor.nextTick$1();
+      await loadData(false, true);
+    });
+    const handleSearch = async () => {
+      console.log("执行搜索:", searchKeyword.value);
+      await loadData(false, true);
+    };
+    const handleSearchCancel = async () => {
+      searchKeyword.value = "";
+      await loadData(false, true);
+    };
+    const handleRefresh = async () => {
+      console.log("下拉刷新");
+      refreshTriggered.value = true;
+      try {
+        await loadData(true, false);
+      } catch (error) {
+        console.error("刷新失败:", error);
+      } finally {
+        refreshTriggered.value = false;
+      }
+    };
+    const handleLoadMore = async () => {
       if (listarticles.loading || !listarticles.hasMore) {
+        console.log("加载更多被阻止:", {
+          loading: listarticles.loading,
+          hasMore: listarticles.hasMore
+        });
         return;
       }
-      Params.page = listarticles.page + 1;
-      listarticles.getarticlemore(Params);
-      console.log("加载更多，当前页码:", Params.page);
-    }
-    function toggleDropdown(type) {
-      currentDropdown.value = currentDropdown.value === type ? null : type;
-    }
-    function selectOption(type, value) {
-      if (type === "domain") {
-        if (value === null) {
-          selectedDomain.value = { field_id: 0, field_code: "", field_name: "全部" };
-          Params.page = 1;
-          Params.field_type = selectedDomain.value.field_code;
-          loadData();
-        } else {
-          console.log("value值：", value);
-          selectedDomain.value = value;
-          Params.page = 1;
-          Params.field_type = selectedDomain.value.field_code;
-          console.log("params:", Params);
-          loadData();
-        }
-      }
-      if (type === "time") {
-        console.log(value);
-        selectedTime.value = value;
-        if (value === "最近一周") {
-          Params.release_time = utils_data.getLastWeekDate();
-        } else if (value === "最近一月") {
-          Params.release_time = utils_data.getLastMonthDate();
-        } else if (value === "最近一年") {
-          Params.release_time = utils_data.getLastYearDate();
-        } else {
-          Params.release_time = "";
-        }
-        Params.page = 1;
-        loadData();
+      const params = buildQueryParams({
+        page: listarticles.page + 1
+      });
+      console.log("加载更多:", params);
+      await listarticles.getarticlemore(params);
+    };
+    const handleDomainSelect = async (domain) => {
+      if (domain === null) {
+        selectedDomain.value = { field_id: 0, field_code: "", field_name: "全部" };
+      } else {
+        selectedDomain.value = domain;
       }
       currentDropdown.value = null;
-    }
+      console.log("选择领域:", selectedDomain.value);
+      await loadData(false, true);
+    };
+    const handleTimeSelect = async (time) => {
+      selectedTime.value = time;
+      currentDropdown.value = null;
+      console.log("选择时间:", time);
+      await loadData(false, true);
+    };
+    const handleResetFilters = async () => {
+      console.log("重置筛选条件");
+      searchKeyword.value = "";
+      selectedDomain.value = { field_id: 0, field_code: "", field_name: "全部" };
+      selectedTime.value = "全部";
+      await loadData(false, true);
+    };
+    const toggleDropdown = (type) => {
+      currentDropdown.value = currentDropdown.value === type ? null : type;
+    };
+    const getEmptyMessage = () => {
+      if (searchKeyword.value) {
+        return `未找到与"${searchKeyword.value}"相关的内容，试试其他关键词吧`;
+      }
+      if (selectedDomain.value.field_id !== 0 || selectedTime.value !== "全部") {
+        return "当前筛选条件下暂无内容，试试调整筛选条件";
+      }
+      return "暂时还没有内容，请稍后再来看看";
+    };
     const handlePolicyClick = (policyItem) => {
-      console.log("点击了政策:", policyItem);
+      console.log("点击政策:", policyItem);
       common_vendor.index.navigateTo({
         url: `/pages/detail/articledetail?id=${policyItem.article_id}`
       });
     };
     const handleNewsClick = (newsItem) => {
-      console.log("点击了新闻:", newsItem.article_id);
+      console.log("点击新闻:", newsItem);
       common_vendor.index.navigateTo({
         url: `/pages/detail/articledetail?id=${newsItem.article_id}`
       });
     };
-    common_vendor.onShow(() => {
-      const source = common_vendor.index.getStorageSync("tabSource") || "tabbar";
-      field.getfield();
-      if (source === "switchTab") {
-        console.log("来源：通过 uni.switchTab() 跳转");
-        Params.is_selection = 1;
-        Params.page = 1;
-        Params.article_type = "NEWS";
-        loadData();
-        Params.article_type = activeTab.value.toUpperCase();
-      } else {
-        console.log("来源：用户点击 tabBar 进入");
-        isselected.value = 0;
-        Params.page = 1;
-        Params.article_type = "NEWS";
-        loadData();
-        Params.article_type = activeTab.value.toUpperCase();
+    common_vendor.onShow(async () => {
+      try {
+        console.log("页面显示 - onShow");
+        await field.getfield();
+        const source = common_vendor.index.getStorageSync("tabSource") || "tabbar";
+        console.log("页面来源:", source);
+        if (source === "switchTab") {
+          activeTab.value = "news";
+        }
+        common_vendor.index.removeStorageSync("tabSource");
+        if (!isPageInitialized.value) {
+          console.log("首次初始化页面");
+          isPageInitialized.value = true;
+          await loadData(false, true);
+        } else {
+          console.log("页面已初始化，跳过数据加载");
+        }
+      } catch (error) {
+        console.error("页面初始化失败:", error);
+        common_vendor.index.showToast({
+          title: "页面初始化失败",
+          icon: "none"
+        });
       }
-      common_vendor.index.removeStorageSync("tabSource");
+    });
+    common_vendor.onUnmounted(() => {
+      console.log("页面卸载");
+      isPageInitialized.value = false;
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -189,66 +209,64 @@ const _sfc_main = {
           backgroundColor: "#dc2626",
           fixed: "true"
         }),
-        b: common_vendor.o(search),
-        c: common_vendor.o(cancel),
-        d: common_vendor.o(($event) => searchbar.value = $event),
+        b: common_vendor.o(handleSearch),
+        c: common_vendor.o(handleSearchCancel),
+        d: common_vendor.o(($event) => searchKeyword.value = $event),
         e: common_vendor.p({
           placeholder: "搜索政策或新闻",
-          modelValue: searchbar.value
+          modelValue: searchKeyword.value
         }),
         f: common_vendor.o(($event) => activeTab.value = $event),
         g: common_vendor.p({
           modelValue: activeTab.value
         }),
-        h: activeTab.value === "policy"
-      }, activeTab.value === "policy" ? {} : {}, {
-        i: common_vendor.t(selectedDomain.value.field_name || "全部领域"),
-        j: currentDropdown.value === "domain" ? 1 : "",
-        k: common_vendor.o(($event) => toggleDropdown("domain")),
-        l: common_vendor.t(selectedTime.value),
-        m: currentDropdown.value === "time" ? 1 : "",
-        n: common_vendor.o(($event) => toggleDropdown("time")),
-        o: currentDropdown.value
+        h: common_vendor.t(selectedDomain.value.field_name || "全部领域"),
+        i: currentDropdown.value === "domain" ? 1 : "",
+        j: common_vendor.o(($event) => toggleDropdown("domain")),
+        k: common_vendor.t(selectedTime.value),
+        l: currentDropdown.value === "time" ? 1 : "",
+        m: common_vendor.o(($event) => toggleDropdown("time")),
+        n: currentDropdown.value
       }, currentDropdown.value ? {
-        p: common_vendor.o(($event) => currentDropdown.value = null)
+        o: common_vendor.o(($event) => currentDropdown.value = null)
       } : {}, {
-        q: currentDropdown.value === "domain"
+        p: currentDropdown.value === "domain"
       }, currentDropdown.value === "domain" ? common_vendor.e({
-        r: selectedDomain.value.field_id === 0
+        q: selectedDomain.value.field_id === 0
       }, selectedDomain.value.field_id === 0 ? {} : {}, {
-        s: common_vendor.o(($event) => selectOption("domain", null)),
-        t: selectedDomain.value.field_id === 0 ? 1 : "",
-        v: common_vendor.f(common_vendor.unref(field).fieldlist, (item, k0, i0) => {
+        r: common_vendor.o(($event) => handleDomainSelect(null)),
+        s: selectedDomain.value.field_id === 0 ? 1 : "",
+        t: common_vendor.f(common_vendor.unref(field).fieldlist, (item, k0, i0) => {
           return common_vendor.e({
             a: common_vendor.t(item.field_name),
             b: selectedDomain.value.field_id === item.field_id
           }, selectedDomain.value.field_id === item.field_id ? {} : {}, {
             c: item.field_id,
-            d: common_vendor.o(($event) => selectOption("domain", item), item.field_id),
+            d: common_vendor.o(($event) => handleDomainSelect(item), item.field_id),
             e: selectedDomain.value.field_id === item.field_id ? 1 : ""
           });
         })
       }) : {}, {
-        w: currentDropdown.value === "time"
+        v: currentDropdown.value === "time"
       }, currentDropdown.value === "time" ? {
-        x: common_vendor.f(timeList, (item, k0, i0) => {
+        w: common_vendor.f(timeList, (item, k0, i0) => {
           return common_vendor.e({
             a: common_vendor.t(item),
             b: selectedTime.value === item
           }, selectedTime.value === item ? {} : {}, {
             c: item,
-            d: common_vendor.o(($event) => selectOption("time", item), item),
+            d: common_vendor.o(($event) => handleTimeSelect(item), item),
             e: selectedTime.value === item ? 1 : ""
           });
         })
       } : {}, {
-        y: activeTab.value === "policy"
+        x: activeTab.value === "policy"
       }, activeTab.value === "policy" ? common_vendor.e({
-        z: !initialLoading.value
+        y: !initialLoading.value
       }, !initialLoading.value ? common_vendor.e({
-        A: common_vendor.unref(listarticles).listpolicy.length > 0
-      }, common_vendor.unref(listarticles).listpolicy.length > 0 ? {
-        B: common_vendor.f(common_vendor.unref(listarticles).listpolicy, (item, k0, i0) => {
+        z: currentList.value.length > 0
+      }, currentList.value.length > 0 ? {
+        A: common_vendor.f(currentList.value, (item, k0, i0) => {
           return {
             a: item.article_id,
             b: common_vendor.o(handlePolicyClick, item.article_id),
@@ -259,26 +277,26 @@ const _sfc_main = {
           };
         })
       } : {
-        C: common_vendor.t(getEmptyMessage()),
-        D: common_vendor.o(resetFilters)
+        B: common_vendor.t(getEmptyMessage()),
+        C: common_vendor.o(handleResetFilters)
       }) : {}, {
-        E: initialLoading.value
+        D: initialLoading.value
       }, initialLoading.value ? {} : {}, {
-        F: !initialLoading.value && common_vendor.unref(listarticles).listpolicy.length > 0
-      }, !initialLoading.value && common_vendor.unref(listarticles).listpolicy.length > 0 ? common_vendor.e({
-        G: common_vendor.unref(listarticles).loading
+        E: !initialLoading.value && currentList.value.length > 0
+      }, !initialLoading.value && currentList.value.length > 0 ? common_vendor.e({
+        F: common_vendor.unref(listarticles).loading
       }, common_vendor.unref(listarticles).loading ? {} : !common_vendor.unref(listarticles).hasMore ? {} : {}, {
-        H: !common_vendor.unref(listarticles).hasMore
+        G: !common_vendor.unref(listarticles).hasMore
       }) : {}, {
-        I: common_vendor.o(loadMore),
-        J: common_vendor.o(onRefresh),
-        K: refreshTriggered.value
+        H: common_vendor.o(handleLoadMore),
+        I: common_vendor.o(handleRefresh),
+        J: refreshTriggered.value
       }) : common_vendor.e({
-        L: !initialLoading.value
+        K: !initialLoading.value
       }, !initialLoading.value ? common_vendor.e({
-        M: common_vendor.unref(listarticles).listnew.length > 0
-      }, common_vendor.unref(listarticles).listnew.length > 0 ? {
-        N: common_vendor.f(common_vendor.unref(listarticles).listnew, (item, k0, i0) => {
+        L: currentList.value.length > 0
+      }, currentList.value.length > 0 ? {
+        M: common_vendor.f(currentList.value, (item, k0, i0) => {
           return {
             a: item.article_id,
             b: common_vendor.o(handleNewsClick, item.article_id),
@@ -289,20 +307,20 @@ const _sfc_main = {
           };
         })
       } : {
-        O: common_vendor.t(getEmptyMessage()),
-        P: common_vendor.o(resetFilters)
+        N: common_vendor.t(getEmptyMessage()),
+        O: common_vendor.o(handleResetFilters)
       }) : {}, {
-        Q: initialLoading.value
+        P: initialLoading.value
       }, initialLoading.value ? {} : {}, {
-        R: !initialLoading.value && common_vendor.unref(listarticles).listnew.length > 0
-      }, !initialLoading.value && common_vendor.unref(listarticles).listnew.length > 0 ? common_vendor.e({
-        S: common_vendor.unref(listarticles).loading
+        Q: !initialLoading.value && currentList.value.length > 0
+      }, !initialLoading.value && currentList.value.length > 0 ? common_vendor.e({
+        R: common_vendor.unref(listarticles).loading
       }, common_vendor.unref(listarticles).loading ? {} : !common_vendor.unref(listarticles).hasMore ? {} : {}, {
-        T: !common_vendor.unref(listarticles).hasMore
+        S: !common_vendor.unref(listarticles).hasMore
       }) : {}, {
-        U: common_vendor.o(loadMore),
-        V: common_vendor.o(onRefresh),
-        W: refreshTriggered.value
+        T: common_vendor.o(handleLoadMore),
+        U: common_vendor.o(handleRefresh),
+        V: refreshTriggered.value
       }));
     };
   }

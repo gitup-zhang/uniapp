@@ -10,24 +10,16 @@
     <!-- 搜索栏 + 筛选栏 -->
     <view class="fixed-top">
       <uni-search-bar 
-        @confirm="search" 
+        @confirm="handleSearch" 
         placeholder="搜索政策或新闻" 
-        v-model="searchbar" 
-        @cancel="cancel">
+        v-model="searchKeyword" 
+        @cancel="handleSearchCancel">
       </uni-search-bar>
-	  
-	  <!-- tab切换 -->
-	    <view>
-	      <Tabswitch v-model="activeTab" />
-	  
-	      <view v-if="activeTab === 'policy'">
-	        <!-- 政府政策内容 -->
-	      </view>
-	      <view v-else>
-	        <!-- 行业新闻内容 -->
-	      </view>
-	    </view>
-	  
+      
+      <!-- tab切换 -->
+      <view>
+        <Tabswitch v-model="activeTab" />
+      </view>
 
       <view class="filter-wrapper">
         <view class="filter-bar">
@@ -58,7 +50,7 @@
           <view class="dropdown-header">选择领域</view>
           <view 
             class="dropdown-item" 
-            @click="selectOption('domain', null)" 
+            @click="handleDomainSelect(null)" 
             :class="{ selected: selectedDomain.field_id === 0 }">
             <text class="item-icon">🌍</text>
             <text class="item-text">全部</text>
@@ -68,7 +60,7 @@
             class="dropdown-item" 
             v-for="item in field.fieldlist" 
             :key="item.field_id"
-            @click="selectOption('domain', item)" 
+            @click="handleDomainSelect(item)" 
             :class="{ selected: selectedDomain.field_id === item.field_id }">
             <text class="item-icon">📋</text>
             <text class="item-text">{{ item.field_name }}</text>
@@ -83,7 +75,7 @@
             class="dropdown-item" 
             v-for="item in timeList" 
             :key="item"
-            @click="selectOption('time', item)" 
+            @click="handleTimeSelect(item)" 
             :class="{ selected: selectedTime === item }">
             <text class="item-icon">⏰</text>
             <text class="item-text">{{ item }}</text>
@@ -94,20 +86,20 @@
     </view>
 
     <!-- 政策列表 -->
-	 <view v-if="activeTab === 'policy'">
+    <view v-if="activeTab === 'policy'">
       <scroll-view 
         class="news-scroll" 
         scroll-y="true" 
-        @scrolltolower="loadMore"
+        @scrolltolower="handleLoadMore"
         :refresher-enabled="true"
-        @refresherrefresh="onRefresh"
+        @refresherrefresh="handleRefresh"
         :refresher-triggered="refreshTriggered">
         
         <view v-if="!initialLoading">
           <!-- 有数据时显示列表 -->
-          <view v-if="listarticles.listpolicy.length > 0">
+          <view v-if="currentList.length > 0">
             <ArticlePolicyVue 
-              v-for="item in listarticles.listpolicy" 
+              v-for="item in currentList" 
               :key="item.article_id"
               :policyData="item"
               @click="handlePolicyClick" />
@@ -118,7 +110,7 @@
             <view class="empty-icon">📋</view>
             <view class="empty-title">暂无政策信息</view>
             <view class="empty-desc">{{ getEmptyMessage() }}</view>
-            <view class="empty-action" @click="resetFilters">
+            <view class="empty-action" @click="handleResetFilters">
               <text>重置筛选</text>
             </view>
           </view>
@@ -131,7 +123,7 @@
         </view>
 
         <!-- 底部加载更多状态 -->
-        <view v-if="!initialLoading && listarticles.listpolicy.length > 0" class="load-more-container">
+        <view v-if="!initialLoading && currentList.length > 0" class="load-more-container">
           <view v-if="listarticles.loading" class="loading-more">
             <view class="loading-spinner-small"></view>
             <text>加载更多...</text>
@@ -143,169 +135,149 @@
           </view>
         </view>
       </scroll-view>
-	</view>
+    </view>
 
-	<!-- 新闻列表 -->
-	<view v-else>
-	  <scroll-view 
-      class="news-scroll" 
-      scroll-y="true" 
-      @scrolltolower="loadMore"
-      :refresher-enabled="true"
-      @refresherrefresh="onRefresh"
-      :refresher-triggered="refreshTriggered">
-      
-      <view v-if="!initialLoading">
-        <!-- 有数据时显示列表 -->
-        <view v-if="listarticles.listnew.length > 0">
-          <ArticleCard 
-            v-for="item in listarticles.listnew" 
-            :key="item.article_id"
-            :newsData="item"
-            @click="handleNewsClick" />
-        </view>
+    <!-- 新闻列表 -->
+    <view v-else>
+      <scroll-view 
+        class="news-scroll" 
+        scroll-y="true" 
+        @scrolltolower="handleLoadMore"
+        :refresher-enabled="true"
+        @refresherrefresh="handleRefresh"
+        :refresher-triggered="refreshTriggered">
         
-        <!-- 空状态 -->
-        <view v-else class="empty-state">
-          <view class="empty-icon">📰</view>
-          <view class="empty-title">暂无新闻信息</view>
-          <view class="empty-desc">{{ getEmptyMessage() }}</view>
-          <view class="empty-action" @click="resetFilters">
-            <text>重置筛选</text>
+        <view v-if="!initialLoading">
+          <!-- 有数据时显示列表 -->
+          <view v-if="currentList.length > 0">
+            <ArticleCard 
+              v-for="item in currentList" 
+              :key="item.article_id"
+              :newsData="item"
+              @click="handleNewsClick" />
+          </view>
+          
+          <!-- 空状态 -->
+          <view v-else class="empty-state">
+            <view class="empty-icon">📰</view>
+            <view class="empty-title">暂无新闻信息</view>
+            <view class="empty-desc">{{ getEmptyMessage() }}</view>
+            <view class="empty-action" @click="handleResetFilters">
+              <text>重置筛选</text>
+            </view>
           </view>
         </view>
-      </view>
 
-      <!-- 初始加载状态 -->
-      <view v-if="initialLoading" class="initial-loading">
-        <view class="loading-spinner"></view>
-        <view class="loading-text">加载中...</view>
-      </view>
+        <!-- 初始加载状态 -->
+        <view v-if="initialLoading" class="initial-loading">
+          <view class="loading-spinner"></view>
+          <view class="loading-text">加载中...</view>
+        </view>
 
-      <!-- 底部加载更多状态 -->
-      <view v-if="!initialLoading && listarticles.listnew.length > 0" class="load-more-container">
-        <view v-if="listarticles.loading" class="loading-more">
-          <view class="loading-spinner-small"></view>
-          <text>加载更多...</text>
+        <!-- 底部加载更多状态 -->
+        <view v-if="!initialLoading && currentList.length > 0" class="load-more-container">
+          <view v-if="listarticles.loading" class="loading-more">
+            <view class="loading-spinner-small"></view>
+            <text>加载更多...</text>
+          </view>
+          <view v-else-if="!listarticles.hasMore" class="no-more">
+            <view class="no-more-line"></view>
+            <text>已加载全部内容</text>
+            <view class="no-more-line"></view>
+          </view>
         </view>
-        <view v-else-if="!listarticles.hasMore" class="no-more">
-          <view class="no-more-line"></view>
-          <text>已加载全部内容</text>
-          <view class="no-more-line"></view>
-        </view>
-      </view>
-    </scroll-view>
-	</view>
+      </scroll-view>
+    </view>
   </view>
 </template>
 
 <script setup>
-import { ref, onMounted,watch } from 'vue'
-import {useArticlesStore} from '@/store/Articles.js'
+import { ref, onMounted, watch, computed, nextTick, onUnmounted} from 'vue'
+import { useArticlesStore } from '@/store/Articles.js'
 import { usefieldstore } from '@/store/field.js'
-import { Dataformat,formatDate,getLastWeekDate,getLastMonthDate,getLastYearDate } from '../../utils/data'
+import { Dataformat, formatDate, getLastWeekDate, getLastMonthDate, getLastYearDate } from '../../utils/data'
 import { onShow } from '@dcloudio/uni-app'
 import Tabswitch from '@/components/Tabswitch/Tabswitch.vue'
 import ArticleCard from '@/components/ArticleCard/ArticleCard.vue'
 import ArticlePolicyVue from '../../components/ArticleCard/ArticlePolicy.vue'
 
+// Store 实例
 const listarticles = useArticlesStore()
 const field = usefieldstore()
 
+// 核心状态
 const activeTab = ref('policy')
-
-// 搜索栏
-const searchbar = ref("")
-
-// 当前打开的下拉框
+const searchKeyword = ref("")
 const currentDropdown = ref(null)
-
-// 是否精选
-const isselected=ref(0)
-
-// 初始加载状态
 const initialLoading = ref(false)
-
-// 下拉刷新状态
 const refreshTriggered = ref(false)
 
-// 初始值设为"全部"
-const selectedDomain = ref({ field_id: 0,field_code: "", field_name: '全部' })
-const selectedTime = ref('发布时间')
+// 筛选条件
+const selectedDomain = ref({ field_id: 0, field_code: "", field_name: '全部' })
+const selectedTime = ref('全部')
 
-// 时间列表
+// 时间选项
 const timeList = ['全部', '最近一周', '最近一月', '最近一年']
 
-// 定义参数查询的结构体
-const Params = { 
-  field_type: "",
-  page: 0,
-  is_selection: 0,
-  article_title: "",
-  release_time:"",
-  article_type:activeTab.value.toUpperCase()
-};
+// 页面初始化标记
+const isPageInitialized = ref(false)
 
-// 监视器，监控activeTab的变化
-watch(activeTab, (newVal, oldVal) => {
-  console.log('Tab 变化:', oldVal, '=>', newVal)
-  if (newVal === 'news') {
-    listarticles.resetpage(1)
-	resetFilters()
-	Params.article_type="NEWS"
-  } else if (newVal === 'policy') {
-    listarticles.resetpage(1)
-	resetFilters()
-	Params.article_type="POLICY"
-  }
+// 计算当前显示的列表
+const currentList = computed(() => {
+  return activeTab.value === 'policy' ? listarticles.listpolicy : listarticles.listnew
 })
 
-// 获取空状态提示文案
-function getEmptyMessage() {
-  if (searchbar.value) {
-    return `未找到与"${searchbar.value}"相关的内容，试试其他关键词吧`
+// 构建查询参数的工具函数
+const buildQueryParams = (overrides = {}) => {
+  const baseParams = {
+    field_type: selectedDomain.value.field_code || "",
+    page: 1,
+    is_selection: 0,
+    article_title: searchKeyword.value || "",
+    release_time: getTimeParam(),
+    article_type: activeTab.value.toUpperCase(),
+    ...overrides
   }
-  if (selectedDomain.value.field_id !== 0 || selectedTime.value !== '全部') {
-    return '当前筛选条件下暂无内容，试试调整筛选条件'
-  }
-  return '暂时还没有内容，请稍后再来看看'
+  
+  console.log('构建查询参数:', baseParams)
+  return baseParams
 }
 
-// 重置筛选条件
-function resetFilters() {
-  searchbar.value = ""
-  selectedDomain.value = { field_id: 0,field_code: "", field_name: '全部' }
-  selectedTime.value = '全部'
-  
-  // 重置参数
-  Params.article_title = ""
-  Params.field_type = ""
-  Params.release_time = ""
-  Params.page = 1
-  
-  // 重新加载数据
-  loadData()
-}
-
-// 下拉刷新
-async function onRefresh() {
-  refreshTriggered.value = true
-  Params.page = 1
-  
-  try {
-    await listarticles.getlistpolicy(Params)
-  } catch (error) {
-    console.error('刷新失败:', error)
-  } finally {
-    refreshTriggered.value = false
+// 获取时间参数
+const getTimeParam = () => {
+  switch (selectedTime.value) {
+    case '最近一周':
+      return getLastWeekDate()
+    case '最近一月':
+      return getLastMonthDate()
+    case '最近一年':
+      return getLastYearDate()
+    default:
+      return ""
   }
 }
 
 // 统一的数据加载方法
-async function loadData() {
-  initialLoading.value = true
+const loadData = async (isRefresh = false, showLoading = true) => {
   try {
-    await listarticles.getlistpolicy(Params)
+    if (!isRefresh && showLoading) {
+      initialLoading.value = true
+    }
+    
+    const params = buildQueryParams({ 
+      page: 1,
+      isRefresh 
+    })
+    
+    console.log('开始加载数据:', { activeTab: activeTab.value, params })
+    
+    await listarticles.getlistpolicy(params)
+    
+    console.log('数据加载完成:', {
+      type: activeTab.value,
+      count: currentList.value.length
+    })
+    
   } catch (error) {
     console.error('加载数据失败:', error)
     uni.showToast({
@@ -313,141 +285,192 @@ async function loadData() {
       icon: 'none'
     })
   } finally {
-    initialLoading.value = false
+    if (!isRefresh && showLoading) {
+      initialLoading.value = false
+    }
   }
 }
 
-// 搜索
-function search() {
-	Params.article_title=searchbar.value
-	Params.page=1
-  loadData()
-  console.log("搜索关键词:", searchbar.value)
+// Tab 切换处理
+watch(activeTab, async (newTab, oldTab) => {
+  if (!isPageInitialized.value) return
+  
+  console.log('Tab 切换:', oldTab, '=>', newTab)
+  
+  // 重置页面状态
+  listarticles.resetpage(1)
+  
+  // 等待下一个 tick 确保状态更新完成
+  await nextTick()
+  
+  // 加载新 tab 的数据
+  await loadData(false, true)
+})
+
+// 搜索处理
+const handleSearch = async () => {
+  console.log('执行搜索:', searchKeyword.value)
+  await loadData(false, true)
 }
 
 // 取消搜索
-function cancel() {
-  searchbar.value = ""
-  Params.page=1
-  Params.article_title=searchbar.value
-  loadData()
+const handleSearchCancel = async () => {
+  searchKeyword.value = ""
+  await loadData(false, true)
+}
+
+// 下拉刷新
+const handleRefresh = async () => {
+  console.log('下拉刷新')
+  refreshTriggered.value = true
+  
+  try {
+    await loadData(true, false)
+  } catch (error) {
+    console.error('刷新失败:', error)
+  } finally {
+    refreshTriggered.value = false
+  }
 }
 
 // 加载更多
-function loadMore() {
+const handleLoadMore = async () => {
   if (listarticles.loading || !listarticles.hasMore) {
+    console.log('加载更多被阻止:', { 
+      loading: listarticles.loading, 
+      hasMore: listarticles.hasMore 
+    })
     return
   }
   
-  Params.page = listarticles.page + 1
-  listarticles.getarticlemore(Params)
-  console.log("加载更多，当前页码:", Params.page)
+  const params = buildQueryParams({ 
+    page: listarticles.page + 1 
+  })
+  
+  console.log('加载更多:', params)
+  await listarticles.getarticlemore(params)
+}
+
+// 领域筛选
+const handleDomainSelect = async (domain) => {
+  if (domain === null) {
+    selectedDomain.value = { field_id: 0, field_code: "", field_name: '全部' }
+  } else {
+    selectedDomain.value = domain
+  }
+  
+  currentDropdown.value = null
+  console.log('选择领域:', selectedDomain.value)
+  
+  await loadData(false, true)
+}
+
+// 时间筛选
+const handleTimeSelect = async (time) => {
+  selectedTime.value = time
+  currentDropdown.value = null
+  
+  console.log('选择时间:', time)
+  await loadData(false, true)
+}
+
+// 重置筛选条件
+const handleResetFilters = async () => {
+  console.log('重置筛选条件')
+  
+  searchKeyword.value = ""
+  selectedDomain.value = { field_id: 0, field_code: "", field_name: '全部' }
+  selectedTime.value = '全部'
+  
+  await loadData(false, true)
 }
 
 // 切换下拉框
-function toggleDropdown(type) {
+const toggleDropdown = (type) => {
   currentDropdown.value = currentDropdown.value === type ? null : type
 }
 
-// 选择筛选项
-function selectOption(type, value) {
-  if (type === 'domain') {
-    if (value === null) {
-      selectedDomain.value = { field_id: 0,field_code: "", field_name: '全部' }
-	  Params.page=1
-	  Params.field_type=selectedDomain.value.field_code
-      loadData()
-    } else {
-		console.log("value值：",value)
-      selectedDomain.value = value
-	  Params.page=1
-	  Params.field_type=selectedDomain.value.field_code
-	  console.log("params:",Params)
-      loadData()
-    }
+// 获取空状态提示文案
+const getEmptyMessage = () => {
+  if (searchKeyword.value) {
+    return `未找到与"${searchKeyword.value}"相关的内容，试试其他关键词吧`
   }
-
-  if (type === 'time') {
-	  console.log(value)
-    selectedTime.value = value
-	if (value === '最近一周') {
-	      Params.release_time = getLastWeekDate();
-	    } else if (value === '最近一月') {
-	      Params.release_time = getLastMonthDate();
-	    } else if (value === '最近一年') {
-	      Params.release_time = getLastYearDate();
-	    } else {
-	      Params.release_time = '';
-	    }
-	
-	    Params.page = 1;
-	    loadData()
+  if (selectedDomain.value.field_id !== 0 || selectedTime.value !== '全部') {
+    return '当前筛选条件下暂无内容，试试调整筛选条件'
   }
-
-  currentDropdown.value = null
+  return '暂时还没有内容，请稍后再来看看'
 }
 
-// 处理政策点击
+// 点击事件处理
 const handlePolicyClick = (policyItem) => {
-  console.log('点击了政策:', policyItem)
+  console.log('点击政策:', policyItem)
   uni.navigateTo({
     url: `/pages/detail/articledetail?id=${policyItem.article_id}`
   })
 }
 
-// 处理新闻点击
 const handleNewsClick = (newsItem) => {
-  console.log('点击了新闻:', newsItem.article_id)
+  console.log('点击新闻:', newsItem)
   uni.navigateTo({
     url: `/pages/detail/articledetail?id=${newsItem.article_id}`
   })
 }
 
-// 跳转详情
-function OnClick(id) {
-	console.log("测试的Id:"+id)
-  uni.navigateTo({
-    url: `/pages/detail/articledetail?id=${id}`
-  })
-}
-
-// 在页面显示时判断来源
-onShow(() => {
-  const source = uni.getStorageSync('tabSource') || 'tabbar'
-  field.getfield()
-  
-  if (source === 'switchTab') {
-    console.log('来源：通过 uni.switchTab() 跳转');
-	Params.is_selection=1
-	Params.page=1
-	//loadData()
-	Params.article_type="NEWS"
-	loadData()
-	Params.article_type=activeTab.value.toUpperCase()
-  } else {
-    console.log('来源：用户点击 tabBar 进入');
-	isselected.value=0
-	Params.page=1
-	//loadData()
-	Params.article_type="NEWS"
-	loadData()
-	Params.article_type=activeTab.value.toUpperCase()
+// 页面显示时的处理
+onShow(async () => {
+  try {
+    console.log('页面显示 - onShow')
+    
+    // 获取字段列表
+    await field.getfield()
+    
+    // 判断页面来源
+    const source = uni.getStorageSync('tabSource') || 'tabbar'
+    console.log('页面来源:', source)
+    
+    // 如果是通过 switchTab 跳转来的，设置为精选模式并切换到新闻tab
+    if (source === 'switchTab') {
+      activeTab.value = 'news'
+      // 这里可以设置精选参数
+      // selectedDomain.value = { field_id: 1, field_code: "featured", field_name: '精选' }
+    }
+    
+    // 清除来源标记
+    uni.removeStorageSync('tabSource')
+    
+    // 如果是首次初始化，加载数据
+    if (!isPageInitialized.value) {
+      console.log('首次初始化页面')
+      isPageInitialized.value = true
+      await loadData(false, true)
+    } else {
+      console.log('页面已初始化，跳过数据加载')
+    }
+    
+  } catch (error) {
+    console.error('页面初始化失败:', error)
+    uni.showToast({
+      title: '页面初始化失败',
+      icon: 'none'
+    })
   }
-
-  // 清除标记，避免干扰下一次跳转
-  uni.removeStorageSync('tabSource')
 })
 
+// 组件卸载时清理
+onUnmounted(() => {
+  console.log('页面卸载')
+  isPageInitialized.value = false
+})
 </script>
 
 <style>
+/* 原有样式保持不变 */
 .page {
   height: 100vh;
   overflow: hidden;
   position: relative;
 }
 
-/* 固定顶部区域（搜索 + 筛选） */
 .fixed-top {
   position: fixed;
   top: 178rpx;
@@ -459,7 +482,6 @@ onShow(() => {
   box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 
-/* 滚动区域 */
 .news-scroll {
   position: fixed;
   top: calc(178rpx + 260rpx);
@@ -471,14 +493,12 @@ onShow(() => {
   background-color: #f5f5f5;
 }
 
-/* 导航栏标题 */
 .navbar-title {
   font-size: 20px;
   font-weight: bold;
   color: white;
 }
 
-/* 筛选区域 */
 .filter-wrapper {
   position: relative;
   z-index: 1;
@@ -537,7 +557,6 @@ onShow(() => {
   transform: rotate(180deg);
 }
 
-/* 下拉遮罩 */
 .dropdown-overlay {
   position: fixed;
   top: 0;
@@ -548,7 +567,6 @@ onShow(() => {
   z-index: 98;
 }
 
-/* 下拉列表 */
 .dropdown-list {
   position: absolute;
   top: 100%;
@@ -607,7 +625,6 @@ onShow(() => {
   font-weight: 700;
 }
 
-/* 空状态样式 */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -655,7 +672,6 @@ onShow(() => {
   transform: scale(0.95);
 }
 
-/* 初始加载状态 */
 .initial-loading {
   display: flex;
   flex-direction: column;
@@ -680,12 +696,10 @@ onShow(() => {
   margin-top: 20rpx;
 }
 
-/* 底部加载更多容器 */
 .load-more-container {
   padding: 20rpx;
 }
 
-/* 加载更多状态 */
 .loading-more {
   display: flex;
   align-items: center;
@@ -705,7 +719,6 @@ onShow(() => {
   animation: spin 1s linear infinite;
 }
 
-/* 没有更多内容 */
 .no-more {
   display: flex;
   align-items: center;
@@ -723,7 +736,6 @@ onShow(() => {
   max-width: 120rpx;
 }
 
-/* 旋转动画 */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
