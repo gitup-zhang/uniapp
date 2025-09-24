@@ -1,8 +1,9 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
-const store_Notice = require("../../store/Notice.js");
+require("../../store/Notice.js");
 const store_Home = require("../../store/Home.js");
+const store_Event = require("../../store/Event.js");
 if (!Math) {
   (CustomNavbar + showInforVue)();
 }
@@ -11,9 +12,10 @@ const showInforVue = () => "../../components/show-infor/show-infor.js";
 const _sfc_main = {
   __name: "index",
   setup(__props) {
-    const usenotice = store_Notice.useNoticeStore();
     const selected = store_Home.useSelectedstore();
+    const EventStore = store_Event.useEventstore();
     const currentTab = common_vendor.ref(0);
+    const firstEight = common_vendor.computed(() => EventStore.eventing.slice(0, 8));
     function handleMorearticle() {
       common_vendor.index.setStorageSync("tabSource", "switchTab");
       common_vendor.index.switchTab({
@@ -31,6 +33,13 @@ const _sfc_main = {
         url: `/pages/detail/articledetail?id=${id}`
       });
     }
+    function onclickevent(id) {
+      console.log(id);
+      const disable = false;
+      common_vendor.index.navigateTo({
+        url: `/pages/detail/activitydetail?id=${id}&disable=${disable}`
+      });
+    }
     function switchTab(index) {
       currentTab.value = index;
     }
@@ -44,14 +53,9 @@ const _sfc_main = {
         handleMorearticle();
       }
     }
-    function noticeclick(id) {
-      common_vendor.index.navigateTo({
-        url: `/pages/detail/noticedetail?id=${id}`
-      });
-    }
     common_vendor.onMounted(() => {
-      usenotice.getnoticestore();
       selected.getselected();
+      EventStore.getlisting(10);
     });
     return (_ctx, _cache) => {
       return {
@@ -62,23 +66,28 @@ const _sfc_main = {
         e: common_assets._imports_2,
         f: common_vendor.o(handleMoreactivity),
         g: common_vendor.p({
-          title: "为您推荐"
+          title: "服务导航"
         }),
-        h: common_vendor.f(common_vendor.unref(usenotice).notice, (item, k0, i0) => {
+        h: common_vendor.t(common_vendor.unref(selected).policytotal),
+        i: common_vendor.t(common_vendor.unref(selected).newstotal),
+        j: common_vendor.t(common_vendor.unref(EventStore).eventcount.Eventing),
+        k: currentTab.value === 0 ? 1 : "",
+        l: common_vendor.o(($event) => switchTab(0)),
+        m: currentTab.value === 1 ? 1 : "",
+        n: common_vendor.o(($event) => switchTab(1)),
+        o: currentTab.value === 2 ? 1 : "",
+        p: common_vendor.o(($event) => switchTab(2)),
+        q: common_vendor.o(handleMoreClick),
+        r: common_vendor.f(firstEight.value, (item, index, i0) => {
           return {
-            a: common_vendor.t(item.title),
-            b: common_vendor.o(($event) => noticeclick(item.id), item.id),
-            c: item.id
+            a: common_vendor.t(index + 1),
+            b: index < 3 ? 1 : "",
+            c: common_vendor.t(item.title),
+            d: item.id,
+            e: common_vendor.o(($event) => onclickevent(item.id), item.id)
           };
         }),
-        i: currentTab.value === 0 ? 1 : "",
-        j: common_vendor.o(($event) => switchTab(0)),
-        k: currentTab.value === 1 ? 1 : "",
-        l: common_vendor.o(($event) => switchTab(1)),
-        m: currentTab.value === 2 ? 1 : "",
-        n: common_vendor.o(($event) => switchTab(2)),
-        o: common_vendor.o(handleMoreClick),
-        p: common_vendor.f(common_vendor.unref(selected).news, (item, index, i0) => {
+        s: common_vendor.f(common_vendor.unref(selected).policys, (item, index, i0) => {
           return {
             a: common_vendor.t(index + 1),
             b: index < 3 ? 1 : "",
@@ -87,7 +96,7 @@ const _sfc_main = {
             e: common_vendor.o(($event) => onclickactivity(item.article_id), item.article_id)
           };
         }),
-        q: common_vendor.f(common_vendor.unref(selected).policys, (item, index, i0) => {
+        t: common_vendor.f(common_vendor.unref(selected).news, (item, index, i0) => {
           return {
             a: common_vendor.t(index + 1),
             b: index < 3 ? 1 : "",
@@ -96,17 +105,8 @@ const _sfc_main = {
             e: common_vendor.o(($event) => onclickactivity(item.article_id), item.article_id)
           };
         }),
-        r: common_vendor.f(common_vendor.unref(selected).news, (item, index, i0) => {
-          return {
-            a: common_vendor.t(index + 1),
-            b: index < 3 ? 1 : "",
-            c: common_vendor.t(item.article_title),
-            d: item.article_id,
-            e: common_vendor.o(($event) => onclickactivity(item.article_id), item.article_id)
-          };
-        }),
-        s: currentTab.value,
-        t: common_vendor.o(onSwiperChange)
+        v: currentTab.value,
+        w: common_vendor.o(onSwiperChange)
       };
     };
   }

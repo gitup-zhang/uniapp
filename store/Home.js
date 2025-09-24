@@ -5,8 +5,10 @@ import {getArticleList} from '@/new-apis/articles.js'
 export const useSelectedstore=defineStore('selected',()=>{
 	// 精选政策
 	const policys=ref([])
+	const policytotal=ref(0)
 	// 精选新闻
 	const news=ref([])
+	const newstotal=ref(0)
 	
 	const getselected=async()=>{
 			  
@@ -15,11 +17,13 @@ export const useSelectedstore=defineStore('selected',()=>{
 			    mask: true
 			  })
 			  try{
-				  const res_new=await getArticleList({is_selection:1,page_size:8,article_type:"NEWS"})
+				  const res_new=await getArticleList({page_size:8,article_type:"NEWS"})
 				  
 				  news.value=res_new.data
-				  const res_policy=await getArticleList({is_selection:1,page_size:8,article_type:"POLICY"})
+				  newstotal.value=res_new.total
+				  const res_policy=await getArticleList({page_size:8,article_type:"POLICY"})
 				  policys.value=res_policy.data
+				  policytotal.value=res_policy.total
 				  
 			  }catch(error){
 				  console.log(error)
@@ -32,7 +36,10 @@ export const useSelectedstore=defineStore('selected',()=>{
 	return{
 				  news,
 				  policys,
-				 getselected 
+				 getselected,
+				  policytotal,
+				  newstotal
+				  
 			  }
 	
 })

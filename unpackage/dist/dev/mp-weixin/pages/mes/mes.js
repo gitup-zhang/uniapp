@@ -85,8 +85,8 @@ const _sfc_main = {
       return 0;
     };
     const goToLogin = () => {
-      common_vendor.index.switchTab({
-        url: "../mymessage/mymessage"
+      common_vendor.index.navigateTo({
+        url: "/pages/detail/Login"
       });
     };
     const loadUserMessages = async (isRefresh = false) => {

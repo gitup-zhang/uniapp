@@ -22,6 +22,7 @@ const _sfc_main = {
   __name: "news",
   setup(__props) {
     const EventStore = store_Event.useEventstore();
+    const firstTwo = common_vendor.computed(() => EventStore.eventing.slice(0, 2));
     function change(e) {
       const clickedIndex = e.detail.index;
       console.log("点击了第", clickedIndex, "个宫格");
@@ -50,7 +51,6 @@ const _sfc_main = {
       });
     }
     common_vendor.onShow(() => {
-      EventStore.getlisting(2);
       EventStore.getlisoutdate(3);
     });
     return (_ctx, _cache) => {
@@ -67,7 +67,7 @@ const _sfc_main = {
           type: "line"
         }),
         c: common_vendor.o(goMorehotactivity),
-        d: common_vendor.f(common_vendor.unref(EventStore).eventing, (item, k0, i0) => {
+        d: common_vendor.f(firstTwo.value, (item, k0, i0) => {
           return {
             a: "26b1a250-4-" + i0 + "," + ("26b1a250-3-" + i0),
             b: common_vendor.p({

@@ -44,9 +44,14 @@ export const useArticlesStore=defineStore('articlelist',()=>{
 			
 			// 根据文章类型分别处理数据
 			if(signal === "POLICY"){
-				listpolicy.value = res.data || []
+				
+				if (isDifferent(listpolicy.value, res.data)) {
+				    listpolicy.value = res.data;
+				  }
 			} else {
-				listnew.value = res.data || []
+				if (isDifferent(listnew.value, res.data)) {
+				    listnew.value = res.data;
+				  }
 			}
 			
 			// 如果是第一页且没有数据，显示空状态
@@ -78,6 +83,14 @@ export const useArticlesStore=defineStore('articlelist',()=>{
 				uni.hideLoading()
 			}
 		}
+	}
+	// 比较器,防止重复访问
+	function isDifferent(oldArr, newArr) {
+	  if (oldArr.length !== newArr.length) return true;
+	  for (let i = 0; i < oldArr.length; i++) {
+	    if (oldArr[i].article_id !== newArr[i].article_id) return true; // 用唯一标识判断
+	  }
+	  return false;
 	}
 
 	// 加载更多文章

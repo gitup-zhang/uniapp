@@ -14,7 +14,7 @@
 	
 	<!-- 热门活动 -->
 			<uni-grid :column="2" :highlight="false" :show-border="false" @change="change" :square="false">
-				<uni-grid-item v-for="item in EventStore.eventing" :index="item.id" :key="item.id">
+				<uni-grid-item v-for="item in firstTwo" :index="item.id" :key="item.id">
 <!-- 					<view class="grid-item-box" style="background-color: #fff;" > -->
 						  <ActivityCard
 						    :imgSrc="item.cover_image_url"
@@ -45,7 +45,7 @@
 </template>
 
 <script setup>
-import {ref,onMounted} from 'vue'
+import {ref,onMounted,computed} from 'vue'
 import { onLoad,onShow } from '@dcloudio/uni-app'
 import {useEventstore} from '@/store/Event.js'
 import ActivityCard from '@/components/ActivityCard/ActivityCard.vue'
@@ -54,6 +54,8 @@ import HorizontalActivityCard from '@/components/HorizontalActivityCard/Horizont
 
 // 初始化pinia
 const EventStore=useEventstore()
+
+const firstTwo = computed(() => EventStore.eventing.slice(0, 2));
 
 
 // 热门活动点击
@@ -90,7 +92,7 @@ function goMorehistoryactivity(){
 }
 // 初始化
 onShow(()=>{
-	EventStore.getlisting(2)
+	
 	EventStore.getlisoutdate(3)
 })
 </script>

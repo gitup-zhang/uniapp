@@ -148,7 +148,8 @@
 			"path" : "pages/detail/Login",
 			"style" : 
 			{
-				"navigationBarTitleText" : ""
+				"navigationBarTitleText" : "",
+				"navigationStyle": "custom"
 			}
 		}
 		

@@ -239,8 +239,8 @@ const getCurrentUnreadCount = () => {
 
 // 登录相关方法
 const goToLogin = () => {
-  uni.switchTab({
-    url: '../mymessage/mymessage'
+  uni.navigateTo({
+    url: '/pages/detail/Login'
   })
 }
 

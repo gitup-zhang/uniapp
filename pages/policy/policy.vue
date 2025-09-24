@@ -420,7 +420,7 @@ onShow(() => {
     console.log('来源：通过 uni.switchTab() 跳转');
 	Params.is_selection=1
 	Params.page=1
-	loadData()
+	//loadData()
 	Params.article_type="NEWS"
 	loadData()
 	Params.article_type=activeTab.value.toUpperCase()
@@ -428,7 +428,7 @@ onShow(() => {
     console.log('来源：用户点击 tabBar 进入');
 	isselected.value=0
 	Params.page=1
-	loadData()
+	//loadData()
 	Params.article_type="NEWS"
 	loadData()
 	Params.article_type=activeTab.value.toUpperCase()

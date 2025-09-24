@@ -14,7 +14,7 @@ const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-ico
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_load_more + ActivityTicket + _easycom_uni_popup)();
+  (_easycom_uni_icons + ActivityTicket + _easycom_uni_load_more + _easycom_uni_popup)();
 }
 const ActivityTicket = () => "../../components/ActivityTicket/ActivityTicket.js";
 const _sfc_main = {
@@ -24,25 +24,7 @@ const _sfc_main = {
     const SYSTEMINFO = common_vendor.index.getSystemInfoSync();
     const statusBarHeight = common_vendor.ref(SYSTEMINFO.statusBarHeight);
     const loadingPopup = common_vendor.ref(null);
-    const isLogging = common_vendor.ref(false);
     const loadingText = common_vendor.ref({ more: "加载中..." });
-    const loginType = common_vendor.ref("account");
-    const accountForm = common_vendor.reactive({
-      username: "",
-      password: "",
-      usernameError: "",
-      passwordError: ""
-    });
-    const smsForm = common_vendor.reactive({
-      phone: "",
-      code: "",
-      phoneError: "",
-      codeError: ""
-    });
-    const smsCountdown = common_vendor.ref(0);
-    const isValidPhone = common_vendor.computed(() => {
-      return /^1[3-9]\d{9}$/.test(smsForm.phone);
-    });
     const myActivityData = common_vendor.ref(null);
     const hasActivities = common_vendor.computed(() => {
       return myActivityData.value && Object.keys(myActivityData.value).length > 0;
@@ -86,229 +68,14 @@ const _sfc_main = {
         return "";
       return phone.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
     };
-    const switchLoginType = (type) => {
-      loginType.value = type;
-      accountForm.username = "";
-      accountForm.password = "";
-      accountForm.usernameError = "";
-      accountForm.passwordError = "";
-      smsForm.phone = "";
-      smsForm.code = "";
-      smsForm.phoneError = "";
-      smsForm.codeError = "";
-    };
-    const validateUsername = () => {
-      if (!accountForm.username.trim()) {
-        accountForm.usernameError = "请输入账号或手机号";
-        return false;
-      }
-      accountForm.usernameError = "";
-      return true;
-    };
-    const validatePassword = () => {
-      if (!accountForm.password.trim()) {
-        accountForm.passwordError = "请输入密码";
-        return false;
-      }
-      if (accountForm.password.length < 6) {
-        accountForm.passwordError = "密码长度不能少于6位";
-        return false;
-      }
-      accountForm.passwordError = "";
-      return true;
-    };
-    const validatePhone = () => {
-      if (!smsForm.phone.trim()) {
-        smsForm.phoneError = "请输入手机号";
-        return false;
-      }
-      if (!isValidPhone.value) {
-        smsForm.phoneError = "请输入正确的手机号格式";
-        return false;
-      }
-      smsForm.phoneError = "";
-      return true;
-    };
-    const validateSmsCode = () => {
-      if (!smsForm.code.trim()) {
-        smsForm.codeError = "请输入验证码";
-        return false;
-      }
-      if (smsForm.code.length !== 6) {
-        smsForm.codeError = "验证码为6位数字";
-        return false;
-      }
-      smsForm.codeError = "";
-      return true;
-    };
-    const clearUsernameError = () => {
-      if (accountForm.usernameError) {
-        accountForm.usernameError = "";
-      }
-    };
-    const clearPasswordError = () => {
-      if (accountForm.passwordError) {
-        accountForm.passwordError = "";
-      }
-    };
-    const clearPhoneError = () => {
-      if (smsForm.phoneError) {
-        smsForm.phoneError = "";
-      }
-    };
-    const clearCodeError = () => {
-      if (smsForm.codeError) {
-        smsForm.codeError = "";
-      }
-    };
-    const handleAccountLogin = async () => {
-      const isUsernameValid = validateUsername();
-      const isPasswordValid = validatePassword();
-      if (!isUsernameValid || !isPasswordValid) {
-        return;
-      }
-      try {
-        isLogging.value = true;
-        const loginResult = await callAccountLoginAPI({
-          username: accountForm.username,
-          password: accountForm.password
-        });
-        await userInfo.saveLoginInfo(loginResult);
-        await refreshUserData();
-        common_vendor.index.showToast({
-          title: "登录成功",
-          icon: "success"
-        });
-      } catch (error) {
-        console.error("账号登录失败:", error);
-        common_vendor.index.showToast({
-          title: error.message || "登录失败，请重试",
-          icon: "error"
-        });
-      } finally {
-        isLogging.value = false;
-      }
-    };
-    const sendSmsCode = async () => {
-      if (!validatePhone()) {
-        return;
-      }
-      try {
-        smsCountdown.value = 60;
-        const timer = setInterval(() => {
-          smsCountdown.value--;
-          if (smsCountdown.value <= 0) {
-            clearInterval(timer);
-          }
-        }, 1e3);
-        common_vendor.index.showToast({
-          title: "验证码已发送",
-          icon: "success"
-        });
-      } catch (error) {
-        console.error("发送验证码失败:", error);
-        common_vendor.index.showToast({
-          title: error.message || "发送失败，请重试",
-          icon: "error"
-        });
-      }
-    };
-    const handleSmsLogin = async () => {
-      const isPhoneValid = validatePhone();
-      const isCodeValid = validateSmsCode();
-      if (!isPhoneValid || !isCodeValid) {
-        return;
-      }
-      try {
-        isLogging.value = true;
-        const loginResult = await callSmsLoginAPI({
-          phone: smsForm.phone,
-          code: smsForm.code
-        });
-        await userInfo.saveLoginInfo(loginResult);
-        await refreshUserData();
-        common_vendor.index.showToast({
-          title: "登录成功",
-          icon: "success"
-        });
-      } catch (error) {
-        console.error("短信登录失败:", error);
-        common_vendor.index.showToast({
-          title: error.message || "登录失败，请重试",
-          icon: "error"
-        });
-      } finally {
-        isLogging.value = false;
-      }
-    };
-    const wechatlogin = async () => {
-      try {
-        isLogging.value = true;
-        const res = await userInfo.loginWithWeChat();
-        isLogging.value = false;
-        if (res) {
-          initPage();
-        }
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    const handleForgotPassword = () => {
+    const goToLogin = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/auth/forgot-password"
-      });
-    };
-    const callAccountLoginAPI = async (data) => {
-      return new Promise((resolve, reject) => {
-        common_vendor.index.request({
-          url: "https://your-api-domain.com/api/account-login",
-          method: "POST",
-          data,
-          success: (res) => {
-            if (res.data.success) {
-              resolve(res.data.data);
-            } else {
-              reject(new Error(res.data.message || "登录失败"));
-            }
-          },
-          fail: (error) => {
-            reject(error);
-          }
-        });
-      });
-    };
-    const callSmsLoginAPI = async (data) => {
-      return new Promise((resolve, reject) => {
-        common_vendor.index.request({
-          url: "https://your-api-domain.com/api/sms-login",
-          method: "POST",
-          data,
-          success: (res) => {
-            if (res.data.success) {
-              resolve(res.data.data);
-            } else {
-              reject(new Error(res.data.message || "登录失败"));
-            }
-          },
-          fail: (error) => {
-            reject(error);
-          }
-        });
+        url: "/pages/detail/Login"
       });
     };
     const goToProfile = () => {
       common_vendor.index.navigateTo({
         url: "/pages/detail/profile"
-      });
-    };
-    const showUserAgreement = () => {
-      common_vendor.index.navigateTo({
-        url: "/pages/agreement/user"
-      });
-    };
-    const showPrivacyPolicy = () => {
-      common_vendor.index.navigateTo({
-        url: "/pages/agreement/privacy"
       });
     };
     const discoverActivities = () => {
@@ -376,171 +143,78 @@ const _sfc_main = {
       return common_vendor.e({
         a: statusBarHeight.value + "px",
         b: !common_vendor.unref(userInfo).signal
-      }, !common_vendor.unref(userInfo).signal ? common_vendor.e({
+      }, !common_vendor.unref(userInfo).signal ? {
         c: common_assets._imports_0$1,
-        d: loginType.value === "account" ? 1 : "",
-        e: common_vendor.o(($event) => switchLoginType("account")),
-        f: loginType.value === "sms" ? 1 : "",
-        g: common_vendor.o(($event) => switchLoginType("sms")),
-        h: loginType.value === "wechat" ? 1 : "",
-        i: common_vendor.o(($event) => switchLoginType("wechat")),
-        j: loginType.value === "account"
-      }, loginType.value === "account" ? common_vendor.e({
-        k: common_vendor.p({
+        d: common_vendor.p({
           type: "person",
-          size: "20",
-          color: "#999"
-        }),
-        l: isLogging.value,
-        m: common_vendor.o(validateUsername),
-        n: common_vendor.o([($event) => accountForm.username = $event.detail.value, clearUsernameError]),
-        o: accountForm.username,
-        p: accountForm.usernameError ? 1 : "",
-        q: accountForm.usernameError
-      }, accountForm.usernameError ? {
-        r: common_vendor.t(accountForm.usernameError)
-      } : {}, {
-        s: common_vendor.p({
-          type: "locked",
-          size: "20",
-          color: "#999"
-        }),
-        t: isLogging.value,
-        v: common_vendor.o(validatePassword),
-        w: common_vendor.o([($event) => accountForm.password = $event.detail.value, clearPasswordError]),
-        x: accountForm.password,
-        y: common_vendor.o(handleForgotPassword),
-        z: accountForm.passwordError ? 1 : "",
-        A: accountForm.passwordError
-      }, accountForm.passwordError ? {
-        B: common_vendor.t(accountForm.passwordError)
-      } : {}, {
-        C: isLogging.value
-      }, isLogging.value ? {
-        D: common_vendor.p({
-          status: "loading",
-          color: "#fff",
-          ["content-text"]: {
-            contentnomore: ""
-          }
-        })
-      } : {}, {
-        E: common_vendor.o(handleAccountLogin),
-        F: isLogging.value
-      }) : {}, {
-        G: loginType.value === "sms"
-      }, loginType.value === "sms" ? common_vendor.e({
-        H: common_vendor.p({
-          type: "phone",
-          size: "20",
-          color: "#999"
-        }),
-        I: isLogging.value,
-        J: common_vendor.o(validatePhone),
-        K: common_vendor.o([($event) => smsForm.phone = $event.detail.value, clearPhoneError]),
-        L: smsForm.phone,
-        M: smsForm.phoneError ? 1 : "",
-        N: smsForm.phoneError
-      }, smsForm.phoneError ? {
-        O: common_vendor.t(smsForm.phoneError)
-      } : {}, {
-        P: common_vendor.p({
-          type: "chatboxes",
-          size: "20",
-          color: "#999"
-        }),
-        Q: isLogging.value,
-        R: common_vendor.o(validateSmsCode),
-        S: common_vendor.o([($event) => smsForm.code = $event.detail.value, clearCodeError]),
-        T: smsForm.code,
-        U: common_vendor.t(smsCountdown.value > 0 ? `${smsCountdown.value}s` : "获取验证码"),
-        V: common_vendor.o(sendSmsCode),
-        W: !isValidPhone.value || smsCountdown.value > 0,
-        X: smsForm.codeError ? 1 : "",
-        Y: smsForm.codeError
-      }, smsForm.codeError ? {
-        Z: common_vendor.t(smsForm.codeError)
-      } : {}, {
-        aa: isLogging.value
-      }, isLogging.value ? {
-        ab: common_vendor.p({
-          status: "loading",
-          color: "#fff",
-          ["content-text"]: {
-            contentnomore: ""
-          }
-        })
-      } : {}, {
-        ac: common_vendor.o(handleSmsLogin),
-        ad: isLogging.value
-      }) : {}, {
-        ae: loginType.value === "wechat"
-      }, loginType.value === "wechat" ? {
-        af: common_vendor.p({
-          type: "weixin",
-          size: "60",
-          color: "#1aad19"
-        }),
-        ag: common_vendor.p({
-          type: "weixin",
           size: "20",
           color: "#fff"
         }),
-        ah: common_vendor.o((...args) => _ctx.handlePhoneAuth && _ctx.handlePhoneAuth(...args)),
-        ai: isLogging.value,
-        aj: common_vendor.o(wechatlogin)
-      } : {}, {
-        ak: common_vendor.o(showUserAgreement),
-        al: common_vendor.o(showPrivacyPolicy)
-      }) : common_vendor.e({
-        am: common_vendor.unref(userInfo).info.avatar_url || "/static/icon/empty.png",
-        an: common_vendor.t(common_vendor.unref(userInfo).info.nickname || "用户"),
-        ao: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
-        ap: common_vendor.p({
+        e: common_vendor.o(goToLogin),
+        f: common_vendor.p({
+          type: "calendar",
+          size: "24",
+          color: "#667eea"
+        }),
+        g: common_vendor.p({
+          type: "person",
+          size: "24",
+          color: "#667eea"
+        }),
+        h: common_vendor.p({
+          type: "chat",
+          size: "24",
+          color: "#667eea"
+        })
+      } : common_vendor.e({
+        i: common_vendor.unref(userInfo).info.avatar_url || "/static/icon/empty.png",
+        j: common_vendor.t(common_vendor.unref(userInfo).info.nickname || "用户"),
+        k: common_vendor.t(formatPhoneNumber(common_vendor.unref(userInfo).info.phone)),
+        l: common_vendor.p({
           type: "right",
           size: "18",
           color: "rgba(255,255,255,0.8)"
         }),
-        aq: common_vendor.o(goToProfile),
-        ar: common_assets._imports_1$1,
-        as: common_vendor.t(common_vendor.unref(userInfo).eventcount.Eventbefore || 0),
-        at: common_vendor.t(common_vendor.unref(userInfo).eventcount.Eventing || 0),
-        av: common_vendor.t(common_vendor.unref(userInfo).eventcount.Evented || 0),
-        aw: common_vendor.p({
+        m: common_vendor.o(goToProfile),
+        n: common_assets._imports_1$1,
+        o: common_vendor.t(common_vendor.unref(userInfo).eventcount.Eventbefore || 0),
+        p: common_vendor.t(common_vendor.unref(userInfo).eventcount.Eventing || 0),
+        q: common_vendor.t(common_vendor.unref(userInfo).eventcount.Evented || 0),
+        r: common_vendor.p({
           type: "right",
           size: "14",
           color: "#999"
         }),
-        ax: common_vendor.o(viewAllActivities),
-        ay: hasActivities.value
+        s: common_vendor.o(viewAllActivities),
+        t: hasActivities.value
       }, hasActivities.value ? {
-        az: common_vendor.o(onAction),
-        aA: common_vendor.o(onCancel),
-        aB: common_vendor.p({
+        v: common_vendor.o(onAction),
+        w: common_vendor.o(onCancel),
+        x: common_vendor.p({
           activityData: myActivityData.value
         })
       } : {
-        aC: common_vendor.p({
+        y: common_vendor.p({
           type: "search",
           size: "16",
           color: "#fff"
         }),
-        aD: common_vendor.o(discoverActivities),
-        aE: common_vendor.p({
+        z: common_vendor.o(discoverActivities),
+        A: common_vendor.p({
           type: "refresh",
           size: "16",
           color: "#667eea"
         }),
-        aF: common_vendor.o(refreshActivities)
+        B: common_vendor.o(refreshActivities)
       }), {
-        aG: common_vendor.p({
+        C: common_vendor.p({
           status: "loading",
           ["content-text"]: loadingText.value
         }),
-        aH: common_vendor.sr(loadingPopup, "a5a8e0a1-13", {
+        D: common_vendor.sr(loadingPopup, "a5a8e0a1-9", {
           "k": "loadingPopup"
         }),
-        aI: common_vendor.p({
+        E: common_vendor.p({
           type: "center"
         })
       });

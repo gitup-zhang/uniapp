@@ -28,9 +28,13 @@ const useArticlesStore = common_vendor.defineStore("articlelist", () => {
         hasMore.value = false;
       }
       if (signal === "POLICY") {
-        listpolicy.value = res.data || [];
+        if (isDifferent(listpolicy.value, res.data)) {
+          listpolicy.value = res.data;
+        }
       } else {
-        listnew.value = res.data || [];
+        if (isDifferent(listnew.value, res.data)) {
+          listnew.value = res.data;
+        }
       }
       if (res.page === 1 && (!res.data || res.data.length === 0)) {
         console.log("当前列表为空");
@@ -55,6 +59,15 @@ const useArticlesStore = common_vendor.defineStore("articlelist", () => {
       }
     }
   };
+  function isDifferent(oldArr, newArr) {
+    if (oldArr.length !== newArr.length)
+      return true;
+    for (let i = 0; i < oldArr.length; i++) {
+      if (oldArr[i].article_id !== newArr[i].article_id)
+        return true;
+    }
+    return false;
+  }
   const getarticlemore = async (params) => {
     let signal = params.article_type;
     if (loading.value || !hasMore.value) {

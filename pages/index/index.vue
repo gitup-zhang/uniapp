@@ -1,132 +1,150 @@
 <template>
   <view class="container">
     <CustomNavbar />
-    <!-- 页面内容 -->
-	<showInforVue  title="为您推荐" >
-		<template v-slot:body>
-		<view class="recommend-list">
-		  <view class="recommend-item" @click="handleMorearticle">
-		    <view class="icon-wrapper policy-icon">
-		      <image src="/static/icon/policy_index.png" class="icon-image" mode="aspectFit" />
-		    </view>
-		    <text class="label">政府政策</text>
-		  </view>
-		
-		  <view class="recommend-item" @click="handleMorearticle">
-		    <view class="icon-wrapper news-icon">
-		      <image src="/static/icon/new_index.png" class="icon-image" mode="aspectFit" />
-		    </view>
-		    <text class="label">行业新闻</text>
-		  </view>
-		  
-		  <view class="recommend-item" @click="handleMoreactivity">
-		    <view class="icon-wrapper activity-icon">
-		      <image src="/static/icon/convention_index.png" class="icon-image" mode="aspectFit" />
-		    </view>
-		    <text class="label">大会报名</text>
-		  </view>
-		</view>
-		</template>
-	</showInforVue>
-	
-	<!-- 优化后的公告信息 -->
-	<view class="notice-section">
-	  <view class="notice-card">
-	    <view class="notice-header">
-	      <view class="notice-icon">
-	        <text class="icon-text">📢</text>
-	      </view>
-	      <text class="notice-title">系统公告</text>
-	      <view class="notice-badge">重要</view>
-	    </view>
-	    <view class="notice-content">
-	      <swiper class="notice-swiper" autoplay="true" vertical="true" interval="4000" circular="true">
-	        <swiper-item v-for="item in usenotice.notice" :key="item.id">
-	          <text class="notice-text" @click="noticeclick(item.id)">{{item.title}}</text>
-	        </swiper-item>
-	      </swiper>
-	    </view>
-	  </view>
-	</view>
-	   
-	<!-- 可滑动的热搜卡片 -->
-	<view class="hot-search-section">
-	  <view class="hot-search-card">
-	    <view class="hot-search-header">
-	      <view class="tab-navigation">
-	        <view class="tab-item" :class="{ active: currentTab === 0 }" @click="switchTab(0)">
-	          <text class="tab-text">热门活动</text>
-	        </view>
-	        <view class="tab-item" :class="{ active: currentTab === 1 }" @click="switchTab(1)">
-	          <text class="tab-text">精选政策</text>
-	        </view>
-	        <view class="tab-item" :class="{ active: currentTab === 2 }" @click="switchTab(2)">
-	          <text class="tab-text">精选新闻</text>
-	        </view>
-	      </view>
-	      <view class="more-btn" @click="handleMoreClick">
-	        <text class="more-text">更多</text>
-	        <text class="more-arrow">></text>
-	      </view>
-	    </view>
-	    
-	    <swiper class="content-swiper" :current="currentTab" @change="onSwiperChange">
-	      <!-- 热门活动 -->
-	      <swiper-item>
-	        <view class="hot-list">
-	          <view class="hot-item" v-for="(item, index) in selected.news" :key="item.article_id" @click="onclickactivity(item.article_id)">
-	            <view class="hot-rank" :class="{ 'top-three': index < 3 }">{{ index + 1 }}</view>
-	            <text class="hot-title">{{ item.article_title }}</text>
-	            <view class="hot-badge activity-badge">活动</view>
-	          </view>
-	        </view>
-	      </swiper-item>
-	      
-	      <!-- 精选政策 -->
-	      <swiper-item>
-	        <view class="hot-list">
-	          <view class="hot-item" v-for="(item, index) in selected.policys" :key="item.article_id" @click="onclickactivity(item.article_id)">
-	            <view class="hot-rank" :class="{ 'top-three': index < 3 }">{{ index + 1 }}</view>
-	            <text class="hot-title">{{ item.article_title }}</text>
-	            <view class="hot-badge policy-badge">政策</view>
-	          </view>
-	        </view>
-	      </swiper-item>
-	      
-	      <!-- 精选新闻 -->
-	      <swiper-item>
-	        <view class="hot-list">
-	          <view class="hot-item" v-for="(item, index) in selected.news" :key="item.article_id" @click="onclickactivity(item.article_id)">
-	            <view class="hot-rank" :class="{ 'top-three': index < 3 }">{{ index + 1 }}</view>
-	            <text class="hot-title">{{ item.article_title }}</text>
-	            <view class="hot-badge news-badge">新闻</view>
-	          </view>
-	        </view>
-	      </swiper-item>
-	    </swiper>
-	  </view>
-	</view>
-  
+    
+    <!-- 功能导航区域 - 紧凑设计 -->
+    <showInforVue title="服务导航">
+      <template v-slot:body>
+        <view class="service-grid">
+          <view class="service-item" @click="handleMorearticle">
+            <view class="service-icon-wrapper policy-icon">
+              <image src="/static/icon/policy_index.png" class="service-icon" mode="aspectFit" />
+            </view>
+            <text class="service-label">政府政策</text>
+          </view>
+
+          <view class="service-item" @click="handleMorearticle">
+            <view class="service-icon-wrapper news-icon">
+              <image src="/static/icon/new_index.png" class="service-icon" mode="aspectFit" />
+            </view>
+            <text class="service-label">行业新闻</text>
+          </view>
+          
+          <view class="service-item" @click="handleMoreactivity">
+            <view class="service-icon-wrapper activity-icon">
+              <image src="/static/icon/convention_index.png" class="service-icon" mode="aspectFit" />
+            </view>
+            <text class="service-label">大会报名</text>
+          </view>
+        </view>
+      </template>
+    </showInforVue>
+    
+    <!-- 统计数据展示 - 紧凑卡片式设计 -->
+    <view class="stats-section">
+      <view class="stats-card">
+        <view class="stats-item">
+          <text class="stats-number">{{selected.policytotal}}</text>
+          <text class="stats-label">政策</text>
+        </view>
+        <view class="stats-item">
+          <text class="stats-number">{{selected.newstotal}}</text>
+          <text class="stats-label">新闻</text>
+        </view>
+        <view class="stats-item">
+          <text class="stats-number">{{EventStore.eventcount.Eventing}}</text>
+          <text class="stats-label">活动</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 精选内容区域 -->
+    <view class="featured-section">
+      <view class="featured-card">
+        <view class="featured-header">
+          <view class="tab-navigation">
+            <view class="tab-item" :class="{ active: currentTab === 0 }" @click="switchTab(0)">
+              <text class="tab-text">热门活动</text>
+            </view>
+            <view class="tab-item" :class="{ active: currentTab === 1 }" @click="switchTab(1)">
+              <text class="tab-text">精选政策</text>
+            </view>
+            <view class="tab-item" :class="{ active: currentTab === 2 }" @click="switchTab(2)">
+              <text class="tab-text">精选新闻</text>
+            </view>
+          </view>
+          <view class="more-btn" @click="handleMoreClick">
+            <text class="more-text">更多</text>
+            <text class="more-arrow">→</text>
+          </view>
+        </view>
+        
+        <swiper class="content-swiper" :current="currentTab" @change="onSwiperChange">
+          <!-- 热门活动 -->
+          <swiper-item>
+            <scroll-view class="content-scroll" scroll-y="true">
+              <view class="content-list">
+                <view class="content-item" v-for="(item,index) in firstEight" :key="item.id" @click="onclickevent(item.id)">
+                  <view class="item-left">
+                    <view class="item-rank" :class="{ 'top-three': index < 3 }">{{ index + 1 }}</view>
+                    <view class="item-content">
+                      <text class="item-title">{{ item.title }}</text>
+                    </view>
+                  </view>
+                  <view class="item-badge activity-badge">活动</view>
+                </view>
+              </view>
+            </scroll-view>
+          </swiper-item>
+          
+          <!-- 精选政策 -->
+          <swiper-item>
+            <scroll-view class="content-scroll" scroll-y="true">
+              <view class="content-list">
+                <view class="content-item" v-for="(item, index) in selected.policys" :key="item.article_id" @click="onclickactivity(item.article_id)">
+                  <view class="item-left">
+                    <view class="item-rank" :class="{ 'top-three': index < 3 }">{{ index + 1 }}</view>
+                    <view class="item-content">
+                      <text class="item-title">{{ item.article_title }}</text>
+                    </view>
+                  </view>
+                  <view class="item-badge policy-badge">政策</view>
+                </view>
+              </view>
+            </scroll-view>
+          </swiper-item>
+          
+          <!-- 精选新闻 -->
+          <swiper-item>
+            <scroll-view class="content-scroll" scroll-y="true">
+              <view class="content-list">
+                <view class="content-item" v-for="(item, index) in selected.news" :key="item.article_id" @click="onclickactivity(item.article_id)">
+                  <view class="item-left">
+                    <view class="item-rank" :class="{ 'top-three': index < 3 }">{{ index + 1 }}</view>
+                    <view class="item-content">
+                      <text class="item-title">{{ item.article_title }}</text>
+                    </view>
+                  </view>
+                  <view class="item-badge news-badge">新闻</view>
+                </view>
+              </view>
+            </scroll-view>
+          </swiper-item>
+        </swiper>
+      </view>
+    </view>
   </view>
- 
 </template>
 
-
 <script setup>
-import {ref,onMounted} from 'vue'
+import {ref,onMounted,computed} from 'vue'
+import { onLoad,onShow } from '@dcloudio/uni-app'
 import CustomNavbar from '@/components/CustomNavbar/CustomNavbar.vue'
 import showInforVue from '../../components/show-infor/show-infor.vue';
 import {useNoticeStore} from '@/store/Notice.js'
 import {useSelectedstore} from '@/store/Home.js'
+import {useEventstore} from '@/store/Event.js'
 
 // 获得公告对象
-const usenotice=useNoticeStore()
+// const usenotice=useNoticeStore()
 // 获得精选对象
 const selected=useSelectedstore()
+const EventStore=useEventstore()
 
 // 当前选中的标签页
 const currentTab = ref(0)
 
+const firstEight = computed(() => EventStore.eventing.slice(0, 8));
 
 // 获取更多新闻和政策
 function handleMorearticle(){
@@ -134,23 +152,27 @@ function handleMorearticle(){
 	uni.switchTab({
 		url: '../policy/policy'
 	});
-
 }
+
 // 获取更多活动
 function handleMoreactivity(){
 	uni.switchTab({
 		url: '../news/news'
 	});
-	
-	
 }
-
 
 // 获取精选的政策和新闻信息
 function onclickactivity(id){
 	console.log(id)
 	uni.navigateTo({
 	  url: `/pages/detail/articledetail?id=${id}`
+	})
+}
+function onclickevent(id){
+	console.log(id)
+	const disable = false
+	uni.navigateTo({
+	  url: `/pages/detail/activitydetail?id=${id}&disable=${disable}`
 	})
 }
 
@@ -172,19 +194,14 @@ function handleMoreClick() {
     handleMorearticle() // 政策和新闻
   }
 }
-function noticeclick(id){
-	uni.navigateTo({
-		 url: `/pages/detail/noticedetail?id=${id}`
-	})
-}
-
 
 // 初始化
 onMounted(()=>{
-	usenotice.getnoticestore()
+	//usenotice.getnoticestore()
 	selected.getselected()
+	EventStore.getlisting(10)
 })
-    
+
 
 </script>
 
@@ -192,34 +209,43 @@ onMounted(()=>{
 .container {
   padding: 0;
   margin: 0;
-  
   min-height: 100vh;
- background-color:#f5f5f5 ;
+  background: linear-gradient(180deg, #f8faff 0%, #f5f7fa 100%);
 }
-/* 为您推荐 */
-.recommend-list {
+
+/* 服务导航区域 - 紧凑设计 */
+.service-grid {
   display: flex;
-  
-	justify-content: flex-start;
-  margin-top: 10rpx;
-  gap: 60rpx;
-  
-}
-.recommend-item {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  margin-top: 16rpx;
 }
 
+.service-item {
+  background: white;
+  border-radius: 16rpx;
+  padding: 28rpx 16rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  flex: 1;
+  position: relative;
+}
 
-.icon-wrapper {
-  width: 120rpx;
-  height: 120rpx;
-  border-radius: 60rpx;
-  margin-bottom: 10rpx;
+.service-item:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 1rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+.service-icon-wrapper {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  margin: 0 auto 16rpx;
   display: flex;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.12);
 }
 
 .policy-icon {
@@ -229,188 +255,88 @@ onMounted(()=>{
 .news-icon {
   background: linear-gradient(135deg, #1fa2ff, #12d8fa);
 }
-.activity-icon{
-	background: linear-gradient(135deg, #90EE90, #228B22);
-	
+
+.activity-icon {
+  background: linear-gradient(135deg, #90EE90, #228B22);
 }
 
-.icon-image {
-  width: 64rpx;
-  height: 64rpx;
+.service-icon {
+  width: 36rpx;
+  height: 36rpx;
 }
 
-.label {
-  font-size: 28rpx;
+.service-label {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 500;
   color: #333;
 }
-/* 精选政策新闻 */
-.news-item {
+
+/* 统计数据区域 - 紧凑卡片式设计 */
+.stats-section {
+  margin: 20rpx 30rpx;
+}
+
+.stats-card {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx 20rpx;
   display: flex;
   align-items: center;
-  margin-bottom: 40rpx; /* 增加底部间距，使新闻条目之间有更多空间 */
-}
-
-.news-item:last-child {
-  margin-bottom: 0; /* 最后一个新闻条目不设置底部间距 */
-}
-
-.news-image {
-  width: 240rpx; /* 增大图片宽度 */
-  height: 180rpx; /* 增大图片高度 */
-  border-radius: 10rpx;
-  margin-right: 40rpx; /* 增大图片与文字内容的间距 */
-  flex-shrink: 0; /* 防止图片被压缩 */
-  background-color: #f0f0f0; /* 图片加载前的占位背景色 */
-}
-
-.news-content {
-  flex: 1; /* 占据剩余空间 */
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.news-title {
-  font-size: 36rpx; /* 增大标题字体大小 */
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 15rpx; /* 增大标题与简介的间距 */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2; /* 限制标题显示两行 */
-  -webkit-box-orient: vertical;
-}
-
-.news-summary {
-  font-size: 30rpx; /* 增大简介字体大小 */
-  color: #666;
-  margin-bottom: 15rpx; /* 增大简介与标签的间距 */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2; /* 限制简介显示两行 */
-  -webkit-box-orient: vertical;
-}
-
-.hot-tag {
-  background-color: #e60012; /* 红色背景 */
-  color: #fff; /* 白色字体 */
-  font-size: 26rpx; /* 增大标签字体大小 */
-  padding: 6rpx 16rpx; /* 增大内边距 */
-  border-radius: 10rpx; /* 增大圆角 */
-  align-self: flex-start; /* 标签靠左对齐 */
-  line-height: 1; /* 确保文字垂直居中 */
-}
-
-/* 优化后的公告布局 */
-.notice-section {
-  padding: 0rpx 30rpx;
-  margin-bottom: 10rpx;
-  background-color: #f5f5f5;
-}
-
-.notice-card {
-  background: white;
-  border-radius: 20rpx;
-  padding: 24rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
-  border-left: 6rpx solid #667eea;
+  justify-content: space-around;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
   position: relative;
   overflow: hidden;
 }
 
-.notice-card::before {
+.stats-card::before {
   content: '';
   position: absolute;
   top: 0;
+  left: 0;
   right: 0;
-  width: 80rpx;
-  height: 80rpx;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-radius: 50%;
-  transform: translate(50%, -50%);
-  opacity: 0.1;
+  height: 3rpx;
+  background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #4facfe);
 }
 
-.notice-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16rpx;
-}
-
-.notice-icon {
-  width: 48rpx;
-  height: 48rpx;
-  border-radius: 50%;
-  background: rgba(102, 126, 234, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 16rpx;
-}
-
-.icon-text {
-  font-size: 24rpx;
-}
-
-.notice-title {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #2d3748;
+.stats-item {
+  text-align: center;
   flex: 1;
 }
 
-.notice-badge {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-  color: white;
-  font-size: 20rpx;
+.stats-number {
+  display: block;
+  font-size: 36rpx;
   font-weight: bold;
-  padding: 6rpx 12rpx;
-  border-radius: 12rpx;
-  box-shadow: 0 2rpx 8rpx rgba(255, 107, 107, 0.3);
+  color: #333;
+  margin-bottom: 4rpx;
 }
 
-.notice-content {
-  height: 60rpx;
-  position: relative;
+.stats-label {
+  display: block;
+  font-size: 24rpx;
+  color: #666;
 }
 
-.notice-swiper {
-  height: 100%;
+/* 精选内容区域 */
+.featured-section {
+  margin: 20rpx 30rpx 20rpx;
 }
 
-.notice-text {
-  font-size: 28rpx;
-  color: #4a5568;
-  line-height: 60rpx;
-  padding-right: 20rpx;
-}
-
-.more-text {
-  font-size: 26rpx;
-  color: #999;
-}
-
-/* 热搜卡片样式 */
-.hot-search-section {
-  padding: 0rpx 30rpx;
-  margin-bottom: 20rpx;
-}
-
-.hot-search-card {
+.featured-card {
   background: white;
   border-radius: 20rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
 }
 
-.hot-search-header {
+.featured-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20rpx 24rpx 0;
-  border-bottom: 2rpx solid #f5f5f5;
+  padding: 24rpx 30rpx 16rpx;
+  background: linear-gradient(135deg, #f8faff, #f0f4ff);
+  border-bottom: 1rpx solid #f0f0f0;
 }
 
 .tab-navigation {
@@ -420,7 +346,7 @@ onMounted(()=>{
 
 .tab-item {
   position: relative;
-  padding-bottom: 16rpx;
+  padding-bottom: 8rpx;
 }
 
 .tab-item.active .tab-text {
@@ -434,13 +360,13 @@ onMounted(()=>{
   bottom: 0;
   left: 0;
   right: 0;
-  height: 4rpx;
+  height: 3rpx;
   background: linear-gradient(90deg, #667eea, #764ba2);
   border-radius: 2rpx;
 }
 
 .tab-text {
-  font-size: 30rpx;
+  font-size: 28rpx;
   color: #666;
   transition: all 0.3s ease;
 }
@@ -449,86 +375,114 @@ onMounted(()=>{
   display: flex;
   align-items: center;
   padding: 8rpx 16rpx;
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(102, 126, 234, 0.08);
   border-radius: 16rpx;
+  transition: all 0.3s ease;
 }
 
-.more-btn .more-text {
+.more-btn:active {
+  background: rgba(102, 126, 234, 0.15);
+}
+
+.more-text {
   font-size: 24rpx;
   color: #667eea;
-  margin-right: 4rpx;
+  margin-right: 6rpx;
 }
 
 .more-arrow {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #667eea;
 }
 
 .content-swiper {
-  height: 680rpx;
+  height: 700rpx;
 }
 
-.hot-list {
-  padding: 24rpx;
+.content-scroll {
   height: 100%;
-  overflow-y: auto;
 }
 
-.hot-item {
+.content-list {
+  padding: 20rpx 30rpx;
+}
+
+.content-item {
   display: flex;
   align-items: center;
-  padding: 16rpx 0;
-  border-bottom: 1rpx solid #f5f5f5;
-  position: relative;
-  transition: background-color 0.2s ease;
+  justify-content: space-between;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  transition: all 0.2s ease;
 }
 
-.hot-item:hover {
-  background-color: #f8f9ff;
+.content-item:active {
+  background-color: #f8faff;
+  transform: translateX(8rpx);
 }
 
-.hot-item:last-child {
+.content-item:last-child {
   border-bottom: none;
 }
 
-.hot-rank {
+.item-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.item-rank {
   width: 48rpx;
   height: 48rpx;
-  border-radius: 8rpx;
-  background: #e2e8f0;
-  color: #718096;
-  font-size: 26rpx;
+  border-radius: 12rpx;
+  background: #f0f0f0;
+  color: #999;
+  font-size: 28rpx;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 20rpx;
+  margin-right: 24rpx;
   flex-shrink: 0;
 }
 
-.hot-rank.top-three {
+.item-rank.top-three {
   background: linear-gradient(135deg, #ff6b6b, #ee5a52);
   color: white;
-  box-shadow: 0 2rpx 8rpx rgba(255, 107, 107, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(255, 107, 107, 0.3);
 }
 
-.hot-title {
+.item-content {
   flex: 1;
-  font-size: 28rpx;
-  color: #2d3748;
+  min-width: 0;
+}
+
+.item-title {
+  font-size: 30rpx;
+  color: #333;
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  margin-right: 16rpx;
+  margin-bottom: 12rpx;
 }
 
-.hot-badge {
-  font-size: 20rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 12rpx;
+.item-meta {
+  display: flex;
+  gap: 20rpx;
+}
+
+.item-time, .item-views {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.item-badge {
+  font-size: 22rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 16rpx;
   color: white;
   font-weight: bold;
   flex-shrink: 0;
