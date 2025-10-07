@@ -178,11 +178,18 @@ const _sfc_main = {
         console.log("页面显示 - onShow");
         await field.getfield();
         const source = common_vendor.index.getStorageSync("tabSource") || "tabbar";
+        const articlesort = common_vendor.index.getStorageSync("article") || "news";
         console.log("页面来源:", source);
+        console.log("文章类型", articlesort);
         if (source === "switchTab") {
-          activeTab.value = "news";
+          if (articlesort === "news") {
+            activeTab.value = "news";
+          } else {
+            activeTab.value = "policy";
+          }
         }
         common_vendor.index.removeStorageSync("tabSource");
+        common_vendor.index.removeStorageSync("article");
         if (!isPageInitialized.value) {
           console.log("首次初始化页面");
           isPageInitialized.value = true;

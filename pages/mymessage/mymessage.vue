@@ -347,10 +347,10 @@ const cancelSignUp = async (activityData) => {
       icon: 'success'
     })
   } catch (error) {
-    console.error('取消报名失败:', error)
+    console.error('取消报名失败:', error.data)
     uni.showToast({
-      title: '取消失败',
-      icon: 'error'
+      title: error.data.message,
+      icon: 'none'
     })
   }
 }

@@ -27,14 +27,6 @@
         <view class="tabs-container">
           <view 
             class="filter-tab" 
-            :class="{ active: activeTab === 'all' }"
-            @tap="switchTab('all')"
-          >
-            <text class="tab-text">全部</text>
-            <view class="tab-badge" v-if="totalUnreadCount > 0">{{ totalUnreadCount > 99 ? '99+' : totalUnreadCount }}</view>
-          </view>
-          <view 
-            class="filter-tab" 
             :class="{ active: activeTab === 'system' }"
             @tap="switchTab('system')"
           >
@@ -62,73 +54,99 @@
         </view>
       </view>
       
-      <!-- 消息列表 -->
-      <scroll-view
-        class="message-list"
+      <!-- 自定义下拉刷新容器 -->
+      <view 
+        class="pull-to-refresh-container"
         :style="{ marginTop: statusBarHeight + 44 + 56 + 'px' }"
-        scroll-y="true"
-        enable-back-to-top="true"
-        :bounces="false"
-        @scrolltolower="loadMoreMessages"
-        :refresher-enabled="true"
-        :refresher-triggered="isRefreshing"
-        @refresherrefresh="handleRefresh"
-        @refresherrestore="handleRefreshRestore"
+        @touchstart="handleTouchStart"
+        @touchmove="handleTouchMove"
+        @touchend="handleTouchEnd"
       >
-        <view class="message-list-content">
-          <!-- 加载状态 -->
-          <view v-if="isLoading && !hasLoadedOnce" class="loading-state">
-            <view class="loading-spinner"></view>
-            <text class="loading-text">加载中...</text>
-          </view>
-          
-          <!-- 系统消息卡片列表 - 仅在全部或系统消息标签下显示 -->
-          <template v-if="activeTab === 'all' || activeTab === 'system'">
-            <MessageCard
-              v-for="msg in systemMessages"
-              :key="msg.event_id"
-              :message="msg"
-              :message-type="'system'"
-              :loading="isLoading"
-              @tap="handleMessageTap"
-              @markAsRead="handleMarkAsRead"
-            />
-          </template>
-          
-          <!-- 群组消息卡片列表 - 仅在全部或群组消息标签下显示 -->
-          <template v-if="activeTab === 'all' || activeTab === 'group'">
-            <MessageCard
-              v-for="msg in groupMessages"
-              :key="msg.event_id"
-              :message="msg"
-              :message-type="'group'"
-              :loading="isLoading"
-              @tap="handleMessageTap"
-              @markAsRead="handleMarkAsRead"
-            />
-          </template>
-          
-          <!-- 空状态 -->
-          <view v-if="!isLoading && shouldShowEmpty" class="empty-state">
-            <view class="empty-animation">
-              <view class="empty-icon">💬</view>
-              <view class="empty-waves">
-                <view class="wave wave1"></view>
-                <view class="wave wave2"></view>
-                <view class="wave wave3"></view>
-              </view>
+        <!-- 刷新指示器 -->
+        <view 
+          class="refresh-indicator" 
+          :style="{ 
+            height: pullDistance + 'px',
+            opacity: pullDistance > 0 ? 1 : 0
+          }"
+        >
+          <view class="refresh-content" v-if="pullDistance > 10">
+            <view 
+              class="refresh-icon" 
+              :class="{ 
+                'refreshing': isRefreshing,
+                'ready': pullDistance >= refreshThreshold && !isRefreshing
+              }"
+            >
+              <text class="icon-text" v-if="!isRefreshing">↓</text>
+              <view class="loading-circle" v-else></view>
             </view>
-            <text class="empty-title">{{ getEmptyTitle() }}</text>
-            <text class="empty-desc">{{ getEmptyDesc() }}</text>
-          </view>
-          
-          <!-- 底部加载更多 -->
-          <view v-if="isLoadingMore" class="load-more">
-            <view class="loading-spinner small"></view>
-            <text class="load-more-text">加载更多...</text>
+            <text class="refresh-text">{{ getRefreshText() }}</text>
           </view>
         </view>
-      </scroll-view>
+        
+        <!-- 消息列表 -->
+        <scroll-view
+          class="message-list"
+          scroll-y="true"
+          enable-back-to-top="true"
+          @scrolltolower="loadMoreMessages"
+        >
+          <view class="message-list-content" :style="{ transform: `translateY(${pullDistance}px)` }">
+            <!-- 加载状态 -->
+            <view v-if="isLoading && !hasLoadedOnce" class="loading-state">
+              <view class="loading-spinner"></view>
+              <text class="loading-text">加载中...</text>
+            </view>
+            
+            <!-- 系统消息卡片列表 - 仅在系统消息标签下显示 -->
+            <template v-if="activeTab === 'system'">
+              <MessageCard
+                v-for="msg in systemMessages"
+                :key="msg.event_id"
+                :message="msg"
+                :message-type="'system'"
+                :loading="isLoading"
+                @tap="handleMessageTap"
+                @markAsRead="handleMarkAsRead"
+              />
+            </template>
+            
+            <!-- 群组消息卡片列表 - 仅在群组消息标签下显示 -->
+            <template v-if="activeTab === 'group'">
+              <MessageCard
+                v-for="msg in groupMessages"
+                :key="msg.event_id"
+                :message="msg"
+                :message-type="'group'"
+                :loading="isLoading"
+                @tap="handleMessageTap"
+                @markAsRead="handleMarkAsRead"
+              />
+            </template>
+            
+            <!-- 空状态 -->
+            <view v-if="!isLoading && shouldShowEmpty" class="empty-state">
+              <view class="empty-animation">
+                <view class="empty-icon">💬</view>
+                <view class="empty-waves">
+                  <view class="wave wave1"></view>
+                  <view class="wave wave2"></view>
+                  <view class="wave wave3"></view>
+                </view>
+              </view>
+              <text class="empty-title">{{ getEmptyTitle() }}</text>
+              <text class="empty-desc">{{ getEmptyDesc() }}</text>
+            </view>
+            
+            <!-- 底部加载更多 -->
+            <view v-if="isLoadingMore" class="load-more">
+              <view class="loading-spinner small"></view>
+              <text class="load-more-text">加载更多...</text>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
     </view>
   </view>
 </template>
@@ -138,7 +156,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useInfoStore } from '@/store/Info.js'
 import MessageCard from '@/components/MessageCard/MessageCard.vue'
 import { useMesstore } from '@/store/mes.js'
-import { onLoad, onShow, onPullDownRefresh } from '@dcloudio/uni-app'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 
 // 获取状态管理
 const userStore = useInfoStore()
@@ -146,19 +164,37 @@ const mesStore = useMesstore()
 
 // 响应式数据
 const statusBarHeight = ref(0)
-const activeTab = ref('all')
+const activeTab = ref('system') // 默认显示系统消息
 const isLoading = ref(false)
 const isRefreshing = ref(false)
 const isLoadingMore = ref(false)
 const hasLoadedOnce = ref(false)
 
+// 自定义下拉刷新相关数据
+const startY = ref(0)
+const currentY = ref(0)
+const pullDistance = ref(0)
+const isPulling = ref(false)
+const isAtTop = ref(true)
+const refreshThreshold = 20 // 刷新阈值（px）
+const maxPullDistance = 30 // 最大下拉距离
+
 // 登录状态计算属性
 const isLoggedIn = computed(() => userStore.signal)
 
 // 未读数量计算属性
-const totalUnreadCount = computed(() => mesStore.totalUnreadCount)
 const systemUnreadCount = computed(() => mesStore.systemUnreadCount)
 const groupUnreadCount = computed(() => mesStore.groupUnreadCount)
+
+// 计算总未读数量（用于一键已读按钮）
+const totalUnreadCount = computed(() => {
+  if (activeTab.value === 'system') {
+    return systemUnreadCount.value
+  } else if (activeTab.value === 'group') {
+    return groupUnreadCount.value
+  }
+  return 0
+})
 
 // 系统消息列表
 const systemMessages = computed(() => {
@@ -174,9 +210,7 @@ const groupMessages = computed(() => {
 
 // 是否显示空状态
 const shouldShowEmpty = computed(() => {
-  if (activeTab.value === 'all') {
-    return systemMessages.value.length === 0 && groupMessages.value.length === 0
-  } else if (activeTab.value === 'system') {
+  if (activeTab.value === 'system') {
     return systemMessages.value.length === 0
   } else if (activeTab.value === 'group') {
     return groupMessages.value.length === 0
@@ -207,12 +241,6 @@ onLoad(async () => {
   }
 })
 
-// 下拉刷新
-onPullDownRefresh(async () => {
-  await handleRefresh()
-  uni.stopPullDownRefresh()
-})
-
 // 监听登录状态变化
 watch(isLoggedIn, async (newVal) => {
   if (newVal && !hasLoadedOnce.value) {
@@ -225,11 +253,97 @@ watch(isLoggedIn, async (newVal) => {
   }
 })
 
+// 优化后的下拉刷新事件处理
+const handleTouchStart = (e) => {
+  if (isRefreshing.value) return
+  
+  startY.value = e.touches[0].clientY
+  currentY.value = e.touches[0].clientY
+  
+  // 检查是否在顶部
+  const query = uni.createSelectorQuery()
+  query.select('.message-list').scrollOffset()
+  query.exec((res) => {
+    if (res[0]) {
+      isAtTop.value = res[0].scrollTop <= 0
+    }
+  })
+}
+
+const handleTouchMove = (e) => {
+  if (isRefreshing.value || !isAtTop.value) return
+  
+  currentY.value = e.touches[0].clientY
+  const distance = currentY.value - startY.value
+  
+  if (distance > 0) {
+    isPulling.value = true
+    // 使用阻尼效果，距离越大阻力越大
+    const damping = 0.5
+    pullDistance.value = Math.min(distance * damping, maxPullDistance)
+  } else {
+    isPulling.value = false
+    pullDistance.value = 0
+  }
+}
+
+const handleTouchEnd = async () => {
+  if (!isPulling.value || isRefreshing.value) {
+    pullDistance.value = 0
+    isPulling.value = false
+    return
+  }
+  
+  if (pullDistance.value >= refreshThreshold) {
+    // 触发刷新
+    isRefreshing.value = true
+    isPulling.value = false
+    // 固定在刷新位置
+    pullDistance.value = refreshThreshold
+    
+    try {
+      await loadUserMessages(true)
+      uni.showToast({
+        title: '刷新成功',
+        icon: 'success',
+        duration: 1000
+      })
+    } catch (error) {
+      console.error('刷新失败:', error)
+      uni.showToast({
+        title: '刷新失败',
+        icon: 'none',
+        duration: 1500
+      })
+    } finally {
+      // 延迟恢复，让用户看到刷新完成
+      setTimeout(() => {
+        pullDistance.value = 0
+        isRefreshing.value = false
+      }, 300)
+    }
+  } else {
+    // 未达到阈值，快速回弹
+    pullDistance.value = 0
+    isPulling.value = false
+  }
+}
+
+// 获取刷新文本
+const getRefreshText = () => {
+  if (isRefreshing.value) {
+    return '刷新中'
+  } else if (pullDistance.value >= refreshThreshold) {
+    return '松开刷新'
+  } else if (isPulling.value) {
+    return '下拉刷新'
+  }
+  return ''
+}
+
 // 获取当前标签的未读数量
 const getCurrentUnreadCount = () => {
-  if (activeTab.value === 'all') {
-    return totalUnreadCount.value
-  } else if (activeTab.value === 'system') {
+  if (activeTab.value === 'system') {
     return systemUnreadCount.value
   } else if (activeTab.value === 'group') {
     return groupUnreadCount.value
@@ -267,7 +381,6 @@ const loadUserMessages = async (isRefresh = false) => {
   } catch (error) {
     console.error('加载消息失败:', error)
     
-    // 根据错误类型显示不同提示
     let errorMsg = '加载消息失败'
     if (error.message && error.message.includes('网络')) {
       errorMsg = '网络连接异常，请检查网络设置'
@@ -286,35 +399,6 @@ const loadUserMessages = async (isRefresh = false) => {
   }
 }
 
-// 处理刷新
-const handleRefresh = async () => {
-  if (isRefreshing.value) return
-  
-  isRefreshing.value = true
-  try {
-    await loadUserMessages(true)
-    uni.showToast({
-      title: '刷新成功',
-      icon: 'success',
-      duration: 1500
-    })
-  } catch (error) {
-    console.error('刷新失败:', error)
-    uni.showToast({
-      title: '刷新失败',
-      icon: 'error',
-      duration: 1500
-    })
-  } finally {
-    isRefreshing.value = false
-  }
-}
-
-// 处理刷新恢复
-const handleRefreshRestore = () => {
-  isRefreshing.value = false
-}
-
 // 加载更多消息（上拉加载）
 const loadMoreMessages = async () => {
   if (isLoading.value || isRefreshing.value || isLoadingMore.value) return
@@ -323,8 +407,6 @@ const loadMoreMessages = async () => {
   isLoadingMore.value = true
   
   try {
-    // 这里可以实现分页加载逻辑
-    // 暂时只是延迟一下，避免频繁触发
     await new Promise(resolve => setTimeout(resolve, 1000))
   } catch (error) {
     console.error('加载更多失败:', error)
@@ -347,7 +429,6 @@ const handleMessageTap = (msg, messageType) => {
   console.log('点击消息卡片:', msg, '消息类型:', messageType)
   
   try {
-    // 根据消息类型跳转到相应的详情页面
     if (messageType === 'system') {
       console.log("系统消息跳转")
       uni.navigateTo({
@@ -371,7 +452,6 @@ const handleMessageTap = (msg, messageType) => {
 
 // 处理单个消息标记已读
 const handleMarkAsRead = async (msg, messageType) => {
-  // 使用新的未读判断逻辑
   if (!msg || !mesStore.isMessageUnread(msg)) return
   
   try {
@@ -395,7 +475,6 @@ const handleMarkAsRead = async (msg, messageType) => {
 // 获取空状态标题
 const getEmptyTitle = () => {
   const titles = {
-    all: '暂无消息',
     system: '暂无系统消息',
     group: '暂无群组消息'
   }
@@ -405,7 +484,6 @@ const getEmptyTitle = () => {
 // 获取空状态描述
 const getEmptyDesc = () => {
   const descs = {
-    all: '目前还没有任何消息',
     system: '暂时没有系统通知',
     group: '您还未加入任何群组'
   }
@@ -418,12 +496,7 @@ const markAllAsRead = async () => {
   
   let unreadMessages = []
   
-  // 根据当前标签页获取未读消息
-  if (activeTab.value === 'all') {
-    const systemUnread = systemMessages.value.filter(msg => mesStore.isMessageUnread(msg))
-    const groupUnread = groupMessages.value.filter(msg => mesStore.isMessageUnread(msg))
-    unreadMessages = [...systemUnread, ...groupUnread]
-  } else if (activeTab.value === 'system') {
+  if (activeTab.value === 'system') {
     unreadMessages = systemMessages.value.filter(msg => mesStore.isMessageUnread(msg))
   } else if (activeTab.value === 'group') {
     unreadMessages = groupMessages.value.filter(msg => mesStore.isMessageUnread(msg))
@@ -439,7 +512,6 @@ const markAllAsRead = async () => {
   }
   
   try {
-    // 显示确认对话框
     const res = await new Promise((resolve) => {
       uni.showModal({
         title: '确认操作',
@@ -450,7 +522,6 @@ const markAllAsRead = async () => {
     
     if (!res.confirm) return
     
-    // 显示加载提示
     uni.showLoading({
       title: '处理中...',
       mask: true
@@ -458,7 +529,6 @@ const markAllAsRead = async () => {
     
     const promises = []
     
-    // 分别处理系统消息和群组消息
     unreadMessages.forEach(msg => {
       if (msg.type === 'system') {
         promises.push(mesStore.markSystemMessageAsRead(msg.id))
@@ -639,7 +709,7 @@ const markAllAsRead = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 80rpx;
+  min-width: 120rpx;
   text-align: center;
   border: 1rpx solid transparent;
 }
@@ -710,6 +780,68 @@ const markAllAsRead = async () => {
   font-weight: 500;
 }
 
+/* 自定义下拉刷新容器 */
+.pull-to-refresh-container {
+  flex: 1;
+  background: #fff5f5;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 刷新指示器 */
+.refresh-indicator {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff5f5;
+  overflow: hidden;
+  transition: opacity 0.2s ease;
+}
+
+.refresh-content {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 8rpx 0;
+}
+
+.refresh-icon {
+  width: 36rpx;
+  height: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.refresh-icon.ready {
+  transform: rotate(180deg);
+}
+
+.icon-text {
+  font-size: 28rpx;
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.loading-circle {
+  width: 32rpx;
+  height: 32rpx;
+  border: 3rpx solid rgba(239, 68, 68, 0.2);
+  border-top-color: #ef4444;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.refresh-text {
+  font-size: 26rpx;
+  color: #6b7280;
+  font-weight: 500;
+}
+
 /* 消息列表 */
 .message-list {
   flex: 1;
@@ -719,6 +851,8 @@ const markAllAsRead = async () => {
 .message-list-content {
   padding: 32rpx;
   padding-bottom: 40rpx;
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
 }
 
 /* 加载状态 */

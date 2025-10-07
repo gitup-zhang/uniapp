@@ -3,7 +3,7 @@
     <!-- 顶部固定导航栏 -->
     <uni-nav-bar statusBar="true" backgroundColor="#dc2626" fixed="true">
       <template v-slot:left>
-        <view class="navbar-title">咨询</view>
+        <view class="navbar-title">资讯</view>
       </template>
     </uni-nav-bar>
 
@@ -426,17 +426,26 @@ onShow(async () => {
     
     // 判断页面来源
     const source = uni.getStorageSync('tabSource') || 'tabbar'
+	const articlesort=uni.getStorageSync('article')||'news'
     console.log('页面来源:', source)
+	console.log("文章类型",articlesort)
     
     // 如果是通过 switchTab 跳转来的，设置为精选模式并切换到新闻tab
     if (source === 'switchTab') {
-      activeTab.value = 'news'
+		if(articlesort==='news'){
+			activeTab.value = 'news'
+			}else{
+				activeTab.value = 'policy'
+			}
+       
+	   
       // 这里可以设置精选参数
       // selectedDomain.value = { field_id: 1, field_code: "featured", field_name: '精选' }
     }
     
     // 清除来源标记
     uni.removeStorageSync('tabSource')
+	uni.removeStorageSync('article')
     
     // 如果是首次初始化，加载数据
     if (!isPageInitialized.value) {

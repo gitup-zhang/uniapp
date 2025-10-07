@@ -1,36 +1,78 @@
+
 .navbar-title {
-  font-size: 20px;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 10px; /* 与左侧“新闻”一致的垂直视觉位置 */
+	  font-size: 20px;
+	  font-weight: bold;
+	  color: white;
+	  margin-bottom: 10px;
 }
 .navbar-center {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  padding-bottom: 10px;
-  pointer-events: none;
-  transform: translateY(10px); /* 替代 margin-top */
+	  position: absolute;
+	  left: 0;
+	  right: 0;
+	  top: 0;
+	  bottom: 0;
+	  display: flex;
+	  justify-content: center;
+	  align-items: flex-end;
+	  padding-bottom: 10px;
+	  pointer-events: none;
+	  transform: translateY(10px);
 }
-
-
-/* 标题样式 */
+	
+	/* Tab栏样式 - 固定定位 */
+.tab-container {
+		display: flex;
+		background: #ffffff;
+		border-bottom: 1px solid #f0f0f0;
+		position: fixed;
+		top: 100px; /* 导航栏高度 */
+		left: 0;
+		right: 0;
+		z-index: 999;
+		height: 100rpx;
+}
+.tab-item {
+		flex: 1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		position: relative;
+		padding: 20rpx 0;
+}
+.tab-item.active::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 60rpx;
+		height: 6rpx;
+		background: #ff4757;
+		border-radius: 3rpx;
+}
+.tab-text {
+		font-size: 28rpx;
+		color: #666;
+		font-weight: 400;
+		transition: all 0.3s;
+}
+.tab-text.active {
+		color: #ff4757;
+		font-weight: 600;
+}
+	
+	/* 滚动内容区域 */
+.scroll-content {
+		position: absolute;
+		top: calc(100px + 100rpx); /* 导航栏高度 + tab栏高度 */
+		left: 0;
+		right: 0;
+		bottom: 0;
+}
 .example-body {
-
 		display: block;
-
 		padding: 10px;
 }
-
-
-/* 	.mb-10 {
-		margin-bottom: 10px;
-	} */
 .load-more-container {
 		padding: 20rpx;
 		display: flex;

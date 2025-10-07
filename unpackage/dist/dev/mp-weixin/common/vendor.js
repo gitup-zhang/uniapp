@@ -7732,7 +7732,6 @@ const onHide = /* @__PURE__ */ createHook(ON_HIDE);
 const onLaunch = /* @__PURE__ */ createHook(ON_LAUNCH);
 const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
 const onReachBottom = /* @__PURE__ */ createHook(ON_REACH_BOTTOM);
-const onPullDownRefresh = /* @__PURE__ */ createHook(ON_PULL_DOWN_REFRESH);
 var isVue2 = false;
 function set(target, key, val) {
   if (Array.isArray(target)) {
@@ -8815,7 +8814,6 @@ exports.onHide = onHide;
 exports.onLaunch = onLaunch;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;
-exports.onPullDownRefresh = onPullDownRefresh;
 exports.onReachBottom = onReachBottom;
 exports.onShow = onShow;
 exports.onUnmounted = onUnmounted;

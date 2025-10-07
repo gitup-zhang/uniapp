@@ -5,10 +5,12 @@ import {getEventList,getEventDetail} from '@/new-apis/events.js'
 export const useEventstore=defineStore('event',()=>{
 	const eventing=ref([])
 	const eventoutdate=ref([])
+	const eventnotbegun=ref([]) // 新增：未开始的活动
 	const eventcount=ref({
 		Eventbefore:0,
 		Eventing:0,
-		Evented:0
+		Evented:0,
+		EventNotBegun:0 // 新增：未开始活动数量
 	})
 	
 	// 进行中活动的分页相关状态
@@ -22,6 +24,12 @@ export const useEventstore=defineStore('event',()=>{
 	const outdatePageSize = ref(10)
 	const outdateHasMoreData = ref(true)
 	const outdateIsLoading = ref(false)
+	
+	// 未开始活动的分页相关状态
+	const notbegunCurrentPage = ref(1)
+	const notbegunPageSize = ref(10)
+	const notbegunHasMoreData = ref(true)
+	const notbegunIsLoading = ref(false)
 	
 	// 获取的活动详情
 	const eventdetail=ref({})
@@ -92,6 +100,73 @@ export const useEventstore=defineStore('event',()=>{
 		currentPage.value = 1
 		hasMoreData.value = true
 		await getlisting(pageSize.value, false)
+	}
+	
+	// 获取未开始活动 - 新增功能
+	const getlistnotbegun=async(num, loadMore = false)=>{
+		if (notbegunIsLoading.value) return
+		
+		notbegunIsLoading.value = true
+		
+		// 如果不是加载更多，显示loading
+		if (!loadMore) {
+			uni.showLoading({
+			  title: '加载中...',
+			  mask: true
+			})
+		}
+		
+		try{
+			const page = loadMore ? notbegunCurrentPage.value + 1 : 1
+			const res = await getEventList({
+				page: page,
+				page_size: num || notbegunPageSize.value,
+				event_status: "NotBegun"
+			})
+			
+			if (loadMore) {
+				// 加载更多：追加数据
+				eventnotbegun.value = [...eventnotbegun.value, ...res.data]
+				notbegunCurrentPage.value = page
+			} else {
+				// 首次加载：替换数据
+				eventnotbegun.value = res.data
+				notbegunCurrentPage.value = 1
+			}
+			
+			// 更新总数和是否还有更多数据
+			eventcount.value.EventNotBegun = res.total
+			notbegunHasMoreData.value = eventnotbegun.value.length < res.total
+			
+			console.log(`已加载即将开始活动 ${eventnotbegun.value.length}/${res.total} 条`)
+					 
+		}catch(error){
+			console.log(error)
+			uni.showToast({
+				title: '加载失败',
+				icon: 'error'
+			})
+		}finally{
+			notbegunIsLoading.value = false
+			if (!loadMore) {
+				uni.hideLoading()
+			}
+		}
+	}
+	
+	// 加载更多未开始活动数据
+	const loadMoreNotbegunEvents = async() => {
+		if (!notbegunHasMoreData.value || notbegunIsLoading.value) {
+			return
+		}
+		await getlistnotbegun(notbegunPageSize.value, true)
+	}
+	
+	// 刷新未开始活动数据
+	const refreshNotbegunEvents = async() => {
+		notbegunCurrentPage.value = 1
+		notbegunHasMoreData.value = true
+		await getlistnotbegun(notbegunPageSize.value, false)
 	}
 	
 	// 获取过期活动 - 修改为支持分页
@@ -183,8 +258,10 @@ export const useEventstore=defineStore('event',()=>{
 	return {
 		eventing,
 		eventoutdate,
+		eventnotbegun, // 新增
 		getlisting,
 		getlisoutdate,
+		getlistnotbegun, // 新增
 		geteventdetail,
 		eventdetail,
 		eventcount,
@@ -201,7 +278,14 @@ export const useEventstore=defineStore('event',()=>{
 		outdateHasMoreData,
 		outdateIsLoading,
 		loadMoreOutdateEvents,
-		refreshOutdateEvents
+		refreshOutdateEvents,
+		// 未开始活动的分页相关
+		notbegunCurrentPage,
+		notbegunPageSize,
+		notbegunHasMoreData,
+		notbegunIsLoading,
+		loadMoreNotbegunEvents,
+		refreshNotbegunEvents
 	}
 	
 	

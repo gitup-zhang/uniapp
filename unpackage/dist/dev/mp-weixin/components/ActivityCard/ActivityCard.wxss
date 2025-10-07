@@ -25,13 +25,19 @@
   border-radius: 8rpx;
   margin-right: 10rpx;
 }
-.status-tag.joined.data-v-5b024a23 {
-  background-color: #e6f0ff;
-  color: #1a73e8;
+
+/* 进行中状态样式 */
+.status-tag.in-progress.data-v-5b024a23 {
+  background-color: #e6f7ff;
+  color: #1890ff;
+  border: 1rpx solid #91d5ff;
 }
-.status-tag.not-joined.data-v-5b024a23 {
-  background-color: #fef0f0;
-  color: #f56c6c;
+
+/* 即将开始状态样式 */
+.status-tag.upcoming.data-v-5b024a23 {
+  background-color: #fff7e6;
+  color: #fa8c16;
+  border: 1rpx solid #ffd666;
 }
 .title.data-v-5b024a23 {
   font-size: 28rpx;

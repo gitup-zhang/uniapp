@@ -39,6 +39,8 @@
 			{
 				"navigationBarTitleText" : "",
 				"navigationStyle": "custom"
+				  // 禁用原生下拉刷新
+				    
 			}
 		},
 		{

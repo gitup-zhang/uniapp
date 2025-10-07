@@ -2,17 +2,16 @@
   <view class="activity-card">
     <!-- 活动图片 -->
     <image class="cover-img" :src="imgSrc" mode="aspectFill" />
-
     <!-- 活动信息 -->
     <view class="info-box">
       <view class="tag-title">
-        <!-- 根据 isJoined 显示不同的状态 -->
-      <!--  <text
+        <!-- 显示活动状态标签 -->
+        <text
           class="status-tag"
-          :class="isJoined ? 'joined' : 'not-joined'"
+          :class="isStarted ? 'in-progress' : 'upcoming'"
         >
-          {{ isJoined ? '已报名' : '未报名' }}
-        </text> -->
+          {{ status }}
+        </text>
         <text class="title" :title="title">{{ title }}</text>
       </view>
       <view class="info-line">
@@ -31,7 +30,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   imgSrc: {
     type: String,
     required: true
@@ -52,10 +53,19 @@ defineProps({
     type: Boolean,
     default: false
   },
-  fee:{
-	  type: Number,
-	  required: true
+  fee: {
+    type: Number,
+    required: true
+  },
+  status: {
+    type: String,
+    required: true
   }
+})
+
+// 计算属性：根据status判断活动是否已开始
+const isStarted = computed(() => {
+  return props.status === '进行中'
 })
 </script>
 
@@ -91,14 +101,18 @@ defineProps({
   margin-right: 10rpx;
 }
 
-.status-tag.joined {
-  background-color: #e6f0ff;
-  color: #1a73e8;
+/* 进行中状态样式 */
+.status-tag.in-progress {
+  background-color: #e6f7ff;
+  color: #1890ff;
+  border: 1rpx solid #91d5ff;
 }
 
-.status-tag.not-joined {
-  background-color: #fef0f0;
-  color: #f56c6c;
+/* 即将开始状态样式 */
+.status-tag.upcoming {
+  background-color: #fff7e6;
+  color: #fa8c16;
+  border: 1rpx solid #ffd666;
 }
 
 .title {

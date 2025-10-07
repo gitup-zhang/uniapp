@@ -84,8 +84,8 @@ const _sfc_main = {
       } catch (error) {
         console.error("取消报名失败:", error);
         common_vendor.index.showToast({
-          title: "取消失败",
-          icon: "error"
+          title: error.data.message,
+          icon: "none"
         });
       }
     };

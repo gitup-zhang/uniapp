@@ -6,21 +6,35 @@ if (!Math) {
   MessageCard();
 }
 const MessageCard = () => "../../components/MessageCard/MessageCard.js";
+const refreshThreshold = 20;
+const maxPullDistance = 30;
 const _sfc_main = {
   __name: "mes",
   setup(__props) {
     const userStore = store_Info.useInfoStore();
     const mesStore = store_mes.useMesstore();
     const statusBarHeight = common_vendor.ref(0);
-    const activeTab = common_vendor.ref("all");
+    const activeTab = common_vendor.ref("system");
     const isLoading = common_vendor.ref(false);
     const isRefreshing = common_vendor.ref(false);
     const isLoadingMore = common_vendor.ref(false);
     const hasLoadedOnce = common_vendor.ref(false);
+    const startY = common_vendor.ref(0);
+    const currentY = common_vendor.ref(0);
+    const pullDistance = common_vendor.ref(0);
+    const isPulling = common_vendor.ref(false);
+    const isAtTop = common_vendor.ref(true);
     const isLoggedIn = common_vendor.computed(() => userStore.signal);
-    const totalUnreadCount = common_vendor.computed(() => mesStore.totalUnreadCount);
     const systemUnreadCount = common_vendor.computed(() => mesStore.systemUnreadCount);
     const groupUnreadCount = common_vendor.computed(() => mesStore.groupUnreadCount);
+    common_vendor.computed(() => {
+      if (activeTab.value === "system") {
+        return systemUnreadCount.value;
+      } else if (activeTab.value === "group") {
+        return groupUnreadCount.value;
+      }
+      return 0;
+    });
     const systemMessages = common_vendor.computed(() => {
       if (!isLoggedIn.value)
         return [];
@@ -32,9 +46,7 @@ const _sfc_main = {
       return mesStore.groupmes || [];
     });
     const shouldShowEmpty = common_vendor.computed(() => {
-      if (activeTab.value === "all") {
-        return systemMessages.value.length === 0 && groupMessages.value.length === 0;
-      } else if (activeTab.value === "system") {
+      if (activeTab.value === "system") {
         return systemMessages.value.length === 0;
       } else if (activeTab.value === "group") {
         return groupMessages.value.length === 0;
@@ -60,10 +72,6 @@ const _sfc_main = {
         await loadUserMessages();
       }
     });
-    common_vendor.onPullDownRefresh(async () => {
-      await handleRefresh();
-      common_vendor.index.stopPullDownRefresh();
-    });
     common_vendor.watch(isLoggedIn, async (newVal) => {
       if (newVal && !hasLoadedOnce.value) {
         console.log("用户已登录，加载消息数据");
@@ -74,10 +82,80 @@ const _sfc_main = {
         hasLoadedOnce.value = false;
       }
     });
+    const handleTouchStart = (e) => {
+      if (isRefreshing.value)
+        return;
+      startY.value = e.touches[0].clientY;
+      currentY.value = e.touches[0].clientY;
+      const query = common_vendor.index.createSelectorQuery();
+      query.select(".message-list").scrollOffset();
+      query.exec((res) => {
+        if (res[0]) {
+          isAtTop.value = res[0].scrollTop <= 0;
+        }
+      });
+    };
+    const handleTouchMove = (e) => {
+      if (isRefreshing.value || !isAtTop.value)
+        return;
+      currentY.value = e.touches[0].clientY;
+      const distance = currentY.value - startY.value;
+      if (distance > 0) {
+        isPulling.value = true;
+        const damping = 0.5;
+        pullDistance.value = Math.min(distance * damping, maxPullDistance);
+      } else {
+        isPulling.value = false;
+        pullDistance.value = 0;
+      }
+    };
+    const handleTouchEnd = async () => {
+      if (!isPulling.value || isRefreshing.value) {
+        pullDistance.value = 0;
+        isPulling.value = false;
+        return;
+      }
+      if (pullDistance.value >= refreshThreshold) {
+        isRefreshing.value = true;
+        isPulling.value = false;
+        pullDistance.value = refreshThreshold;
+        try {
+          await loadUserMessages(true);
+          common_vendor.index.showToast({
+            title: "刷新成功",
+            icon: "success",
+            duration: 1e3
+          });
+        } catch (error) {
+          console.error("刷新失败:", error);
+          common_vendor.index.showToast({
+            title: "刷新失败",
+            icon: "none",
+            duration: 1500
+          });
+        } finally {
+          setTimeout(() => {
+            pullDistance.value = 0;
+            isRefreshing.value = false;
+          }, 300);
+        }
+      } else {
+        pullDistance.value = 0;
+        isPulling.value = false;
+      }
+    };
+    const getRefreshText = () => {
+      if (isRefreshing.value) {
+        return "刷新中";
+      } else if (pullDistance.value >= refreshThreshold) {
+        return "松开刷新";
+      } else if (isPulling.value) {
+        return "下拉刷新";
+      }
+      return "";
+    };
     const getCurrentUnreadCount = () => {
-      if (activeTab.value === "all") {
-        return totalUnreadCount.value;
-      } else if (activeTab.value === "system") {
+      if (activeTab.value === "system") {
         return systemUnreadCount.value;
       } else if (activeTab.value === "group") {
         return groupUnreadCount.value;
@@ -122,31 +200,6 @@ const _sfc_main = {
         isLoading.value = false;
         isRefreshing.value = false;
       }
-    };
-    const handleRefresh = async () => {
-      if (isRefreshing.value)
-        return;
-      isRefreshing.value = true;
-      try {
-        await loadUserMessages(true);
-        common_vendor.index.showToast({
-          title: "刷新成功",
-          icon: "success",
-          duration: 1500
-        });
-      } catch (error) {
-        console.error("刷新失败:", error);
-        common_vendor.index.showToast({
-          title: "刷新失败",
-          icon: "error",
-          duration: 1500
-        });
-      } finally {
-        isRefreshing.value = false;
-      }
-    };
-    const handleRefreshRestore = () => {
-      isRefreshing.value = false;
     };
     const loadMoreMessages = async () => {
       if (isLoading.value || isRefreshing.value || isLoadingMore.value)
@@ -211,7 +264,6 @@ const _sfc_main = {
     };
     const getEmptyTitle = () => {
       const titles = {
-        all: "暂无消息",
         system: "暂无系统消息",
         group: "暂无群组消息"
       };
@@ -219,7 +271,6 @@ const _sfc_main = {
     };
     const getEmptyDesc = () => {
       const descs = {
-        all: "目前还没有任何消息",
         system: "暂时没有系统通知",
         group: "您还未加入任何群组"
       };
@@ -229,11 +280,7 @@ const _sfc_main = {
       if (!isLoggedIn.value)
         return;
       let unreadMessages = [];
-      if (activeTab.value === "all") {
-        const systemUnread = systemMessages.value.filter((msg) => mesStore.isMessageUnread(msg));
-        const groupUnread = groupMessages.value.filter((msg) => mesStore.isMessageUnread(msg));
-        unreadMessages = [...systemUnread, ...groupUnread];
-      } else if (activeTab.value === "system") {
+      if (activeTab.value === "system") {
         unreadMessages = systemMessages.value.filter((msg) => mesStore.isMessageUnread(msg));
       } else if (activeTab.value === "group") {
         unreadMessages = groupMessages.value.filter((msg) => mesStore.isMessageUnread(msg));
@@ -292,34 +339,38 @@ const _sfc_main = {
         b: common_vendor.o(goToLogin)
       } : common_vendor.e({
         c: statusBarHeight.value + "px",
-        d: totalUnreadCount.value > 0
-      }, totalUnreadCount.value > 0 ? {
-        e: common_vendor.t(totalUnreadCount.value > 99 ? "99+" : totalUnreadCount.value)
-      } : {}, {
-        f: activeTab.value === "all" ? 1 : "",
-        g: common_vendor.o(($event) => switchTab("all")),
-        h: systemUnreadCount.value > 0
+        d: systemUnreadCount.value > 0
       }, systemUnreadCount.value > 0 ? {
-        i: common_vendor.t(systemUnreadCount.value > 99 ? "99+" : systemUnreadCount.value)
+        e: common_vendor.t(systemUnreadCount.value > 99 ? "99+" : systemUnreadCount.value)
       } : {}, {
-        j: activeTab.value === "system" ? 1 : "",
-        k: common_vendor.o(($event) => switchTab("system")),
-        l: groupUnreadCount.value > 0
+        f: activeTab.value === "system" ? 1 : "",
+        g: common_vendor.o(($event) => switchTab("system")),
+        h: groupUnreadCount.value > 0
       }, groupUnreadCount.value > 0 ? {
-        m: common_vendor.t(groupUnreadCount.value > 99 ? "99+" : groupUnreadCount.value)
+        i: common_vendor.t(groupUnreadCount.value > 99 ? "99+" : groupUnreadCount.value)
       } : {}, {
-        n: activeTab.value === "group" ? 1 : "",
-        o: common_vendor.o(($event) => switchTab("group")),
-        p: getCurrentUnreadCount() > 0
+        j: activeTab.value === "group" ? 1 : "",
+        k: common_vendor.o(($event) => switchTab("group")),
+        l: getCurrentUnreadCount() > 0
       }, getCurrentUnreadCount() > 0 ? {
-        q: common_vendor.o(markAllAsRead)
+        m: common_vendor.o(markAllAsRead)
       } : {}, {
-        r: statusBarHeight.value + 44 + "px",
-        s: isLoading.value && !hasLoadedOnce.value
+        n: statusBarHeight.value + 44 + "px",
+        o: pullDistance.value > 10
+      }, pullDistance.value > 10 ? common_vendor.e({
+        p: !isRefreshing.value
+      }, !isRefreshing.value ? {} : {}, {
+        q: isRefreshing.value ? 1 : "",
+        r: pullDistance.value >= refreshThreshold && !isRefreshing.value ? 1 : "",
+        s: common_vendor.t(getRefreshText())
+      }) : {}, {
+        t: pullDistance.value + "px",
+        v: pullDistance.value > 0 ? 1 : 0,
+        w: isLoading.value && !hasLoadedOnce.value
       }, isLoading.value && !hasLoadedOnce.value ? {} : {}, {
-        t: activeTab.value === "all" || activeTab.value === "system"
-      }, activeTab.value === "all" || activeTab.value === "system" ? {
-        v: common_vendor.f(systemMessages.value, (msg, k0, i0) => {
+        x: activeTab.value === "system"
+      }, activeTab.value === "system" ? {
+        y: common_vendor.f(systemMessages.value, (msg, k0, i0) => {
           return {
             a: msg.event_id,
             b: common_vendor.o(handleMessageTap, msg.event_id),
@@ -333,9 +384,9 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        w: activeTab.value === "all" || activeTab.value === "group"
-      }, activeTab.value === "all" || activeTab.value === "group" ? {
-        x: common_vendor.f(groupMessages.value, (msg, k0, i0) => {
+        z: activeTab.value === "group"
+      }, activeTab.value === "group" ? {
+        A: common_vendor.f(groupMessages.value, (msg, k0, i0) => {
           return {
             a: msg.event_id,
             b: common_vendor.o(handleMessageTap, msg.event_id),
@@ -349,18 +400,19 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        y: !isLoading.value && shouldShowEmpty.value
+        B: !isLoading.value && shouldShowEmpty.value
       }, !isLoading.value && shouldShowEmpty.value ? {
-        z: common_vendor.t(getEmptyTitle()),
-        A: common_vendor.t(getEmptyDesc())
+        C: common_vendor.t(getEmptyTitle()),
+        D: common_vendor.t(getEmptyDesc())
       } : {}, {
-        B: isLoadingMore.value
+        E: isLoadingMore.value
       }, isLoadingMore.value ? {} : {}, {
-        C: statusBarHeight.value + 44 + 56 + "px",
-        D: common_vendor.o(loadMoreMessages),
-        E: isRefreshing.value,
-        F: common_vendor.o(handleRefresh),
-        G: common_vendor.o(handleRefreshRestore)
+        F: `translateY(${pullDistance.value}px)`,
+        G: common_vendor.o(loadMoreMessages),
+        H: statusBarHeight.value + 44 + 56 + "px",
+        I: common_vendor.o(handleTouchStart),
+        J: common_vendor.o(handleTouchMove),
+        K: common_vendor.o(handleTouchEnd)
       }));
     };
   }

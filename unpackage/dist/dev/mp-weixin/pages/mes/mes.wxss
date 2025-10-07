@@ -140,7 +140,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 80rpx;
+  min-width: 120rpx;
   text-align: center;
   border: 1rpx solid transparent;
 }
@@ -204,6 +204,62 @@
   font-weight: 500;
 }
 
+/* 自定义下拉刷新容器 */
+.pull-to-refresh-container.data-v-bb2249ad {
+  flex: 1;
+  background: #fff5f5;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 刷新指示器 */
+.refresh-indicator.data-v-bb2249ad {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff5f5;
+  overflow: hidden;
+  transition: opacity 0.2s ease;
+}
+.refresh-content.data-v-bb2249ad {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 8rpx 0;
+}
+.refresh-icon.data-v-bb2249ad {
+  width: 36rpx;
+  height: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+.refresh-icon.ready.data-v-bb2249ad {
+  transform: rotate(180deg);
+}
+.icon-text.data-v-bb2249ad {
+  font-size: 28rpx;
+  color: #ef4444;
+  font-weight: bold;
+}
+.loading-circle.data-v-bb2249ad {
+  width: 32rpx;
+  height: 32rpx;
+  border: 3rpx solid rgba(239, 68, 68, 0.2);
+  border-top-color: #ef4444;
+  border-radius: 50%;
+  animation: spin-bb2249ad 0.8s linear infinite;
+}
+.refresh-text.data-v-bb2249ad {
+  font-size: 26rpx;
+  color: #6b7280;
+  font-weight: 500;
+}
+
 /* 消息列表 */
 .message-list.data-v-bb2249ad {
   flex: 1;
@@ -212,6 +268,8 @@
 .message-list-content.data-v-bb2249ad {
   padding: 32rpx;
   padding-bottom: 40rpx;
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
 }
 
 /* 加载状态 */

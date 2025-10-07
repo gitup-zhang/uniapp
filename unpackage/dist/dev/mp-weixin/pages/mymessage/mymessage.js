@@ -127,10 +127,10 @@ const _sfc_main = {
           icon: "success"
         });
       } catch (error) {
-        console.error("取消报名失败:", error);
+        console.error("取消报名失败:", error.data);
         common_vendor.index.showToast({
-          title: "取消失败",
-          icon: "error"
+          title: error.data.message,
+          icon: "none"
         });
       }
     };

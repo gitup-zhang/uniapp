@@ -6,14 +6,14 @@
     <showInforVue title="服务导航">
       <template v-slot:body>
         <view class="service-grid">
-          <view class="service-item" @click="handleMorearticle">
+          <view class="service-item" @click="handleMorearticle('policy')">
             <view class="service-icon-wrapper policy-icon">
               <image src="/static/icon/policy_index.png" class="service-icon" mode="aspectFit" />
             </view>
             <text class="service-label">政府政策</text>
           </view>
 
-          <view class="service-item" @click="handleMorearticle">
+          <view class="service-item" @click="handleMorearticle('news')">
             <view class="service-icon-wrapper news-icon">
               <image src="/static/icon/new_index.png" class="service-icon" mode="aspectFit" />
             </view>
@@ -42,7 +42,7 @@
           <text class="stats-label">新闻</text>
         </view>
         <view class="stats-item">
-          <text class="stats-number">{{EventStore.eventcount.Eventing}}</text>
+          <text class="stats-number">{{selected.eventtotal}}</text>
           <text class="stats-label">活动</text>
         </view>
       </view>
@@ -139,16 +139,17 @@ import {useEventstore} from '@/store/Event.js'
 // const usenotice=useNoticeStore()
 // 获得精选对象
 const selected=useSelectedstore()
-const EventStore=useEventstore()
+const firstEight = computed(() => selected.event.slice(0, 8));
 
 // 当前选中的标签页
 const currentTab = ref(0)
 
-const firstEight = computed(() => EventStore.eventing.slice(0, 8));
+
 
 // 获取更多新闻和政策
-function handleMorearticle(){
+function handleMorearticle(params){
 	uni.setStorageSync('tabSource', 'switchTab');
+	uni.setStorageSync('article',params)
 	uni.switchTab({
 		url: '../policy/policy'
 	});
@@ -188,18 +189,22 @@ function onSwiperChange(e) {
 
 // 更多按钮点击事件
 function handleMoreClick() {
-  if (currentTab.value === 0) {
-    handleMoreactivity() // 活动
-  } else {
-    handleMorearticle() // 政策和新闻
-  }
+ if (currentTab.value === 0) {
+   handleMoreactivity() // 活动
+ } else if (currentTab.value === 1) {
+   handleMorearticle('policy') // 政策和新闻
+ } else if (currentTab.value === 2) {
+   handleMorearticle('news')
+ }
+
 }
 
 // 初始化
 onMounted(()=>{
 	//usenotice.getnoticestore()
 	selected.getselected()
-	EventStore.getlisting(10)
+	selected.getevent()
+	//EventStore.getlisting(10)
 })
 
 
