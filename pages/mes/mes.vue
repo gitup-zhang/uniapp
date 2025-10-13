@@ -54,34 +54,21 @@
         </view>
       </view>
       
-      <!-- 自定义下拉刷新容器 -->
+      <!-- 消息列表容器 -->
       <view 
-        class="pull-to-refresh-container"
+        class="message-list-wrapper"
         :style="{ marginTop: statusBarHeight + 44 + 56 + 'px' }"
-        @touchstart="handleTouchStart"
-        @touchmove="handleTouchMove"
-        @touchend="handleTouchEnd"
       >
-        <!-- 刷新指示器 -->
+        <!-- 简约刷新指示器 -->
         <view 
           class="refresh-indicator" 
           :style="{ 
             height: pullDistance + 'px',
-            opacity: pullDistance > 0 ? 1 : 0
+            opacity: Math.min(pullDistance / 50, 1)
           }"
         >
-          <view class="refresh-content" v-if="pullDistance > 10">
-            <view 
-              class="refresh-icon" 
-              :class="{ 
-                'refreshing': isRefreshing,
-                'ready': pullDistance >= refreshThreshold && !isRefreshing
-              }"
-            >
-              <text class="icon-text" v-if="!isRefreshing">↓</text>
-              <view class="loading-circle" v-else></view>
-            </view>
-            <text class="refresh-text">{{ getRefreshText() }}</text>
+          <view class="refresh-spinner" :class="{ active: isRefreshing }">
+            <view class="spinner-circle"></view>
           </view>
         </view>
         
@@ -90,9 +77,13 @@
           class="message-list"
           scroll-y="true"
           enable-back-to-top="true"
+          @scroll="handleScroll"
           @scrolltolower="loadMoreMessages"
+          @touchstart="handleTouchStart"
+          @touchmove="handleTouchMove"
+          @touchend="handleTouchEnd"
         >
-          <view class="message-list-content" :style="{ transform: `translateY(${pullDistance}px)` }">
+          <view class="message-list-content">
             <!-- 加载状态 -->
             <view v-if="isLoading && !hasLoadedOnce" class="loading-state">
               <view class="loading-spinner"></view>
@@ -171,13 +162,12 @@ const isLoadingMore = ref(false)
 const hasLoadedOnce = ref(false)
 
 // 自定义下拉刷新相关数据
+const scrollTop = ref(0)
 const startY = ref(0)
-const currentY = ref(0)
 const pullDistance = ref(0)
 const isPulling = ref(false)
-const isAtTop = ref(true)
-const refreshThreshold = 20 // 刷新阈值（px）
-const maxPullDistance = 30 // 最大下拉距离
+const refreshThreshold = 60 // 刷新阈值（px）
+const maxPullDistance = 100 // 最大下拉距离
 
 // 登录状态计算属性
 const isLoggedIn = computed(() => userStore.signal)
@@ -253,40 +243,44 @@ watch(isLoggedIn, async (newVal) => {
   }
 })
 
-// 优化后的下拉刷新事件处理
-const handleTouchStart = (e) => {
-  if (isRefreshing.value) return
-  
-  startY.value = e.touches[0].clientY
-  currentY.value = e.touches[0].clientY
-  
-  // 检查是否在顶部
-  const query = uni.createSelectorQuery()
-  query.select('.message-list').scrollOffset()
-  query.exec((res) => {
-    if (res[0]) {
-      isAtTop.value = res[0].scrollTop <= 0
-    }
-  })
+// 监听滚动位置
+const handleScroll = (e) => {
+  scrollTop.value = e.detail.scrollTop
 }
 
+// 下拉刷新触摸开始
+const handleTouchStart = (e) => {
+  if (isRefreshing.value) return
+  startY.value = e.touches[0].pageY
+}
+
+// 下拉刷新触摸移动
 const handleTouchMove = (e) => {
-  if (isRefreshing.value || !isAtTop.value) return
+  if (isRefreshing.value) return
   
-  currentY.value = e.touches[0].clientY
-  const distance = currentY.value - startY.value
+  // 只有在顶部（scrollTop <= 5）才允许下拉刷新
+  if (scrollTop.value > 5) {
+    pullDistance.value = 0
+    isPulling.value = false
+    return
+  }
+  
+  const currentY = e.touches[0].pageY
+  const distance = currentY - startY.value
   
   if (distance > 0) {
+    // 阻尼效果：下拉距离越大，阻力越大
+    const damping = 1
+    const calculatedDistance = Math.pow(distance, 0.8) * damping
+    pullDistance.value = Math.min(calculatedDistance, maxPullDistance)
     isPulling.value = true
-    // 使用阻尼效果，距离越大阻力越大
-    const damping = 0.5
-    pullDistance.value = Math.min(distance * damping, maxPullDistance)
   } else {
-    isPulling.value = false
     pullDistance.value = 0
+    isPulling.value = false
   }
 }
 
+// 下拉刷新触摸结束
 const handleTouchEnd = async () => {
   if (!isPulling.value || isRefreshing.value) {
     pullDistance.value = 0
@@ -294,19 +288,18 @@ const handleTouchEnd = async () => {
     return
   }
   
+  // 达到刷新阈值
   if (pullDistance.value >= refreshThreshold) {
-    // 触发刷新
     isRefreshing.value = true
+    pullDistance.value = 50 // 固定在刷新位置
     isPulling.value = false
-    // 固定在刷新位置
-    pullDistance.value = refreshThreshold
     
     try {
       await loadUserMessages(true)
       uni.showToast({
         title: '刷新成功',
         icon: 'success',
-        duration: 1000
+        duration: 1500
       })
     } catch (error) {
       console.error('刷新失败:', error)
@@ -316,29 +309,17 @@ const handleTouchEnd = async () => {
         duration: 1500
       })
     } finally {
-      // 延迟恢复，让用户看到刷新完成
+      // 延迟恢复
       setTimeout(() => {
         pullDistance.value = 0
         isRefreshing.value = false
       }, 300)
     }
   } else {
-    // 未达到阈值，快速回弹
+    // 未达到阈值，回弹
     pullDistance.value = 0
     isPulling.value = false
   }
-}
-
-// 获取刷新文本
-const getRefreshText = () => {
-  if (isRefreshing.value) {
-    return '刷新中'
-  } else if (pullDistance.value >= refreshThreshold) {
-    return '松开刷新'
-  } else if (isPulling.value) {
-    return '下拉刷新'
-  }
-  return ''
 }
 
 // 获取当前标签的未读数量
@@ -780,8 +761,8 @@ const markAllAsRead = async () => {
   font-weight: 500;
 }
 
-/* 自定义下拉刷新容器 */
-.pull-to-refresh-container {
+/* 消息列表容器 */
+.message-list-wrapper {
   flex: 1;
   background: #fff5f5;
   position: relative;
@@ -790,56 +771,38 @@ const markAllAsRead = async () => {
   flex-direction: column;
 }
 
-/* 刷新指示器 */
+/* 简约刷新指示器 */
 .refresh-indicator {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #fff5f5;
-  overflow: hidden;
-  transition: opacity 0.2s ease;
+  transition: height 0.2s ease, opacity 0.2s ease;
 }
 
-.refresh-content {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  padding: 8rpx 0;
-}
-
-.refresh-icon {
-  width: 36rpx;
-  height: 36rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.3s ease;
-}
-
-.refresh-icon.ready {
-  transform: rotate(180deg);
-}
-
-.icon-text {
-  font-size: 28rpx;
-  color: #ef4444;
-  font-weight: bold;
-}
-
-.loading-circle {
+.refresh-spinner {
   width: 32rpx;
   height: 32rpx;
+  position: relative;
+}
+
+.spinner-circle {
+  width: 100%;
+  height: 100%;
   border: 3rpx solid rgba(239, 68, 68, 0.2);
   border-top-color: #ef4444;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  transition: opacity 0.2s ease;
 }
 
-.refresh-text {
-  font-size: 26rpx;
-  color: #6b7280;
-  font-weight: 500;
+.refresh-spinner.active .spinner-circle {
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* 消息列表 */
@@ -851,8 +814,6 @@ const markAllAsRead = async () => {
 .message-list-content {
   padding: 32rpx;
   padding-bottom: 40rpx;
-  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  will-change: transform;
 }
 
 /* 加载状态 */
@@ -878,11 +839,6 @@ const markAllAsRead = async () => {
   height: 40rpx;
   border-width: 4rpx;
   margin-bottom: 16rpx;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
 
 .loading-text {

@@ -6,8 +6,8 @@ if (!Math) {
   MessageCard();
 }
 const MessageCard = () => "../../components/MessageCard/MessageCard.js";
-const refreshThreshold = 20;
-const maxPullDistance = 30;
+const refreshThreshold = 60;
+const maxPullDistance = 100;
 const _sfc_main = {
   __name: "mes",
   setup(__props) {
@@ -19,11 +19,10 @@ const _sfc_main = {
     const isRefreshing = common_vendor.ref(false);
     const isLoadingMore = common_vendor.ref(false);
     const hasLoadedOnce = common_vendor.ref(false);
+    const scrollTop = common_vendor.ref(0);
     const startY = common_vendor.ref(0);
-    const currentY = common_vendor.ref(0);
     const pullDistance = common_vendor.ref(0);
     const isPulling = common_vendor.ref(false);
-    const isAtTop = common_vendor.ref(true);
     const isLoggedIn = common_vendor.computed(() => userStore.signal);
     const systemUnreadCount = common_vendor.computed(() => mesStore.systemUnreadCount);
     const groupUnreadCount = common_vendor.computed(() => mesStore.groupUnreadCount);
@@ -82,31 +81,32 @@ const _sfc_main = {
         hasLoadedOnce.value = false;
       }
     });
+    const handleScroll = (e) => {
+      scrollTop.value = e.detail.scrollTop;
+    };
     const handleTouchStart = (e) => {
       if (isRefreshing.value)
         return;
-      startY.value = e.touches[0].clientY;
-      currentY.value = e.touches[0].clientY;
-      const query = common_vendor.index.createSelectorQuery();
-      query.select(".message-list").scrollOffset();
-      query.exec((res) => {
-        if (res[0]) {
-          isAtTop.value = res[0].scrollTop <= 0;
-        }
-      });
+      startY.value = e.touches[0].pageY;
     };
     const handleTouchMove = (e) => {
-      if (isRefreshing.value || !isAtTop.value)
+      if (isRefreshing.value)
         return;
-      currentY.value = e.touches[0].clientY;
-      const distance = currentY.value - startY.value;
-      if (distance > 0) {
-        isPulling.value = true;
-        const damping = 0.5;
-        pullDistance.value = Math.min(distance * damping, maxPullDistance);
-      } else {
-        isPulling.value = false;
+      if (scrollTop.value > 5) {
         pullDistance.value = 0;
+        isPulling.value = false;
+        return;
+      }
+      const currentY = e.touches[0].pageY;
+      const distance = currentY - startY.value;
+      if (distance > 0) {
+        const damping = 1;
+        const calculatedDistance = Math.pow(distance, 0.8) * damping;
+        pullDistance.value = Math.min(calculatedDistance, maxPullDistance);
+        isPulling.value = true;
+      } else {
+        pullDistance.value = 0;
+        isPulling.value = false;
       }
     };
     const handleTouchEnd = async () => {
@@ -117,14 +117,14 @@ const _sfc_main = {
       }
       if (pullDistance.value >= refreshThreshold) {
         isRefreshing.value = true;
+        pullDistance.value = 50;
         isPulling.value = false;
-        pullDistance.value = refreshThreshold;
         try {
           await loadUserMessages(true);
           common_vendor.index.showToast({
             title: "刷新成功",
             icon: "success",
-            duration: 1e3
+            duration: 1500
           });
         } catch (error) {
           console.error("刷新失败:", error);
@@ -143,16 +143,6 @@ const _sfc_main = {
         pullDistance.value = 0;
         isPulling.value = false;
       }
-    };
-    const getRefreshText = () => {
-      if (isRefreshing.value) {
-        return "刷新中";
-      } else if (pullDistance.value >= refreshThreshold) {
-        return "松开刷新";
-      } else if (isPulling.value) {
-        return "下拉刷新";
-      }
-      return "";
     };
     const getCurrentUnreadCount = () => {
       if (activeTab.value === "system") {
@@ -356,21 +346,14 @@ const _sfc_main = {
         m: common_vendor.o(markAllAsRead)
       } : {}, {
         n: statusBarHeight.value + 44 + "px",
-        o: pullDistance.value > 10
-      }, pullDistance.value > 10 ? common_vendor.e({
-        p: !isRefreshing.value
-      }, !isRefreshing.value ? {} : {}, {
-        q: isRefreshing.value ? 1 : "",
-        r: pullDistance.value >= refreshThreshold && !isRefreshing.value ? 1 : "",
-        s: common_vendor.t(getRefreshText())
-      }) : {}, {
-        t: pullDistance.value + "px",
-        v: pullDistance.value > 0 ? 1 : 0,
-        w: isLoading.value && !hasLoadedOnce.value
+        o: isRefreshing.value ? 1 : "",
+        p: pullDistance.value + "px",
+        q: Math.min(pullDistance.value / 50, 1),
+        r: isLoading.value && !hasLoadedOnce.value
       }, isLoading.value && !hasLoadedOnce.value ? {} : {}, {
-        x: activeTab.value === "system"
+        s: activeTab.value === "system"
       }, activeTab.value === "system" ? {
-        y: common_vendor.f(systemMessages.value, (msg, k0, i0) => {
+        t: common_vendor.f(systemMessages.value, (msg, k0, i0) => {
           return {
             a: msg.event_id,
             b: common_vendor.o(handleMessageTap, msg.event_id),
@@ -384,9 +367,9 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        z: activeTab.value === "group"
+        v: activeTab.value === "group"
       }, activeTab.value === "group" ? {
-        A: common_vendor.f(groupMessages.value, (msg, k0, i0) => {
+        w: common_vendor.f(groupMessages.value, (msg, k0, i0) => {
           return {
             a: msg.event_id,
             b: common_vendor.o(handleMessageTap, msg.event_id),
@@ -400,19 +383,19 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        B: !isLoading.value && shouldShowEmpty.value
+        x: !isLoading.value && shouldShowEmpty.value
       }, !isLoading.value && shouldShowEmpty.value ? {
-        C: common_vendor.t(getEmptyTitle()),
-        D: common_vendor.t(getEmptyDesc())
+        y: common_vendor.t(getEmptyTitle()),
+        z: common_vendor.t(getEmptyDesc())
       } : {}, {
-        E: isLoadingMore.value
+        A: isLoadingMore.value
       }, isLoadingMore.value ? {} : {}, {
-        F: `translateY(${pullDistance.value}px)`,
-        G: common_vendor.o(loadMoreMessages),
-        H: statusBarHeight.value + 44 + 56 + "px",
-        I: common_vendor.o(handleTouchStart),
-        J: common_vendor.o(handleTouchMove),
-        K: common_vendor.o(handleTouchEnd)
+        B: common_vendor.o(handleScroll),
+        C: common_vendor.o(loadMoreMessages),
+        D: common_vendor.o(handleTouchStart),
+        E: common_vendor.o(handleTouchMove),
+        F: common_vendor.o(handleTouchEnd),
+        G: statusBarHeight.value + 44 + 56 + "px"
       }));
     };
   }
