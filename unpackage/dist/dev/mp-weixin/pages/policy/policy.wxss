@@ -17,7 +17,7 @@
 }
 .news-scroll {
   position: fixed;
-  top: calc(178rpx + 260rpx);
+  top: calc(188rpx + 260rpx);
   bottom: var(--window-bottom);
   left: 0;
   right: 0;

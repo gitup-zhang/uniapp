@@ -36,6 +36,9 @@ const _sfc_main = {
       career: ""
       // 职业改为字符串输入
     });
+    function hasUserId(id2) {
+      return EventStore.eventdetail.user_info.some((item) => item.code === id2);
+    }
     const countDown = common_vendor.ref(0);
     const isCountingDown = common_vendor.computed(() => countDown.value > 0);
     const countDownText = common_vendor.computed(() => {
@@ -186,11 +189,11 @@ const _sfc_main = {
       common_vendor.index.navigateBack();
     }
     const validateFormData = () => {
-      if (!formData.name.trim()) {
+      if (!formData.name.trim() && hasUserId("name")) {
         common_vendor.index.showToast({ title: "请输入姓名", icon: "none" });
         return false;
       }
-      if (!formData.phone) {
+      if (!formData.phone && hasUserId("phone_number")) {
         common_vendor.index.showToast({ title: "请输入手机号码", icon: "none" });
         return false;
       }
@@ -202,18 +205,18 @@ const _sfc_main = {
         common_vendor.index.showToast({ title: "请输入验证码", icon: "none" });
         return false;
       }
-      if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && hasUserId("email")) {
         common_vendor.index.showToast({ title: "请输入正确的邮箱格式", icon: "none" });
         return false;
       }
       return true;
     };
     const validateForm = () => {
-      if (!formData.name.trim()) {
+      if (!formData.name.trim() && hasUserId("name")) {
         common_vendor.index.showToast({ title: "请输入姓名", icon: "none" });
         return false;
       }
-      if (!formData.phone) {
+      if (!formData.phone && hasUserId("phone_number")) {
         common_vendor.index.showToast({ title: "请输入手机号码", icon: "none" });
         return false;
       }
@@ -221,7 +224,7 @@ const _sfc_main = {
         common_vendor.index.showToast({ title: "请输入正确的手机号码", icon: "none" });
         return false;
       }
-      if (!formData.email) {
+      if (!formData.email && hasUserId("email")) {
         common_vendor.index.showToast({ title: "请输入邮箱地址", icon: "none" });
         return false;
       }
@@ -230,11 +233,11 @@ const _sfc_main = {
         common_vendor.index.showToast({ title: "请输入正确的邮箱格式", icon: "none" });
         return false;
       }
-      if (!formData.unit.trim()) {
+      if (!formData.unit.trim() && hasUserId("unit")) {
         common_vendor.index.showToast({ title: "请输入单位名称", icon: "none" });
         return false;
       }
-      if (!formData.career.trim()) {
+      if (!formData.career.trim() && hasUserId("position")) {
         common_vendor.index.showToast({ title: "请输入职业", icon: "none" });
         return false;
       }
@@ -264,7 +267,11 @@ const _sfc_main = {
         }
         common_vendor.index.navigateBack();
       } catch (e) {
-        console.log(e);
+        common_vendor.index.showToast({
+          title: e.data.message,
+          icon: "none"
+        });
+        console.log(e.data.message);
       } finally {
         common_vendor.index.hideLoading();
       }
@@ -293,64 +300,91 @@ const _sfc_main = {
         e: common_vendor.t(common_vendor.unref(utils_data.formatEventDate)(common_vendor.unref(EventStore).eventdetail.event_start_time, common_vendor.unref(EventStore).eventdetail.event_end_time)),
         f: common_vendor.t(common_vendor.unref(EventStore).eventdetail.event_address),
         g: common_vendor.t(common_vendor.unref(EventStore).eventdetail.registration_fee),
-        h: common_vendor.t(isEditing.value ? "✓" : "✎"),
-        i: common_vendor.t(isEditing.value ? "保存" : "编辑"),
-        j: common_vendor.o(handleEdit),
-        k: isEditing.value ? 1 : "",
-        l: !isEditing.value,
-        m: !isEditing.value ? 1 : "",
-        n: isEditing.value ? 1 : "",
-        o: formData.name,
-        p: common_vendor.o(($event) => formData.name = $event.detail.value),
-        q: !isEditing.value,
-        r: !isEditing.value ? 1 : "",
-        s: isEditing.value ? 1 : "",
-        t: common_vendor.o([($event) => formData.phone = $event.detail.value, onPhoneInput]),
-        v: formData.phone,
-        w: needPhoneVerification.value && isEditing.value
-      }, needPhoneVerification.value && isEditing.value ? {
-        x: common_vendor.t(countDownText.value),
-        y: common_vendor.o(sendVerifyCode),
-        z: isCountingDown.value || !canSendCode.value
+        h: common_vendor.unref(EventStore).eventdetail.user_info.length > 0
+      }, common_vendor.unref(EventStore).eventdetail.user_info.length > 0 ? {
+        i: common_vendor.t(isEditing.value ? "✓" : "✎"),
+        j: common_vendor.t(isEditing.value ? "保存" : "编辑"),
+        k: common_vendor.o(handleEdit),
+        l: isEditing.value ? 1 : ""
       } : {}, {
+        m: hasUserId("name") || hasUserId("phone_number") || hasUserId("email")
+      }, hasUserId("name") || hasUserId("phone_number") || hasUserId("email") ? common_vendor.e({
+        n: hasUserId("name")
+      }, hasUserId("name") ? {
+        o: !isEditing.value,
+        p: !isEditing.value ? 1 : "",
+        q: isEditing.value ? 1 : "",
+        r: formData.name,
+        s: common_vendor.o(($event) => formData.name = $event.detail.value)
+      } : {}, {
+        t: hasUserId("phone_number")
+      }, hasUserId("phone_number") ? common_vendor.e({
+        v: !isEditing.value,
+        w: !isEditing.value ? 1 : "",
+        x: isEditing.value ? 1 : "",
+        y: common_vendor.o([($event) => formData.phone = $event.detail.value, onPhoneInput]),
+        z: formData.phone,
         A: needPhoneVerification.value && isEditing.value
       }, needPhoneVerification.value && isEditing.value ? {
-        B: formData.verifyCode,
-        C: common_vendor.o(($event) => formData.verifyCode = $event.detail.value)
+        B: common_vendor.t(countDownText.value),
+        C: common_vendor.o(sendVerifyCode),
+        D: isCountingDown.value || !canSendCode.value
+      } : {}) : {}, {
+        E: needPhoneVerification.value && isEditing.value
+      }, needPhoneVerification.value && isEditing.value ? {
+        F: formData.verifyCode,
+        G: common_vendor.o(($event) => formData.verifyCode = $event.detail.value)
       } : {}, {
-        D: !isEditing.value,
-        E: !isEditing.value ? 1 : "",
-        F: isEditing.value ? 1 : "",
-        G: formData.email,
-        H: common_vendor.o(($event) => formData.email = $event.detail.value),
+        H: hasUserId("email")
+      }, hasUserId("email") ? {
         I: !isEditing.value,
         J: !isEditing.value ? 1 : "",
         K: isEditing.value ? 1 : "",
-        L: formData.unit,
-        M: common_vendor.o(($event) => formData.unit = $event.detail.value),
-        N: !isEditing.value,
-        O: !isEditing.value ? 1 : "",
-        P: isEditing.value ? 1 : "",
-        Q: formData.sectoral,
-        R: common_vendor.o(($event) => formData.sectoral = $event.detail.value),
-        S: common_vendor.t(formData.industryIndex === -1 ? "请选择行业" : common_vendor.unref(fieldstore).industory[formData.industryIndex]),
-        T: formData.industryIndex === -1 ? 1 : "",
-        U: isEditing.value
+        L: formData.email,
+        M: common_vendor.o(($event) => formData.email = $event.detail.value)
+      } : {}) : {}, {
+        N: hasUserId("unit") || hasUserId("department") || hasUserId("industry") || hasUserId("position")
+      }, hasUserId("unit") || hasUserId("department") || hasUserId("industry") || hasUserId("position") ? common_vendor.e({
+        O: hasUserId("unit")
+      }, hasUserId("unit") ? {
+        P: !isEditing.value,
+        Q: !isEditing.value ? 1 : "",
+        R: isEditing.value ? 1 : "",
+        S: formData.unit,
+        T: common_vendor.o(($event) => formData.unit = $event.detail.value)
+      } : {}, {
+        U: hasUserId("department")
+      }, hasUserId("department") ? {
+        V: !isEditing.value,
+        W: !isEditing.value ? 1 : "",
+        X: isEditing.value ? 1 : "",
+        Y: formData.sectoral,
+        Z: common_vendor.o(($event) => formData.sectoral = $event.detail.value)
+      } : {}, {
+        aa: hasUserId("industry")
+      }, hasUserId("industry") ? common_vendor.e({
+        ab: common_vendor.t(formData.industryIndex === -1 ? "请选择行业" : common_vendor.unref(fieldstore).industory[formData.industryIndex]),
+        ac: formData.industryIndex === -1 ? 1 : "",
+        ad: isEditing.value
       }, isEditing.value ? {} : {}, {
-        V: !isEditing.value ? 1 : "",
-        W: isEditing.value ? 1 : "",
-        X: common_vendor.unref(fieldstore).industory,
-        Y: formData.industryIndex,
-        Z: common_vendor.o(onIndustryChange),
-        aa: !isEditing.value,
-        ab: !isEditing.value,
-        ac: !isEditing.value ? 1 : "",
-        ad: isEditing.value ? 1 : "",
-        ae: formData.career,
-        af: common_vendor.o(($event) => formData.career = $event.detail.value),
-        ag: common_vendor.o(handleSubmit),
-        ah: isEditing.value,
-        ai: isEditing.value ? 1 : ""
+        ae: !isEditing.value ? 1 : "",
+        af: isEditing.value ? 1 : "",
+        ag: common_vendor.unref(fieldstore).industory,
+        ah: formData.industryIndex,
+        ai: common_vendor.o(onIndustryChange),
+        aj: !isEditing.value
+      }) : {}, {
+        ak: hasUserId("position")
+      }, hasUserId("position") ? {
+        al: !isEditing.value,
+        am: !isEditing.value ? 1 : "",
+        an: isEditing.value ? 1 : "",
+        ao: formData.career,
+        ap: common_vendor.o(($event) => formData.career = $event.detail.value)
+      } : {}) : {}, {
+        aq: common_vendor.o(handleSubmit),
+        ar: isEditing.value,
+        as: isEditing.value ? 1 : ""
       });
     };
   }

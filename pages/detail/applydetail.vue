@@ -30,7 +30,7 @@
     <view class="form-section">
       <view class="form-header">
         <view class="form-title">完善基本资料</view>
-        <button class="edit-btn" @click="handleEdit" :class="{ 'save-mode': isEditing }">
+        <button class="edit-btn" @click="handleEdit" :class="{ 'save-mode': isEditing }" v-if="EventStore.eventdetail.user_info.length > 0">
           <text class="btn-icon">{{ isEditing ? '✓' : '✎' }}</text>
           <text class="btn-text">{{ isEditing ? '保存' : '编辑' }}</text>
         </button>
@@ -38,11 +38,11 @@
       
       <view class="form-content">
         <!-- 基本信息组 -->
-        <view class="form-group">
+        <view class="form-group" v-if="hasUserId('name')||hasUserId('phone_number')||hasUserId('email')">
           <view class="group-title">基本信息</view>
           
           <!-- 姓名 -->
-          <view class="form-item">
+          <view class="form-item" v-if="hasUserId('name')">
             <view class="label">
               <text>姓名</text>
               <text class="required">*</text>
@@ -58,7 +58,7 @@
           </view>
 
           <!-- 手机号码 -->
-          <view class="form-item">
+          <view class="form-item"  v-if="hasUserId('phone_number')">
             <view class="label">
               <text>手机号码</text>
               <text class="required">*</text>
@@ -101,7 +101,7 @@
           </view>
 
           <!-- 邮箱 -->
-          <view class="form-item">
+          <view class="form-item"  v-if="hasUserId('email')">
             <view class="label">
               <text>邮箱</text>
               <text class="required">*</text>
@@ -121,11 +121,11 @@
         </view>
 
         <!-- 工作信息组 -->
-        <view class="form-group">
+        <view class="form-group" v-if="hasUserId('unit')||hasUserId('department')||hasUserId('industry')||hasUserId('position')">
           <view class="group-title">工作信息</view>
           
           <!-- 单位 -->
-          <view class="form-item">
+          <view class="form-item"  v-if="hasUserId('unit')">
             <view class="label">
               <text>单位</text>
               <text class="required">*</text>
@@ -141,7 +141,7 @@
           </view>
 
           <!-- 部门 -->
-          <view class="form-item">
+          <view class="form-item"  v-if="hasUserId('department')">
             <view class="label">部门</view>
             <input 
               class="input" 
@@ -154,7 +154,7 @@
           </view>
 
           <!-- 行业 -->
-          <view class="form-item">
+          <view class="form-item"  v-if="hasUserId('industry')">
             <view class="label">行业</view>
             <picker 
               mode="selector" 
@@ -173,7 +173,7 @@
           </view>
 
           <!-- 职业 - 修改为输入框 -->
-          <view class="form-item">
+          <view class="form-item"  v-if="hasUserId('position')">
             <view class="label">
               <text>职业</text>
               <text class="required">*</text>
@@ -242,7 +242,10 @@ const formData = reactive({
   industryIndex: -1, // 行业选择索引
   career: '', // 职业改为字符串输入
 })
-
+// 判断填写字段是否需要
+function hasUserId(id) {
+  return EventStore.eventdetail.user_info.some(item => item.code === id)
+}
 // 验证码倒计时相关
 const countDown = ref(0)
 const isCountingDown = computed(() => countDown.value > 0)
@@ -444,12 +447,12 @@ function onBack() {
 
 // 表单数据验证（用于保存时）
 const validateFormData = () => {
-  if (!formData.name.trim()) {
+  if (!formData.name.trim()&&hasUserId('name')) {
     uni.showToast({ title: '请输入姓名', icon: 'none' })
     return false
   }
 
-  if (!formData.phone) {
+  if (!formData.phone&&hasUserId('phone_number')) {
     uni.showToast({ title: '请输入手机号码', icon: 'none' })
     return false
   }
@@ -465,7 +468,7 @@ const validateFormData = () => {
     return false
   }
 
-  if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+  if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)&&hasUserId('email')) {
     uni.showToast({ title: '请输入正确的邮箱格式', icon: 'none' })
     return false
   }
@@ -475,12 +478,12 @@ const validateFormData = () => {
 
 // 表单提交验证（报名时使用，不需要验证码）
 const validateForm = () => {
-  if (!formData.name.trim()) {
+  if (!formData.name.trim()&&hasUserId('name')) {
     uni.showToast({ title: '请输入姓名', icon: 'none' })
     return false
   }
 
-  if (!formData.phone) {
+  if (!formData.phone&&hasUserId('phone_number')) {
     uni.showToast({ title: '请输入手机号码', icon: 'none' })
     return false
   }
@@ -490,7 +493,7 @@ const validateForm = () => {
     return false
   }
 
-  if (!formData.email) {
+  if (!formData.email&&hasUserId('email')) {
     uni.showToast({ title: '请输入邮箱地址', icon: 'none' })
     return false
   }
@@ -502,12 +505,12 @@ const validateForm = () => {
     return false
   }
 
-  if (!formData.unit.trim()) {
+  if (!formData.unit.trim()&&hasUserId('unit')) {
     uni.showToast({ title: '请输入单位名称', icon: 'none' })
     return false
   }
 
-  if (!formData.career.trim()) {
+  if (!formData.career.trim()&&hasUserId('position')) {
     uni.showToast({ title: '请输入职业', icon: 'none' })
     return false
   }
@@ -544,7 +547,11 @@ const handleSubmit = async() => {
 	  }
 	   uni.navigateBack()
   }catch(e){
-	  console.log(e)
+	  uni.showToast({
+	    title: e.data.message,
+	    icon: 'none'
+	  })
+	  console.log(e.data.message)
   }finally{
 	  uni.hideLoading()
   }

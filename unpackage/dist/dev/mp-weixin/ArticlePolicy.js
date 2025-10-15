@@ -8,7 +8,7 @@ const _sfc_main = {
       default: () => ({
         article_id: "",
         article_title: "政策文件标题",
-        department: "发文机关",
+        article_source: "发文机关",
         // documentNumber: '文件编号',
         release_time: /* @__PURE__ */ new Date(),
         // effectiveDate: null,
@@ -42,7 +42,7 @@ const _sfc_main = {
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.t(__props.policyData.article_title),
-        b: common_vendor.t(__props.policyData.department),
+        b: common_vendor.t(__props.policyData.article_source),
         c: common_vendor.t(formatDate(__props.policyData.release_time)),
         d: common_vendor.t(__props.policyData.brief_content),
         e: __props.policyData.tags && __props.policyData.tags.length

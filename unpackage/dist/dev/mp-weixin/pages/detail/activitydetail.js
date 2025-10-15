@@ -78,6 +78,17 @@ const _sfc_main = {
         });
         return;
       }
+      const registrationStartTime = new Date(EventStore.eventdetail.registration_start_time).getTime();
+      const currentTime = (/* @__PURE__ */ new Date()).getTime();
+      if (currentTime < registrationStartTime) {
+        common_vendor.index.showModal({
+          title: "提示",
+          content: `活动报名尚未开始，报名开始时间为：${utils_data.Dataformat(EventStore.eventdetail.registration_start_time)}`,
+          showCancel: false,
+          confirmText: "我知道了"
+        });
+        return;
+      }
       common_vendor.index.showToast({
         title: "跳转到报名页面",
         icon: "none"

@@ -150,13 +150,50 @@ function onBack() {
 }
 
 // 报名处理函数
+// const handleRegister = () => {
+//   // 如果按钮被禁用，直接返回
+//   if (disable.value) {
+//     return;
+//   }
+  
+//   // 检查用户是否登录
+//   if (!UserStore.signal) { // 假设你的登录状态字段名为 isLoggedIn
+//     uni.showModal({
+//       title: '提示',
+//       content: '请先登录后再进行报名',
+//       showCancel: true,
+//       cancelText: '取消',
+//       confirmText: '去登录',
+//       success: (res) => {
+//         if (res.confirm) {
+//           // 用户点击确定，跳转到登录页面
+//           uni.switchTab({
+//           	url: '../mymessage/mymessage'
+//           });
+//         }
+//       }
+//     })
+//     return;
+//   }
+  
+  
+//   // 用户已登录，处理报名逻辑
+//   uni.showToast({
+//     title: '跳转到报名页面',
+//     icon: 'none'
+//   })
+//   // 跳转到报名页面
+//   console.log("跳转的id:",id)
+//   uni.navigateTo({ url: `/pages/detail/applydetail?id=${id}` })
+// }
+
+// 报名处理函数
 const handleRegister = () => {
   // 如果按钮被禁用，直接返回
   if (disable.value) {
     return;
   }
-  
-  // 检查用户是否登录
+    // 检查用户是否登录
   if (!UserStore.signal) { // 假设你的登录状态字段名为 isLoggedIn
     uni.showModal({
       title: '提示',
@@ -175,6 +212,22 @@ const handleRegister = () => {
     })
     return;
   }
+  // 检查活动报名是否已开始
+  const registrationStartTime = new Date(EventStore.eventdetail.registration_start_time).getTime()
+  const currentTime = new Date().getTime()
+  
+  if (currentTime < registrationStartTime) {
+    uni.showModal({
+      title: '提示',
+      content: `活动报名尚未开始，报名开始时间为：${Dataformat(EventStore.eventdetail.registration_start_time)}`,
+      showCancel: false,
+      confirmText: '我知道了'
+    })
+    return;
+  }
+  
+
+  
   
   // 用户已登录，处理报名逻辑
   uni.showToast({

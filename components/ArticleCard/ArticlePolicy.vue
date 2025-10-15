@@ -16,7 +16,7 @@
       <view class="policy-info">
         <view class="info-row">
           <text class="info-label">发文机关：</text>
-          <text class="info-value">{{ policyData.department }}</text>
+          <text class="info-value">{{ policyData.article_source }}</text>
         </view>
 		<!--<view class="info-row">
           <text class="info-label">文号：</text>
@@ -85,7 +85,7 @@ const props = defineProps({
     default: () => ({
       article_id: '',
       article_title: '政策文件标题',
-      department: '发文机关',
+      article_source: '发文机关',
       // documentNumber: '文件编号',
       release_time: new Date(),
       // effectiveDate: null,

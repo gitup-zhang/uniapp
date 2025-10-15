@@ -10,7 +10,7 @@ const _sfc_main = {
         article_title: "新闻标题",
         brief_content: "新闻内容摘要，这里展示新闻的主要内容概述...",
         cover_image_url: "/static/images/default-news.jpg",
-        source: "新闻来源",
+        article_source: "新闻来源",
         release_time: /* @__PURE__ */ new Date(),
         field_name: "科技"
         // views: 1234,
@@ -56,7 +56,7 @@ const _sfc_main = {
       }, __props.newsData.field_name ? {
         d: common_vendor.t(__props.newsData.field_name)
       } : {}, {
-        e: common_vendor.t(__props.newsData.source || "新闻来源"),
+        e: common_vendor.t(__props.newsData.article_source || "新闻来源"),
         f: common_vendor.t(formatTime(__props.newsData.release_time)),
         g: common_vendor.t(__props.newsData.article_title),
         h: common_vendor.t(__props.newsData.brief_content),
