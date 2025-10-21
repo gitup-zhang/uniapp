@@ -10,7 +10,7 @@
           </view>
         </view>
         <view class="nav-center">
-          <text class="nav-title">系统消息</text>
+          <text class="nav-title">系统消息123</text>
         </view>
         <view class="nav-right">
           <!-- <view class="message-count" v-if="MesStore.MessageList.length > 0">
@@ -571,7 +571,7 @@ const goBack = () => {
 }
 
 /* 暗黑模式支持 */
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .system-message-page {
     background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
   }
@@ -592,7 +592,7 @@ const goBack = () => {
   .error-text {
     color: #f87171;
   }
-}
+} */
 
 /* 无障碍支持 */
 @media (prefers-reduced-motion: reduce) {

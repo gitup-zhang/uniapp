@@ -467,55 +467,67 @@ to {
 }
 
 /* 暗黑模式支持 */
-@media (prefers-color-scheme: dark) {
-.message-card.data-v-506a9f7c {
+/* @media (prefers-color-scheme: dark) {
+  .message-card {
     background: #1f2937;
     border-color: rgba(239, 68, 68, 0.2);
     box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.3);
-}
-.message-title.data-v-506a9f7c {
+  }
+  
+  .message-title {
     color: #f9fafb;
-}
-.rich-text.data-v-506a9f7c {
+  }
+  
+  .rich-text {
     color: #d1d5db;
-}
-.rich-text.data-v-506a9f7c strong {
+  }
+  
+  .rich-text :deep(strong) {
     color: #f9fafb;
-}
-.rich-text.data-v-506a9f7c blockquote {
+  }
+  
+  .rich-text :deep(blockquote) {
     background: #374151;
     color: #d1d5db;
-}
-.rich-text.data-v-506a9f7c code {
+  }
+  
+  .rich-text :deep(code) {
     background: #374151;
     color: #d1d5db;
-}
-.rich-text.data-v-506a9f7c th {
+  }
+  
+  .rich-text :deep(th) {
     background: #374151;
-}
-.rich-text.data-v-506a9f7c th,
-  .rich-text.data-v-506a9f7c td {
+  }
+  
+  .rich-text :deep(th),
+  .rich-text :deep(td) {
     border-color: #4b5563;
-}
-.message-time.data-v-506a9f7c, .sender-name.data-v-506a9f7c {
+  }
+  
+  .message-time, .sender-name {
     color: #9ca3af;
-}
-.message-icon.data-v-506a9f7c {
+  }
+  
+  .message-icon {
     background: linear-gradient(135deg, #2d1b1b 0%, #3c2626 100%);
     border-color: rgba(239, 68, 68, 0.2);
-}
-.toggle-btn.data-v-506a9f7c {
+  }
+  
+  .toggle-btn {
     background: linear-gradient(135deg, #2d1b1b 0%, #3c2626 100%);
     border-color: rgba(239, 68, 68, 0.3);
     box-shadow: 
       0 8rpx 24rpx rgba(0, 0, 0, 0.3),
       0 2rpx 6rpx rgba(0, 0, 0, 0.1);
-}
-.toggle-btn.data-v-506a9f7c:active {
+  }
+  
+  .toggle-btn:active {
     background: linear-gradient(135deg, #3c2626 0%, #4a2c2c 100%);
     border-color: rgba(239, 68, 68, 0.4);
-}
-.fade-mask.data-v-506a9f7c {
+  }
+  
+  .fade-mask {
     background: linear-gradient(
       to bottom,
       transparent 0%,
@@ -523,8 +535,8 @@ to {
       rgba(31, 41, 55, 0.8) 70%,
       #1f2937 100%
     );
-}
-}
+  }
+} */
 
 /* 无障碍支持 */
 @media (prefers-reduced-motion: reduce) {

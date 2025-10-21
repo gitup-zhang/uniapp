@@ -59,6 +59,11 @@ const _sfc_main = {
       selected.getselected();
       selected.getevent();
     });
+    common_vendor.onShow(() => {
+      console.log("11111111111");
+      selected.getselected();
+      selected.getevent();
+    });
     return (_ctx, _cache) => {
       return {
         a: common_assets._imports_0,

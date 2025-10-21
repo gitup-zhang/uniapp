@@ -327,30 +327,37 @@
 }
 
 /* 暗黑模式适配 */
-@media (prefers-color-scheme: dark) {
-.message-detail-page {
+/* @media (prefers-color-scheme: dark) {
+  .message-detail-page {
     background: #0f172a;
-}
-.detail-scroll {
+  }
+  
+  .detail-scroll {
     background: #0f172a;
-}
-.admin-header, .message-card {
+  }
+  
+  .admin-header, .message-card {
     background: #1e293b;
     border-color: #334155;
-}
-.admin-name {
+  }
+  
+  .admin-name {
     color: #f1f5f9;
-}
-.message-title {
+  }
+  
+  .message-title {
     color: #f1f5f9;
-}
-.content-text {
+  }
+  
+  .content-text {
     color: #cbd5e1;
-}
-.send-time {
+  }
+  
+  .send-time {
     color: #94a3b8;
-}
-.message-title-section {
+  }
+  
+  .message-title-section {
     border-bottom-color: #334155;
-}
-}
+  }
+} */

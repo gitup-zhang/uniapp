@@ -128,7 +128,8 @@
 
 <script setup>
 import {ref,onMounted,computed} from 'vue'
-import { onLoad,onShow } from '@dcloudio/uni-app'
+
+import { onShow } from '@dcloudio/uni-app'
 import CustomNavbar from '@/components/CustomNavbar/CustomNavbar.vue'
 import showInforVue from '../../components/show-infor/show-infor.vue';
 import {useNoticeStore} from '@/store/Notice.js'
@@ -206,7 +207,13 @@ onMounted(()=>{
 	selected.getevent()
 	//EventStore.getlisting(10)
 })
-
+onShow(()=>{
+	console.log("11111111111")
+	//usenotice.getnoticestore()
+	selected.getselected()
+	selected.getevent()
+	//EventStore.getlisting(10)
+})
 
 </script>
 

@@ -1345,29 +1345,29 @@ const viewAllActivities = () => {
 }
 
 // 暗色主题适配
-@media (prefers-color-scheme: dark) {
-  .main-content {
-    background: #1a1a1a;
-  }
+// @media (prefers-color-scheme: dark) {
+//   .main-content {
+//     background: #1a1a1a;
+//   }
   
-  .stats-overview {
-    background: #2d2d2d;
+//   .stats-overview {
+//     background: #2d2d2d;
     
-    .stats-title {
-      color: #fff;
-    }
+//     .stats-title {
+//       color: #fff;
+//     }
     
-    .stat-number {
-      color: #fff;
-    }
+//     .stat-number {
+//       color: #fff;
+//     }
     
-    .stat-label {
-      color: #ccc;
-    }
-  }
+//     .stat-label {
+//       color: #ccc;
+//     }
+//   }
   
-  .section-title {
-    color: #fff;
-  }
-}
+//   .section-title {
+//     color: #fff;
+//   }
+// }
 </style>

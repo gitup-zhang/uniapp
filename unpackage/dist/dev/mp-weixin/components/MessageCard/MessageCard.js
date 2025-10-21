@@ -9,8 +9,7 @@ const _sfc_main = {
       default: () => ({
         id: "",
         group_name: "",
-        unread_count: 0,
-        is_read: 1,
+        has_unread: "N",
         latest_content: "",
         latest_time: "",
         type: "group"
@@ -31,14 +30,22 @@ const _sfc_main = {
     const props = __props;
     const emit = __emit;
     const hasUnreadMessages = common_vendor.computed(() => {
-      return props.message.unread_count > 0 || props.message.is_read === 0;
-    });
-    const displayUnreadCount = common_vendor.computed(() => {
-      const count = props.message.unread_count || (props.message.is_read === 0 ? 1 : 0);
-      return count > 99 ? "99+" : count.toString();
+      return props.message.has_unread === "Y";
     });
     const displayContent = common_vendor.computed(() => {
-      const content = props.message.latest_content || props.message.content || props.message.message || "";
+      let content = props.message.latest_content || props.message.content || props.message.message || "";
+      if (!content) {
+        return props.messageType === "system" ? "系统通知消息" : "暂无消息内容";
+      }
+      content = content.replace(/<img[^>]*>/gi, "[图片]");
+      content = content.replace(/<image[^>]*>/gi, "[图片]");
+      content = content.replace(/<[^>]+>/g, "");
+      content = content.replace(/&nbsp;/g, " ");
+      content = content.replace(/&lt;/g, "<");
+      content = content.replace(/&gt;/g, ">");
+      content = content.replace(/&amp;/g, "&");
+      content = content.replace(/&quot;/g, '"');
+      content = content.replace(/\s+/g, " ").trim();
       return content || (props.messageType === "system" ? "系统通知消息" : "暂无消息内容");
     });
     const formattedTime = common_vendor.computed(() => {
@@ -146,17 +153,15 @@ const _sfc_main = {
         e: common_vendor.t(__props.messageType === "system" ? "系统" : "群聊"),
         f: common_vendor.t(formattedTime.value),
         g: hasUnreadMessages.value
-      }, hasUnreadMessages.value ? {
-        h: common_vendor.t(displayUnreadCount.value)
-      } : {}, {
-        i: common_vendor.t(displayContent.value),
-        j: hasUnreadMessages.value
       }, hasUnreadMessages.value ? {} : {}, {
-        k: hasUnreadMessages.value ? 1 : "",
-        l: __props.loading ? 1 : "",
-        m: __props.messageType === "system" ? 1 : "",
-        n: __props.messageType === "group" ? 1 : "",
-        o: common_vendor.o(handleCardTap)
+        h: common_vendor.t(displayContent.value),
+        i: hasUnreadMessages.value
+      }, hasUnreadMessages.value ? {} : {}, {
+        j: hasUnreadMessages.value ? 1 : "",
+        k: __props.loading ? 1 : "",
+        l: __props.messageType === "system" ? 1 : "",
+        m: __props.messageType === "group" ? 1 : "",
+        n: common_vendor.o(handleCardTap)
       });
     };
   }

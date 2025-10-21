@@ -483,7 +483,7 @@ const goBack = () => {
 }
 
 /* 暗黑模式适配 */
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .message-detail-page {
     background: #0f172a;
   }
@@ -516,5 +516,5 @@ const goBack = () => {
   .message-title-section {
     border-bottom-color: #334155;
   }
-}
+} */
 </style>

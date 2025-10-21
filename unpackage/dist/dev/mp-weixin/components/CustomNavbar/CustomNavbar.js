@@ -1,6 +1,5 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
-const common_assets = require("../../common/assets.js");
 const _sfc_main = {
   __name: "CustomNavbar",
   setup(__props) {
@@ -13,10 +12,9 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return {
-        a: common_assets._imports_0$2,
-        b: statusBarHeight.value + "px",
-        c: navbarHeight.value + "px",
-        d: navbarHeight.value + "px"
+        a: statusBarHeight.value + "px",
+        b: navbarHeight.value + "px",
+        c: navbarHeight.value + "px"
       };
     };
   }

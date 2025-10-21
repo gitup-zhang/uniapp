@@ -306,24 +306,28 @@
 }
 
 /* 暗黑模式支持 */
-@media (prefers-color-scheme: dark) {
-.system-message-page.data-v-82517712 {
+/* @media (prefers-color-scheme: dark) {
+  .system-message-page {
     background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
-}
-.empty-circle.data-v-82517712 {
+  }
+  
+  .empty-circle {
     background: linear-gradient(135deg, #2d1b1b 0%, #3c2626 50%, #4a2c2c 100%);
-}
-.empty-title.data-v-82517712 {
+  }
+  
+  .empty-title {
     color: #f9fafb;
-}
-.error-banner.data-v-82517712 {
+  }
+  
+  .error-banner {
     background: #2d1b1b;
     border-color: #3c2626;
-}
-.error-text.data-v-82517712 {
+  }
+  
+  .error-text {
     color: #f87171;
-}
-}
+  }
+} */
 
 /* 无障碍支持 */
 @media (prefers-reduced-motion: reduce) {

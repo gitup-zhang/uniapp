@@ -1114,7 +1114,7 @@ const getAllImageUrls = () => {
 }
 
 /* 暗黑模式支持 */
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .message-card {
     background: #1f2937;
     border-color: rgba(239, 68, 68, 0.2);
@@ -1183,7 +1183,7 @@ const getAllImageUrls = () => {
       #1f2937 100%
     );
   }
-}
+} */
 
 /* 无障碍支持 */
 @media (prefers-reduced-motion: reduce) {

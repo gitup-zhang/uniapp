@@ -655,71 +655,89 @@ to {
 }
 
 /* 暗黑模式支持 */
-@media (prefers-color-scheme: dark) {
-.message-detail-page.data-v-a39301fc {
+/* @media (prefers-color-scheme: dark) {
+  .message-detail-page {
     background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
-}
-.detail-card.data-v-a39301fc {
+  }
+  
+  .detail-card {
     background: #1f2937;
     border-color: rgba(239, 68, 68, 0.2);
     box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.3);
-}
-.message-title.data-v-a39301fc {
+  }
+  
+  .message-title {
     color: #f9fafb;
-}
-.content-text.data-v-a39301fc {
+  }
+  
+  .content-text {
     color: #d1d5db;
-}
-.meta-value.data-v-a39301fc {
+  }
+  
+  .meta-value {
     color: #e5e7eb;
-}
-.message-icon.data-v-a39301fc, .btn-icon.data-v-a39301fc {
+  }
+  
+  .message-icon, .btn-icon {
     background: linear-gradient(135deg, #2d1b1b 0%, #3c2626 100%);
     border-color: rgba(239, 68, 68, 0.2);
-}
-.attachment-item.data-v-a39301fc, .link-item.data-v-a39301fc {
+  }
+  
+  .attachment-item, .link-item {
     background: #374151;
     border-color: #4b5563;
-}
-.attachment-item.data-v-a39301fc:active, .link-item.data-v-a39301fc:active {
+  }
+  
+  .attachment-item:active, .link-item:active {
     background: #4b5563;
     border-color: #6b7280;
-}
-.attachment-icon.data-v-a39301fc, .link-icon.data-v-a39301fc {
+  }
+  
+  .attachment-icon, .link-icon {
     background: #1f2937;
     box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
-}
-.attachment-name.data-v-a39301fc, .link-title.data-v-a39301fc {
+  }
+  
+  .attachment-name, .link-title {
     color: #f9fafb;
-}
-.attachment-size.data-v-a39301fc, .link-desc.data-v-a39301fc {
+  }
+  
+  .attachment-size, .link-desc {
     color: #d1d5db;
-}
-.btn-text.data-v-a39301fc {
+  }
+  
+  .btn-text {
     color: #e5e7eb;
-}
-.footer-info.data-v-a39301fc {
+  }
+  
+  .footer-info {
     border-color: #374151;
-}
-.info-label.data-v-a39301fc {
+  }
+  
+  .info-label {
     color: #9ca3af;
-}
-.info-value.data-v-a39301fc {
+  }
+  
+  .info-value {
     color: #6b7280;
-}
-.error-circle.data-v-a39301fc {
+  }
+  
+  .error-circle {
     background: linear-gradient(135deg, #2d1b1b 0%, #3c2626 50%, #4a2c2c 100%);
-}
-.error-title.data-v-a39301fc {
+  }
+  
+  .error-title {
     color: #f9fafb;
-}
-.error-desc.data-v-a39301fc {
+  }
+  
+  .error-desc {
     color: #9ca3af;
-}
-.section-title.data-v-a39301fc {
+  }
+  
+  .section-title {
     border-color: rgba(239, 68, 68, 0.3);
-}
-}
+  }
+} */
 
 /* 高级动画效果 */
 .detail-card.data-v-a39301fc {

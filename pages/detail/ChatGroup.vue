@@ -808,7 +808,7 @@ onUnmounted(() => {
 }
 
 /* 暗黑模式适配 */
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .admin-message-container {
     background: #0f172a;
   }
@@ -853,5 +853,5 @@ onUnmounted(() => {
   .no-more-text {
     color: #64748b;
   }
-}
+} */
 </style>

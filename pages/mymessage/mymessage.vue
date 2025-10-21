@@ -978,47 +978,47 @@ const viewAllActivities = () => {
 }
 
 // 暗色主题适配
-@media (prefers-color-scheme: dark) {
-  .main-content {
-    background: #1a1a1a;
-  }
+// @media (prefers-color-scheme: dark) {
+//   .main-content {
+//     background: #1a1a1a;
+//   }
   
-  .stats-overview {
-    background: #2d2d2d;
+//   .stats-overview {
+//     background: #2d2d2d;
     
-    .stats-title {
-      color: #fff;
-    }
+//     .stats-title {
+//       color: #fff;
+//     }
     
-    .stat-number {
-      color: #fff;
-    }
+//     .stat-number {
+//       color: #fff;
+//     }
     
-    .stat-label {
-      color: #ccc;
-    }
-  }
+//     .stat-label {
+//       color: #ccc;
+//     }
+//   }
   
-  .section-title {
-    color: #fff;
-  }
+//   .section-title {
+//     color: #fff;
+//   }
 
-  .empty-card {
-    background: #2d2d2d;
+//   .empty-card {
+//     background: #2d2d2d;
 
-    .empty-title {
-      color: #fff;
-    }
+//     .empty-title {
+//       color: #fff;
+//     }
 
-    .empty-desc {
-      color: #ccc;
-    }
+//     .empty-desc {
+//       color: #ccc;
+//     }
 
-    .refresh-btn {
-      background: #3d3d3d;
-      color: #667eea;
-      border-color: #667eea;
-    }
-  }
-}
+//     .refresh-btn {
+//       background: #3d3d3d;
+//       color: #667eea;
+//       border-color: #667eea;
+//     }
+//   }
+// }
 </style>

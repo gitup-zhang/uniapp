@@ -547,37 +547,3 @@
     width: 100%;
 }
 }
-@media (prefers-color-scheme: dark) {
-.main-content.data-v-a5a8e0a1 {
-    background: #1a1a1a;
-}
-.stats-overview.data-v-a5a8e0a1 {
-    background: #2d2d2d;
-}
-.stats-overview .stats-title.data-v-a5a8e0a1 {
-    color: #fff;
-}
-.stats-overview .stat-number.data-v-a5a8e0a1 {
-    color: #fff;
-}
-.stats-overview .stat-label.data-v-a5a8e0a1 {
-    color: #ccc;
-}
-.section-title.data-v-a5a8e0a1 {
-    color: #fff;
-}
-.empty-card.data-v-a5a8e0a1 {
-    background: #2d2d2d;
-}
-.empty-card .empty-title.data-v-a5a8e0a1 {
-    color: #fff;
-}
-.empty-card .empty-desc.data-v-a5a8e0a1 {
-    color: #ccc;
-}
-.empty-card .refresh-btn.data-v-a5a8e0a1 {
-    background: #3d3d3d;
-    color: #667eea;
-    border-color: #667eea;
-}
-}

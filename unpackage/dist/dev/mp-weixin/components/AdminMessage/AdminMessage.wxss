@@ -292,50 +292,60 @@
 }
 
 /* 暗黑模式适配 */
-@media (prefers-color-scheme: dark) {
-.message-bubble.data-v-3a7f16d9 {
+/* @media (prefers-color-scheme: dark) {
+  .message-bubble {
     background: #1e293b;
     border-color: #334155;
     color: #f1f5f9;
-}
-.title-text.data-v-3a7f16d9 {
+  }
+  
+  .title-text {
     color: #f1f5f9;
-}
-.rich-text.data-v-3a7f16d9 {
+  }
+  
+  .rich-text {
     color: #cbd5e1;
-}
-.sender-name.data-v-3a7f16d9 {
+  }
+  
+  .sender-name {
     color: #f1f5f9;
-}
-.expand-btn.data-v-3a7f16d9 {
+  }
+  
+  .expand-btn {
     background: #334155;
     border-color: #475569;
-}
-.view-detail-hint.data-v-3a7f16d9 {
+  }
+  
+  .view-detail-hint {
     background: rgba(102, 126, 234, 0.1);
-}
-.rich-text.data-v-3a7f16d9 h1,
-  .rich-text.data-v-3a7f16d9 h2,
-  .rich-text.data-v-3a7f16d9 h3 {
+  }
+  
+  .rich-text :deep(h1),
+  .rich-text :deep(h2),
+  .rich-text :deep(h3) {
     color: #f1f5f9;
-}
-.rich-text.data-v-3a7f16d9 strong {
+  }
+  
+  .rich-text :deep(strong) {
     color: #f1f5f9;
-}
-.rich-text.data-v-3a7f16d9 blockquote {
+  }
+  
+  .rich-text :deep(blockquote) {
     background: #334155;
     color: #94a3b8;
-}
-.rich-text.data-v-3a7f16d9 code {
+  }
+  
+  .rich-text :deep(code) {
     background: #334155;
     color: #fca5a5;
-}
-.rich-text.data-v-3a7f16d9 pre {
-    background: #0f172a;
-}
+  }
   
-  /* 暗黑模式下的图片阴影调整 */
-.rich-text.data-v-3a7f16d9 img {
+  .rich-text :deep(pre) {
+    background: #0f172a;
+  }
+  
+  
+  .rich-text :deep(img) {
     box-shadow: 0 2rpx 8rpx rgba(255, 255, 255, 0.1);
-}
-}
+  }
+} */

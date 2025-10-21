@@ -1147,7 +1147,7 @@ const handleAction = (action) => {
 }
 
 /* 暗黑模式适配 */
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .message-bubble {
     background: #1e293b;
     border-color: #334155;
@@ -1199,9 +1199,9 @@ const handleAction = (action) => {
     background: #0f172a;
   }
   
-  /* 暗黑模式下的图片阴影调整 */
+  
   .rich-text :deep(img) {
     box-shadow: 0 2rpx 8rpx rgba(255, 255, 255, 0.1);
   }
-}
+} */
 </style>

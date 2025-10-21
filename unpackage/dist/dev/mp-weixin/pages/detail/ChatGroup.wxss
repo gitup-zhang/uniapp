@@ -335,39 +335,49 @@
 }
 
 /* 暗黑模式适配 */
-@media (prefers-color-scheme: dark) {
-.admin-message-container.data-v-6f6e3c6b {
+/* @media (prefers-color-scheme: dark) {
+  .admin-message-container {
     background: #0f172a;
-}
-.message-list.data-v-6f6e3c6b {
+  }
+  
+  .message-list {
     background: #0f172a;
-}
-.custom-refresher.data-v-6f6e3c6b {
+  }
+  
+  .custom-refresher {
     background: #0f172a;
-}
-.date-text.data-v-6f6e3c6b {
+  }
+  
+  .date-text {
     background: #0f172a;
     color: #64748b;
-}
-.date-line.data-v-6f6e3c6b {
+  }
+  
+  .date-line {
     background: #334155;
-}
-.empty-title.data-v-6f6e3c6b {
+  }
+  
+  .empty-title {
     color: #f1f5f9;
-}
-.empty-desc.data-v-6f6e3c6b {
+  }
+  
+  .empty-desc {
     color: #94a3b8;
-}
-.loading-content.data-v-6f6e3c6b {
+  }
+  
+  .loading-content {
     background: #1e293b;
-}
-.error-content.data-v-6f6e3c6b {
+  }
+  
+  .error-content {
     background: #1e293b;
-}
-.loading-more-text.data-v-6f6e3c6b {
+  }
+  
+  .loading-more-text {
     color: #94a3b8;
-}
-.no-more-text.data-v-6f6e3c6b {
+  }
+  
+  .no-more-text {
     color: #64748b;
-}
-}
+  }
+} */

@@ -34,7 +34,7 @@
         <!-- 右侧：状态指示器 -->
         <view class="status-section">
           <view v-if="hasUnreadMessages" class="unread-indicator">
-            <text class="unread-count">{{ displayUnreadCount }}</text>
+            <view class="unread-dot"></view>
           </view>
           <view class="arrow-icon">
             <text class="arrow">→</text>
@@ -64,8 +64,7 @@ const props = defineProps({
     default: () => ({
       id: '',
       group_name: '',
-      unread_count: 0,
-      is_read: 1,
+      has_unread: 'N',
       latest_content: '',
       latest_time: '',
       type: 'group'
@@ -87,16 +86,34 @@ const emit = defineEmits(['tap', 'markAsRead'])
 
 // 计算属性
 const hasUnreadMessages = computed(() => {
-  return props.message.unread_count > 0 || props.message.is_read === 0
-})
-
-const displayUnreadCount = computed(() => {
-  const count = props.message.unread_count || (props.message.is_read === 0 ? 1 : 0)
-  return count > 99 ? '99+' : count.toString()
+  return props.message.has_unread === 'Y'
 })
 
 const displayContent = computed(() => {
-  const content = props.message.latest_content || props.message.content || props.message.message || ''
+  let content = props.message.latest_content || props.message.content || props.message.message || ''
+  
+  if (!content) {
+    return props.messageType === 'system' ? '系统通知消息' : '暂无消息内容'
+  }
+  
+  // 处理图片标签，替换为 [图片]
+  // 匹配各种图片标签格式：<img>、<image>等
+  content = content.replace(/<img[^>]*>/gi, '[图片]')
+  content = content.replace(/<image[^>]*>/gi, '[图片]')
+  
+  // 移除其他HTML标签，保留纯文本
+  content = content.replace(/<[^>]+>/g, '')
+  
+  // 解码HTML实体
+  content = content.replace(/&nbsp;/g, ' ')
+  content = content.replace(/&lt;/g, '<')
+  content = content.replace(/&gt;/g, '>')
+  content = content.replace(/&amp;/g, '&')
+  content = content.replace(/&quot;/g, '"')
+  
+  // 清理多余空白
+  content = content.replace(/\s+/g, ' ').trim()
+  
   return content || (props.messageType === 'system' ? '系统通知消息' : '暂无消息内容')
 })
 
@@ -389,40 +406,38 @@ const formatTime = (time) => {
   flex-shrink: 0;
 }
 
-/* 未读指示器 */
+/* 未读指示器 - 圆点样式 */
 .unread-indicator {
   position: relative;
 }
 
-.unread-count {
+.unread-dot {
+  width: 20rpx;
+  height: 20rpx;
   background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-  color: #ffffff;
-  font-size: 22rpx;
-  font-weight: 800;
-  padding: 8rpx 16rpx;
-  border-radius: 24rpx;
-  min-width: 32rpx;
-  height: 32rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 50%;
   box-shadow: 
-    0 4rpx 12rpx rgba(66, 153, 225, 0.4),
-    0 2rpx 4rpx rgba(66, 153, 225, 0.3);
-  animation: bounce 0.6s ease-in-out;
+    0 0 0 6rpx rgba(66, 153, 225, 0.2),
+    0 4rpx 12rpx rgba(66, 153, 225, 0.4);
+  animation: pulse-dot 2s infinite;
 }
 
-.system-message .unread-count {
+.system-message .unread-dot {
   background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
   box-shadow: 
-    0 4rpx 12rpx rgba(245, 101, 101, 0.4),
-    0 2rpx 4rpx rgba(245, 101, 101, 0.3);
+    0 0 0 6rpx rgba(245, 101, 101, 0.2),
+    0 4rpx 12rpx rgba(245, 101, 101, 0.4);
 }
 
-@keyframes bounce {
-  0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
-  40%, 43% { transform: translate3d(0,-8rpx,0); }
-  70% { transform: translate3d(0,-4rpx,0); }
+@keyframes pulse-dot {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
 }
 
 /* 箭头图标 */
@@ -544,7 +559,7 @@ const formatTime = (time) => {
 }
 
 /* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
+/*@media (prefers-color-scheme: dark) {
   .message-card {
     background: #2d3748;
     box-shadow: 
@@ -595,5 +610,5 @@ const formatTime = (time) => {
     background: linear-gradient(135deg, #2d3748 0%, #2c1810 100%);
     border-color: rgba(245, 101, 101, 0.2);
   }
-}
+} */
 </style>

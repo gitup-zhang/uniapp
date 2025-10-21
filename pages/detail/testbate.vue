@@ -944,7 +944,7 @@ const markAsRead = async (message) => {
 }
 
 /* 暗黑模式适配 */
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .admin-message-container {
     background: #0f172a;
   }
@@ -1024,7 +1024,7 @@ const markAsRead = async (message) => {
   .loading-content {
     background: #1e293b;
   }
-}
+} */
 
 /* 动画效果 */
 .message-item {

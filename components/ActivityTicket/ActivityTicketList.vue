@@ -751,7 +751,7 @@ const handleArchive = () => {
 }
 
 /* 深色模式适配 */
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .activity-card {
     background: linear-gradient(145deg, #1f2937, #111827);
     border: 1rpx solid rgba(75, 85, 99, 0.3);
@@ -786,5 +786,5 @@ const handleArchive = () => {
     background: linear-gradient(135deg, #374151, #1f2937);
     border-top: 1rpx solid #4b5563;
   }
-}
+} */
 </style>

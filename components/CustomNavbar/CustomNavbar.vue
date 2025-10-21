@@ -3,7 +3,7 @@
     <!-- 固定导航栏 -->
     <view class="navbar" :style="{ paddingTop: statusBarHeight + 'px', height: navbarHeight + 'px' }">
       <!-- 背景图片层 -->
-      <image class="navbar-bg" src="/static/Background 4.png" mode="aspectFill" />
+      <image class="navbar-bg" src="http://47.113.194.28:9000/news-platform/images/202510/1761042141808256418.jpg" mode="aspectFill" />
       <!-- 标题层 -->
       <view class="navbar-title">政府政策与行业新闻助手</view>
     </view>

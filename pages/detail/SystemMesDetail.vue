@@ -912,7 +912,7 @@ const goBack = () => {
 }
 
 /* 暗黑模式支持 */
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   .message-detail-page {
     background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
   }
@@ -994,7 +994,7 @@ const goBack = () => {
   .section-title {
     border-color: rgba(239, 68, 68, 0.3);
   }
-}
+} */
 
 /* 高级动画效果 */
 .detail-card {
