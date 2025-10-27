@@ -148,6 +148,7 @@ import { useInfoStore } from '@/store/Info.js'
 import MessageCard from '@/components/MessageCard/MessageCard.vue'
 import { useMesstore } from '@/store/mes.js'
 import { onLoad, onShow } from '@dcloudio/uni-app'
+import { markAllAsReadmes } from '@/new-apis/mes.js'
 
 // 获取状态管理
 const userStore = useInfoStore()
@@ -176,16 +177,6 @@ const isLoggedIn = computed(() => userStore.signal)
 const systemUnreadCount = computed(() => mesStore.systemUnreadCount)
 const groupUnreadCount = computed(() => mesStore.groupUnreadCount)
 
-// 计算总未读数量（用于一键已读按钮）
-const totalUnreadCount = computed(() => {
-  if (activeTab.value === 'system') {
-    return systemUnreadCount.value
-  } else if (activeTab.value === 'group') {
-    return groupUnreadCount.value
-  }
-  return 0
-})
-
 // 系统消息列表
 const systemMessages = computed(() => {
   if (!isLoggedIn.value) return []
@@ -208,6 +199,11 @@ const shouldShowEmpty = computed(() => {
   return false
 })
 
+// 获取所有未读消息总数
+const getCurrentUnreadCount = () => {
+  return systemUnreadCount.value + groupUnreadCount.value
+}
+
 // 生命周期
 onMounted(async () => {
   try {
@@ -220,8 +216,9 @@ onMounted(async () => {
 })
 
 onShow(async () => {
+  console.log('页面显示，刷新消息列表')
   if (isLoggedIn.value) {
-    await loadUserMessages()
+    await loadUserMessages(true) // 每次返回时刷新消息
   }
 })
 
@@ -320,16 +317,6 @@ const handleTouchEnd = async () => {
     pullDistance.value = 0
     isPulling.value = false
   }
-}
-
-// 获取当前标签的未读数量
-const getCurrentUnreadCount = () => {
-  if (activeTab.value === 'system') {
-    return systemUnreadCount.value
-  } else if (activeTab.value === 'group') {
-    return groupUnreadCount.value
-  }
-  return 0
 }
 
 // 登录相关方法
@@ -471,19 +458,13 @@ const getEmptyDesc = () => {
   return descs[activeTab.value] || '暂无内容'
 }
 
-// 一键标记已读
+// 一键标记所有消息已读
 const markAllAsRead = async () => {
   if (!isLoggedIn.value) return
   
-  let unreadMessages = []
+  const totalUnread = systemUnreadCount.value + groupUnreadCount.value
   
-  if (activeTab.value === 'system') {
-    unreadMessages = systemMessages.value.filter(msg => mesStore.isMessageUnread(msg))
-  } else if (activeTab.value === 'group') {
-    unreadMessages = groupMessages.value.filter(msg => mesStore.isMessageUnread(msg))
-  }
-  
-  if (unreadMessages.length === 0) {
+  if (totalUnread === 0) {
     uni.showToast({
       title: '已经没有未读消息了',
       icon: 'none',
@@ -496,7 +477,7 @@ const markAllAsRead = async () => {
     const res = await new Promise((resolve) => {
       uni.showModal({
         title: '确认操作',
-        content: `确定要将${unreadMessages.length}条未读消息标记为已读吗？`,
+        content: `确定要将所有${totalUnread}条未读消息标记为已读吗？`,
         success: resolve
       })
     })
@@ -508,24 +489,18 @@ const markAllAsRead = async () => {
       mask: true
     })
     
-    const promises = []
-    
-    unreadMessages.forEach(msg => {
-      if (msg.type === 'system') {
-        promises.push(mesStore.markSystemMessageAsRead(msg.id))
-      } else {
-        promises.push(mesStore.markGroupMessageAsRead(msg.id))
-      }
-    })
-    
-    await Promise.allSettled(promises)
+    // 调用store中的markAllAsRead方法
+    await markAllAsReadmes()
     
     uni.hideLoading()
     uni.showToast({
-      title: `已标记${unreadMessages.length}条消息为已读`,
+      title: `已标记${totalUnread}条消息为已读`,
       icon: 'success',
       duration: 2000
     })
+    
+    // 刷新消息列表
+    await loadUserMessages(true)
     
   } catch (error) {
     console.error('批量标记已读失败:', error)

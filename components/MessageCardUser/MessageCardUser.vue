@@ -116,10 +116,10 @@ const emit = defineEmits(['messageClick', 'toggleExpanded', 'viewDetail'])
 const LINE_CONFIG = {
   SHORT_LIMIT: 5,      // 短内容：5行以内
   MEDIUM_LIMIT: 15,    // 中等内容：5-15行
-  PREVIEW_LINES: 5,    // 预览内容行数
+  PREVIEW_LINES: 3,    // 预览内容行数
   
   // 富文本元素行数配置
-  IMAGE_LINES: 4,      // 一张图片占4行
+  IMAGE_LINES: 5,      // 一张图片占4行
   BR_LINES: 1,         // <br> 标签占1行
   PARAGRAPH_MIN_LINES: 1,  // 段落最小行数
   TITLE_MIN_LINES: {       // 标题最小行数

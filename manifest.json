@@ -50,16 +50,14 @@
     "quickapp" : {},
     /* 小程序特有相关 */
     "mp-weixin" : {
-        "appid" : "wx80be6283694e28a2",
+        "appid" : "wxe02b256352256070",
         "setting" : {
             "urlCheck" : false,
             "es6" : false,
             "postcss" : false
         },
         "usingComponents" : true,
-        "permission" : {
-			
-      },
+        "permission" : {},
         "unipush" : {
             "enable" : false
         },

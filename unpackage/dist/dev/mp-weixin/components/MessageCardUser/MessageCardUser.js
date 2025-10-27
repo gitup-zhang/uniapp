@@ -25,10 +25,10 @@ const _sfc_main = {
       // 短内容：5行以内
       MEDIUM_LIMIT: 15,
       // 中等内容：5-15行
-      PREVIEW_LINES: 5,
+      PREVIEW_LINES: 3,
       // 预览内容行数
       // 富文本元素行数配置
-      IMAGE_LINES: 4,
+      IMAGE_LINES: 5,
       // 一张图片占4行
       BR_LINES: 1,
       // <br> 标签占1行

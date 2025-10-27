@@ -13,9 +13,6 @@ const _sfc_main = {
         article_source: "新闻来源",
         release_time: /* @__PURE__ */ new Date(),
         field_name: "科技"
-        // views: 1234,
-        // likes: 89,
-        // comments: 23
       })
     }
   },
@@ -52,14 +49,14 @@ const _sfc_main = {
       return common_vendor.e({
         a: __props.newsData.cover_image_url,
         b: common_vendor.o(handleImageError),
-        c: __props.newsData.field_name
+        c: common_vendor.t(__props.newsData.article_title),
+        d: common_vendor.t(__props.newsData.brief_content),
+        e: __props.newsData.field_name
       }, __props.newsData.field_name ? {
-        d: common_vendor.t(__props.newsData.field_name)
+        f: common_vendor.t(__props.newsData.field_name)
       } : {}, {
-        e: common_vendor.t(__props.newsData.article_source || "新闻来源"),
-        f: common_vendor.t(formatTime(__props.newsData.release_time)),
-        g: common_vendor.t(__props.newsData.article_title),
-        h: common_vendor.t(__props.newsData.brief_content),
+        g: common_vendor.t(__props.newsData.article_source || "新闻来源"),
+        h: common_vendor.t(formatTime(__props.newsData.release_time)),
         i: common_vendor.o(handleClick)
       });
     };

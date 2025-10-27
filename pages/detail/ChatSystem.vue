@@ -1,5 +1,5 @@
 <template>
-  <view class="system-message-page">
+  <view class="admin-message-container">
     <!-- 自定义导航栏 -->
     <view class="custom-navbar">
       <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
@@ -10,116 +10,120 @@
           </view>
         </view>
         <view class="nav-center">
-          <text class="nav-title">系统消息123</text>
+          <text class="nav-title">{{ groupName }}</text>
         </view>
-        <view class="nav-right">
-          <!-- <view class="message-count" v-if="MesStore.MessageList.length > 0">
-            <text class="count-text">{{ MesStore.MessageList.length }}</text>
-          </view> -->
-        </view>
+        <view class="nav-right"></view>
       </view>
     </view>
 
-    <!-- 消息列表 -->
+    <!-- 消息列表区域 -->
     <scroll-view
       class="message-list"
-      :style="{ marginTop: statusBarHeight + 48 + 'px' }"
+      :style="{ marginTop: statusBarHeight + 58 + 'px' }"
       scroll-y="true"
-      :bounces="true"
+      :scroll-into-view="scrollIntoView"
+      :scroll-with-animation="true"
+      @scrolltolower="onScrollToLower"
       :refresher-enabled="true"
       :refresher-triggered="refresherTriggered"
-      @refresherrefresh="handleRefresh"
-      @refresherrestore="handleRefreshRestore"
-      @scrolltolower="handleLoadMore"
-      :lower-threshold="100"
+      refresher-background="#f8fafc"
+      @refresherrefresh="onRefresherRefresh"
+      @refresherrestore="onRefresherRestore"
     >
-      <view class="list-wrapper">
-        <!-- 初始加载状态 -->
-        <view v-if="MesStore.loading && MesStore.MessageList.length === 0" class="loading-container">
-          <view class="loading-spinner"></view>
-          <text class="loading-text">正在加载消息...</text>
+      <view class="message-list-content">
+        <!-- 按日期分组显示消息 -->
+        <template v-for="(group, dateKey) in groupedMessages" :key="dateKey">
+          <view class="date-divider" v-if="Object.keys(groupedMessages).length > 1">
+            <view class="date-line"></view>
+            <text class="date-text">{{ dateKey }}</text>
+            <view class="date-line"></view>
+          </view>
+
+          <!-- 使用管理员消息组件 -->
+          <view class="message-item-wrapper" v-for="message in group" :key="message.id">
+            <MessageCardUser
+              :message="message"
+              @messageClick="handleMessageClick"
+              @toggleExpanded="handleActionClick"
+              @viewDetail="handleViewDetail"
+            />
+          </view>
+        </template>
+
+        <!-- 加载更多提示 -->
+        <view v-if="MesStore.loadingMore" class="loading-more">
+          <view class="loading-spinner-small"></view>
+          <text class="loading-more-text">加载更多...</text>
         </view>
 
-        <!-- 消息列表 -->
-        <view v-else class="messages-container">
-          <!-- 使用消息卡片组件 -->
-          <MessageCard
-            v-for="(message, index) in MesStore.MessageList" 
-            :key="message.id"
-            :message="message"
-            :index="index"
-            @messageClick="handleMessageClick"
-            @toggleExpanded="handleToggleExpanded"
-            @viewDetail="handleViewDetail"
-          />
-
-          <!-- 加载更多状态 -->
-          <view v-if="MesStore.hasMoreData && MesStore.MessageList.length > 0" class="load-more-section">
-            <view v-if="MesStore.loadingMore" class="loading-more">
-              <view class="loading-spinner small"></view>
-              <text class="loading-text">加载更多消息...</text>
-            </view>
-            <view v-else class="load-more-tip">
-              <text class="tip-text">上拉加载更多</text>
-            </view>
-          </view>
-
-          <!-- 无更多数据 -->
-          <view v-else-if="MesStore.MessageList.length > 0 && !MesStore.hasMoreData" class="no-more-section">
-            <view class="no-more-line"></view>
-            <text class="no-more-text">已显示全部消息</text>
-            <view class="no-more-line"></view>
-          </view>
+        <!-- 没有更多数据提示 -->
+        <view v-if="!MesStore.hasMoreData && MesStore.MessageList.length > 0" class="no-more-data">
+          <text class="no-more-text">没有更多消息了</text>
         </view>
 
-        <!-- 空状态 -->
-        <view v-if="!MesStore.loading && MesStore.MessageList.length === 0" class="empty-state">
-          <view class="empty-illustration">
-            <view class="empty-circle">
-              <text class="empty-icon">📭</text>
-            </view>
-          </view>
-          <text class="empty-title">暂无系统消息</text>
-          <text class="empty-desc">系统重要通知会在这里显示</text>
-          <view class="retry-btn" v-if="MesStore.error" @tap="handleRetry">
-            <text class="retry-text">重新加载</text>
-          </view>
-        </view>
-
-        <!-- 错误提示 -->
-        <view v-if="MesStore.error && MesStore.MessageList.length > 0" class="error-banner">
-          <view class="error-content">
-            <text class="error-icon">⚠️</text>
-            <text class="error-text">{{ MesStore.error }}</text>
-            <view class="retry-small-btn" @tap="handleRetry">
-              <text class="retry-small-text">重试</text>
-            </view>
-          </view>
+        <!-- 没有消息提示 -->
+        <view v-if="MesStore.MessageList.length === 0 && !MesStore.loading" class="empty-state">
+          <view class="empty-icon">📢</view>
+          <text class="empty-title">暂无管理员消息</text>
+          <text class="empty-desc">管理员发布的通知消息将在这里显示</text>
         </view>
       </view>
     </scroll-view>
+
+    <!-- 加载遮罩 -->
+    <view v-if="MesStore.loading && MesStore.MessageList.length === 0" class="loading-overlay">
+      <view class="loading-content">
+        <view class="loading-spinner"></view>
+        <text class="loading-text">加载中...</text>
+      </view>
+    </view>
+
+    <!-- 错误提示 -->
+    <view v-if="MesStore.error && !MesStore.loading" class="error-overlay">
+      <view class="error-content">
+        <view class="error-icon">⚠️</view>
+        <text class="error-title">加载失败</text>
+        <text class="error-desc">{{ MesStore.error }}</text>
+        <view class="error-actions">
+          <view class="error-btn" @tap="handleRetry">
+            <text class="error-btn-text">重试</text>
+          </view>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { onLoad, onShow, onHide } from '@dcloudio/uni-app'
+import { ref, computed, onMounted, nextTick, onUnmounted } from 'vue'
+import { onLoad, onShow, onReachBottom } from '@dcloudio/uni-app'
+import MessageCardUser from '@/components/MessageCardUser/MessageCardUser.vue'
 import { useMesstore } from '@/store/mes.js'
-import MessageCard from '@/components/MessageCardUser/MessageCardUser.vue' // 导入消息卡片组件
 
-// 响应式数据
-const statusBarHeight = ref(0)
-const pageSize = ref(10)
-const loadThrottle = ref(false) // 加载节流
+// 页面参数
+const props = defineProps({
+  id: String,
+  groupName: String
+})
 
 // 初始化pinia
 const MesStore = useMesstore()
 
+// 页面状态
+const statusBarHeight = ref(0)
+const scrollIntoView = ref('')
+const isFirstLoad = ref(true)
+
 // 群组信息
 const groupId = ref('')
+const groupName = ref('管理员通知')
 
-// 刷新状态
-const refresherTriggered=ref(false)
+// 防抖控制
+const loadMoreTimer = ref(null)
+
+// 下拉刷新相关状态
+const refresherTriggered = ref(false)
+const refresherText = ref('下拉刷新')
 
 // 生命周期
 onMounted(async () => {
@@ -130,52 +134,126 @@ onMounted(async () => {
 onLoad(async (options) => {
   console.log("跳转到的群组信息：", options)
   groupId.value = options.id || ''
+  groupName.value = decodeURIComponent(options.groupName || '管理员通知')
+  
+  MesStore.clearMessageList()
   await loadInitialMessages()
 })
 
 onShow(() => {
-  // 页面显示时可以做一些操作，比如刷新数据状态检查
-  console.log('系统消息页面显示')
+  isFirstLoad.value = false
 })
 
-onHide(() => {
-  // 页面隐藏时清除错误状态
-  if (MesStore.error) {
-    MesStore.error = null
+onReachBottom(() => {
+  onScrollToLower()
+})
+
+// 计算属性
+const groupedMessages = computed(() => {
+  const grouped = {}
+  
+  if (!MesStore.MessageList || !Array.isArray(MesStore.MessageList)) {
+    return grouped
   }
+  
+  MesStore.MessageList.forEach(message => {
+    const date = new Date(message.created_at || message.send_time || message.updated_at)
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+    
+    let dateKey = ''
+    if (isSameDay(date, today)) {
+      dateKey = '今天'
+    } else if (isSameDay(date, yesterday)) {
+      dateKey = '昨天'
+    } else if (date.getFullYear() === today.getFullYear()) {
+      dateKey = `${date.getMonth() + 1}月${date.getDate()}日`
+    } else {
+      dateKey = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
+    }
+    
+    if (!grouped[dateKey]) {
+      grouped[dateKey] = []
+    }
+    grouped[dateKey].push(message)
+  })
+  
+  Object.keys(grouped).forEach(dateKey => {
+    grouped[dateKey].sort((a, b) => {
+      const timeA = new Date(a.created_at || a.send_time || a.updated_at)
+      const timeB = new Date(b.created_at || b.send_time || b.updated_at)
+      return timeB - timeA
+    })
+  })
+  
+  return grouped
 })
 
-// 另外，也要修复 loadInitialMessages 函数中的节流重置
+// 工具函数
+const isSameDay = (date1, date2) => {
+  return date1.getFullYear() === date2.getFullYear() &&
+         date1.getMonth() === date2.getMonth() &&
+         date1.getDate() === date2.getDate()
+}
+
+// 加载初始消息
 const loadInitialMessages = async () => {
   try {
-    await MesStore.getMessageList(groupId.value, {
-      message_type: 'SYSTEM',
+    const params = {
+      message_type: 'EVENT',
+      event_id: groupId.value,
       page: 1,
-      page_size: pageSize.value
-    })
+      page_size: 20
+    }
+    
+    await MesStore.getMessageList(groupId.value, params)
+    
+    if (MesStore.MessageList.length > 0) {
+      setTimeout(() => {
+        scrollToTop()
+      }, 100)
+    }
+    
   } catch (error) {
-    console.error('初始加载消息失败:', error)
+    console.error('加载消息失败:', error)
     uni.showToast({
-      title: '加载失败，请重试',
-      icon: 'none',
+      title: '加载消息失败',
+      icon: 'error',
       duration: 2000
     })
   }
-  // 移除这里的 finally 块，因为它会干扰刷新状态
 }
 
-// 优化的下拉刷新
-// 修复后的 handleRefresh 函数
-const handleRefresh = async () => {
+// 下拉刷新处理
+const onRefresherRefresh = async () => {
+  console.log('开始下拉刷新')
+  refresherTriggered.value = true
+  refresherText.value = '正在刷新...'
+  
   try {
-    refresherTriggered.value = true
-    // 等待刷新完成
-    await loadInitialMessages()
+    // 重新加载第一页数据
+    const params = {
+      message_type: 'EVENT',
+      event_id: groupId.value,
+      page: 1,
+      page_size: 20
+    }
+    
+    await MesStore.getMessageList(groupId.value, params)
+    
+    // 显示刷新成功提示
     uni.showToast({
       title: '刷新成功',
       icon: 'success',
       duration: 1500
     })
+    
+    // 滚动到顶部
+    setTimeout(() => {
+      scrollToTop()
+    }, 100)
+    
   } catch (error) {
     console.error('刷新失败:', error)
     uni.showToast({
@@ -184,67 +262,212 @@ const handleRefresh = async () => {
       duration: 2000
     })
   } finally {
-    // 确保在异步操作完成后才重置刷新状态
-    refresherTriggered.value = false
-    console.log("刷新状态重置")
+    // 结束刷新状态
+    setTimeout(() => {
+      refresherTriggered.value = false
+      refresherText.value = '下拉刷新'
+    }, 500)
   }
 }
 
-const handleRefreshRestore = () => {
-  console.log('刷新完成')
+// 刷新恢复处理
+const onRefresherRestore = () => {
+  console.log('刷新恢复')
+  refresherText.value = '下拉刷新'
+}
+
+// 滚动到底部加载更多
+const onScrollToLower = () => {
+  if (loadMoreTimer.value) {
+    clearTimeout(loadMoreTimer.value)
+  }
+  
+  if (!MesStore.hasMoreData || MesStore.loadingMore || MesStore.loading) {
+    return
+  }
+  
+  loadMoreTimer.value = setTimeout(async () => {
+    try {
+      const params = {
+        message_type: 'EVENT',
+        event_id: groupId.value,
+        page_size: 20
+      }
+      
+      const result = await MesStore.loadMoreMessages(params)
+      
+      if (result && result.success && result.data && result.data.length === 0) {
+        uni.showToast({
+          title: '没有更多数据',
+          icon: 'none',
+          duration: 1500
+        })
+      }
+      
+    } catch (error) {
+      console.error('加载更多失败:', error)
+    }
+  }, 300)
 }
 
 // 重试加载
 const handleRetry = async () => {
-  MesStore.error = null
   await loadInitialMessages()
 }
 
-// ====== 组件事件处理器 ======
-
-// 消息点击处理
-const handleMessageClick = async (message, index) => {
-  // 可以在这里添加其他点击处理逻辑
-  console.log('点击消息:', message.title)
-}
-
-// 切换内容展开/折叠
-const handleToggleExpanded = async (messageId, index) => {
-  // 切换展开状态
-  MesStore.toggleMessageExpanded(messageId)
-}
-
-// 查看完整内容
-const handleViewDetail = async (message) => {
-	// 先把 message 对象存储到本地缓存
-	uni.setStorageSync('SystemMessage', message)
-  // 跳转到消息详情页
-  uni.navigateTo({
-    url: `/pages/detail/SystemMesDetail`
+// 滚动到顶部
+const scrollToTop = () => {
+  nextTick(() => {
+    try {
+      if (MesStore.MessageList && MesStore.MessageList.length > 0) {
+        scrollIntoView.value = `msg-${MesStore.MessageList[0].id}`
+        
+        setTimeout(() => {
+          uni.pageScrollTo({
+            scrollTop: 0,
+            duration: 300
+          })
+        }, 100)
+      }
+    } catch (error) {
+      console.error('滚动到顶部失败:', error)
+    }
   })
 }
 
 // 返回上一页
 const goBack = () => {
+  if (loadMoreTimer.value) {
+    clearTimeout(loadMoreTimer.value)
+  }
+  
   uni.navigateBack()
 }
+
+// 事件处理方法
+const handleMessageClick = (message, index) => {
+  console.log('消息卡片点击:', message, index)
+  // 可以在这里添加点击卡片的其他逻辑，比如标记已读
+  // 如果需要点击卡片就跳转详情，可以调用 handleViewDetail
+}
+
+// 处理消息展开/折叠
+const handleActionClick = async (messageId, index) => {
+  try {
+    console.log('切换消息展开状态:', messageId, index)
+    
+    // 使用 pinia store 的方法切换展开状态
+    const expanded = MesStore.toggleMessageExpanded(messageId)
+    
+    console.log('消息展开状态已更新:', expanded)
+    
+  } catch (error) {
+    console.error('切换展开状态失败:', error)
+    uni.showToast({
+      title: '操作失败',
+      icon: 'error',
+      duration: 1500
+    })
+  }
+}
+
+// 查看完整内容
+const handleViewDetail = (message) => {
+  try {
+    if (!message || !message.id) {
+      throw new Error('消息数据无效')
+    }
+    
+    console.log('查看消息详情:', message)
+    
+    // 先把 message 对象存储到本地缓存
+    uni.setStorageSync('currentMessage', message)
+    
+    // 跳转到详情页
+    uni.navigateTo({
+      url: '/pages/detail/GroupMesDetail',
+      success: () => {
+        console.log('跳转详情页成功')
+        // 可以在这里标记消息为已读
+        markAsRead(message)
+      },
+      fail: (err) => {
+        console.error('跳转详情页失败:', err)
+        uni.showToast({
+          title: '跳转失败',
+          icon: 'error',
+          duration: 2000
+        })
+      }
+    })
+    
+  } catch (error) {
+    console.error('查看详情失败:', error)
+    uni.showToast({
+      title: error.message || '查看详情失败',
+      icon: 'error',
+      duration: 2000
+    })
+  }
+}
+
+// 标记消息为已读
+const markAsRead = async (message) => {
+  try {
+    if (!message || !message.id) {
+      console.warn('无效的消息数据')
+      return
+    }
+    
+    // 根据消息类型调用不同的标记方法
+    if (message.message_type === 'SYSTEM') {
+      await MesStore.markSystemMessageAsRead(message.id)
+    } else if (message.message_type === 'EVENT' || message.message_type === 'GROUP') {
+      await MesStore.markGroupMessageAsRead(message.id)
+    } else {
+      console.warn('未知的消息类型:', message.message_type)
+      return
+    }
+    
+    console.log('消息已标记为已读:', message.id)
+    
+  } catch (error) {
+    console.error('标记已读失败:', error)
+    // 标记已读失败不影响用户操作，只打印日志
+  }
+}
+
+// 组件销毁时清理
+onUnmounted(() => {
+  if (loadMoreTimer.value) {
+    clearTimeout(loadMoreTimer.value)
+  }
+})
 </script>
 
 <style scoped>
-.system-message-page {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #fff5f5 0%, #fef2f2 100%);
+.admin-message-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f8fafc;
+  overflow: hidden;
 }
 
-/* 导航栏 */
+/* 导航栏样式 */
 .custom-navbar {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+  color: white;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
-  box-shadow: 0 8rpx 32rpx rgba(239, 68, 68, 0.3);
+  box-shadow: 0 2rpx 16rpx rgba(239, 68, 68, 0.3);
+}
+
+.status-bar {
+  width: 100%;
 }
 
 .nav-content {
@@ -252,16 +475,21 @@ const goBack = () => {
   display: flex;
   align-items: center;
   padding: 0 32rpx;
+  position: relative;
 }
 
-.nav-left, .nav-right {
-  width: 120rpx;
+.nav-left {
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
 }
 
-.nav-right {
-  justify-content: flex-end;
+.nav-left:active {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .back-btn {
@@ -291,175 +519,105 @@ const goBack = () => {
 .nav-center {
   flex: 1;
   display: flex;
-  justify-content: center;
-}
-
-.nav-title {
-  font-size: 36rpx;
-  font-weight: 600;
-  color: white;
-  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
-}
-
-.message-count {
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 20rpx;
-  padding: 8rpx 16rpx;
-  backdrop-filter: blur(10rpx);
-  border: 2rpx solid rgba(255, 255, 255, 0.3);
-}
-
-.count-text {
-  font-size: 24rpx;
-  color: white;
-  font-weight: 600;
-}
-
-/* 消息列表 */
-.message-list {
-  flex: 1;
-  height: 100vh;
-}
-
-.list-wrapper {
-  padding: 32rpx 24rpx 140rpx;
-}
-
-/* 加载状态 */
-.loading-container {
-  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 400rpx;
-  gap: 32rpx;
+  padding: 0 32rpx;
 }
 
-.loading-spinner {
-  width: 64rpx;
-  height: 64rpx;
-  border: 4rpx solid rgba(239, 68, 68, 0.1);
-  border-left: 4rpx solid #ef4444;
+.nav-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: white;
+  line-height: 1.2;
+}
+
+.nav-right {
+  width: 60rpx;
+}
+
+/* 消息列表样式 */
+.message-list {
+  flex: 1;
+  background: #f8fafc;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.message-list-content {
+  padding-left: 24rpx;
+  padding-right: 24rpx;
+  padding-top: 24rpx;
+  padding-bottom: 100rpx;
+  min-height: calc(100vh + 120rpx);
+}
+
+/* 消息卡片包装器 - 添加间距 */
+.message-item-wrapper {
+  margin-bottom: 24rpx;
+}
+
+.message-item-wrapper:last-child {
+  margin-bottom: 0;
+}
+
+/* 日期分隔线 */
+.date-divider {
+  display: flex;
+  align-items: center;
+  margin: 40rpx 0 32rpx;
+}
+
+.date-line {
+  flex: 1;
+  height: 2rpx;
+  background: #e2e8f0;
+}
+
+.date-text {
+  font-size: 24rpx;
+  color: #64748b;
+  padding: 0 24rpx;
+  background: #f8fafc;
+}
+
+/* 加载更多样式 */
+.loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx 0;
+  gap: 16rpx;
+}
+
+.loading-spinner-small {
+  width: 32rpx;
+  height: 32rpx;
+  border: 4rpx solid #e2e8f0;
+  border-top: 4rpx solid #ef4444;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
-.loading-spinner.small {
-  width: 48rpx;
-  height: 48rpx;
-  border-width: 3rpx;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loading-text {
-  font-size: 28rpx;
-  color: #9ca3af;
-  font-weight: 500;
-}
-
-/* 消息容器 */
-.messages-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24rpx;
-}
-
-/* 加载更多区域 */
-.load-more-section {
-  display: flex;
-  justify-content: center;
-  padding: 48rpx 0;
-}
-
-.loading-more {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-}
-
-.load-more-tip {
-  padding: 16rpx 32rpx;
-  background: rgba(239, 68, 68, 0.05);
-  border-radius: 50rpx;
-  border: 2rpx solid rgba(239, 68, 68, 0.1);
-}
-
-.tip-text {
+.loading-more-text {
   font-size: 26rpx;
-  color: #9ca3af;
-  font-weight: 500;
+  color: #64748b;
 }
 
-/* 无更多数据 */
-.no-more-section {
+/* 没有更多数据 */
+.no-more-data {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 24rpx;
-  padding: 48rpx 0;
-}
-
-.no-more-line {
-  flex: 1;
-  height: 2rpx;
-  background: linear-gradient(90deg, transparent, #fee2e2, transparent);
+  padding: 40rpx 0;
 }
 
 .no-more-text {
-  font-size: 26rpx;
-  color: #9ca3af;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-/* 错误提示 */
-.error-banner {
-  background: #fee2e2;
-  border: 2rpx solid #fecaca;
-  border-radius: 16rpx;
-  margin: 24rpx 0;
-  overflow: hidden;
-}
-
-.error-content {
-  display: flex;
-  align-items: center;
-  padding: 24rpx;
-  gap: 16rpx;
-}
-
-.error-icon {
-  font-size: 32rpx;
-}
-
-.error-text {
-  flex: 1;
-  font-size: 28rpx;
-  color: #dc2626;
-  font-weight: 500;
-}
-
-.retry-small-btn {
-  background: #dc2626;
-  color: white;
-  padding: 12rpx 24rpx;
-  border-radius: 20rpx;
-  transition: all 0.3s ease;
-}
-
-.retry-small-btn:active {
-  transform: scale(0.95);
-  background: #b91c1c;
-}
-
-.retry-small-text {
   font-size: 24rpx;
-  color: white;
-  font-weight: 600;
+  color: #94a3b8;
 }
 
 /* 空状态 */
@@ -468,143 +626,145 @@ const goBack = () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 60vh;
-  gap: 32rpx;
-}
-
-.empty-illustration {
-  position: relative;
-}
-
-.empty-circle {
-  width: 200rpx;
-  height: 200rpx;
-  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 50%, #fecaca 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  animation: float 3s ease-in-out infinite;
-  box-shadow: 0 16rpx 48rpx rgba(239, 68, 68, 0.15);
-}
-
-.empty-circle::before {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 4rpx solid rgba(239, 68, 68, 0.1);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10rpx); }
-}
-
-@keyframes pulse {
-  0%, 100% { 
-    transform: scale(1);
-    opacity: 0.3;
-  }
-  50% { 
-    transform: scale(1.1);
-    opacity: 0.1;
-  }
+  padding: 120rpx 40rpx;
+  gap: 24rpx;
 }
 
 .empty-icon {
-  font-size: 80rpx;
+  font-size: 120rpx;
+  opacity: 0.6;
 }
 
 .empty-title {
-  font-size: 36rpx;
-  font-weight: 700;
-  color: #374151;
-  text-align: center;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #334155;
 }
 
 .empty-desc {
-  font-size: 28rpx;
-  color: #9ca3af;
+  font-size: 26rpx;
+  color: #64748b;
   text-align: center;
   line-height: 1.6;
-  max-width: 400rpx;
 }
 
-.retry-btn {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  border-radius: 50rpx;
-  padding: 20rpx 40rpx;
-  box-shadow: 0 8rpx 24rpx rgba(239, 68, 68, 0.3);
-  transition: all 0.3s ease;
+/* 加载样式 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  background: white;
+  border-radius: 24rpx;
+  padding: 48rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.2);
+}
+
+.loading-spinner {
+  width: 48rpx;
+  height: 48rpx;
+  border: 4rpx solid #e5e7eb;
+  border-top-color: #ef4444;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #64748b;
   margin-top: 16rpx;
 }
 
-.retry-btn:active {
-  transform: scale(0.95);
-  box-shadow: 0 4rpx 16rpx rgba(239, 68, 68, 0.4);
+/* 错误提示 */
+.error-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
 }
 
-.retry-text {
-  font-size: 28rpx;
-  color: white;
+.error-content {
+  background: white;
+  border-radius: 24rpx;
+  padding: 48rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.2);
+  min-width: 400rpx;
+}
+
+.error-icon {
+  font-size: 80rpx;
+}
+
+.error-title {
+  font-size: 32rpx;
   font-weight: 600;
+  color: #ef4444;
+}
+
+.error-desc {
+  font-size: 26rpx;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.error-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.error-btn {
+  padding: 16rpx 32rpx;
+  background: #ef4444;
+  border-radius: 48rpx;
+  transition: all 0.3s ease;
+}
+
+.error-btn:active {
+  background: #dc2626;
+  transform: scale(0.95);
+}
+
+.error-btn-text {
+  font-size: 26rpx;
+  color: white;
+}
+
+/* 动画 */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* 响应式设计 */
 @media (max-width: 750rpx) {
-  .list-wrapper {
-    padding: 24rpx 16rpx 140rpx;
+  .message-list-content {
+    padding-left: 16rpx;
+    padding-right: 16rpx;
+    padding-bottom: 80rpx;
   }
   
-  .empty-circle {
-    width: 160rpx;
-    height: 160rpx;
-  }
-  
-  .empty-icon {
-    font-size: 64rpx;
-  }
-}
-
-/* 暗黑模式支持 */
-/* @media (prefers-color-scheme: dark) {
-  .system-message-page {
-    background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
-  }
-  
-  .empty-circle {
-    background: linear-gradient(135deg, #2d1b1b 0%, #3c2626 50%, #4a2c2c 100%);
-  }
-  
-  .empty-title {
-    color: #f9fafb;
-  }
-  
-  .error-banner {
-    background: #2d1b1b;
-    border-color: #3c2626;
-  }
-  
-  .error-text {
-    color: #f87171;
-  }
-} */
-
-/* 无障碍支持 */
-@media (prefers-reduced-motion: reduce) {
-  .empty-circle,
-  .loading-spinner {
-    animation: none;
-  }
-  
-  .back-btn,
-  .detail-btn {
-    transition: none;
+  .empty-state {
+    padding: 80rpx 32rpx;
   }
 }
 </style>
-  

@@ -7728,7 +7728,6 @@ const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
   !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
 };
 const onShow = /* @__PURE__ */ createHook(ON_SHOW);
-const onHide = /* @__PURE__ */ createHook(ON_HIDE);
 const onLaunch = /* @__PURE__ */ createHook(ON_LAUNCH);
 const onLoad = /* @__PURE__ */ createHook(ON_LOAD);
 const onReachBottom = /* @__PURE__ */ createHook(ON_REACH_BOTTOM);
@@ -8810,7 +8809,6 @@ exports.initVueI18n = initVueI18n;
 exports.n = n;
 exports.nextTick$1 = nextTick$1;
 exports.o = o;
-exports.onHide = onHide;
 exports.onLaunch = onLaunch;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;

@@ -60,12 +60,11 @@ const _sfc_main = {
       selected.getevent();
     });
     common_vendor.onShow(() => {
-      console.log("11111111111");
       selected.getselected();
       selected.getevent();
     });
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: common_assets._imports_0,
         b: common_vendor.o(($event) => handleMorearticle("policy")),
         c: common_assets._imports_1,
@@ -85,7 +84,9 @@ const _sfc_main = {
         o: currentTab.value === 2 ? 1 : "",
         p: common_vendor.o(($event) => switchTab(2)),
         q: common_vendor.o(handleMoreClick),
-        r: common_vendor.f(firstEight.value, (item, index, i0) => {
+        r: firstEight.value.length > 0
+      }, firstEight.value.length > 0 ? {
+        s: common_vendor.f(firstEight.value, (item, index, i0) => {
           return {
             a: common_vendor.t(index + 1),
             b: index < 3 ? 1 : "",
@@ -93,8 +94,11 @@ const _sfc_main = {
             d: item.id,
             e: common_vendor.o(($event) => onclickevent(item.id), item.id)
           };
-        }),
-        s: common_vendor.f(common_vendor.unref(selected).policys, (item, index, i0) => {
+        })
+      } : {}, {
+        t: common_vendor.unref(selected).policys && common_vendor.unref(selected).policys.length > 0
+      }, common_vendor.unref(selected).policys && common_vendor.unref(selected).policys.length > 0 ? {
+        v: common_vendor.f(common_vendor.unref(selected).policys, (item, index, i0) => {
           return {
             a: common_vendor.t(index + 1),
             b: index < 3 ? 1 : "",
@@ -102,8 +106,11 @@ const _sfc_main = {
             d: item.article_id,
             e: common_vendor.o(($event) => onclickactivity(item.article_id), item.article_id)
           };
-        }),
-        t: common_vendor.f(common_vendor.unref(selected).news, (item, index, i0) => {
+        })
+      } : {}, {
+        w: common_vendor.unref(selected).news && common_vendor.unref(selected).news.length > 0
+      }, common_vendor.unref(selected).news && common_vendor.unref(selected).news.length > 0 ? {
+        x: common_vendor.f(common_vendor.unref(selected).news, (item, index, i0) => {
           return {
             a: common_vendor.t(index + 1),
             b: index < 3 ? 1 : "",
@@ -111,10 +118,11 @@ const _sfc_main = {
             d: item.article_id,
             e: common_vendor.o(($event) => onclickactivity(item.article_id), item.article_id)
           };
-        }),
-        v: currentTab.value,
-        w: common_vendor.o(onSwiperChange)
-      };
+        })
+      } : {}, {
+        y: currentTab.value,
+        z: common_vendor.o(onSwiperChange)
+      });
     };
   }
 };

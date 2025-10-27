@@ -2,6 +2,7 @@
 const common_vendor = require("../../common/vendor.js");
 const store_Info = require("../../store/Info.js");
 const store_mes = require("../../store/mes.js");
+const newApis_mes = require("../../new-apis/mes.js");
 if (!Math) {
   MessageCard();
 }
@@ -26,14 +27,6 @@ const _sfc_main = {
     const isLoggedIn = common_vendor.computed(() => userStore.signal);
     const systemUnreadCount = common_vendor.computed(() => mesStore.systemUnreadCount);
     const groupUnreadCount = common_vendor.computed(() => mesStore.groupUnreadCount);
-    common_vendor.computed(() => {
-      if (activeTab.value === "system") {
-        return systemUnreadCount.value;
-      } else if (activeTab.value === "group") {
-        return groupUnreadCount.value;
-      }
-      return 0;
-    });
     const systemMessages = common_vendor.computed(() => {
       if (!isLoggedIn.value)
         return [];
@@ -52,6 +45,9 @@ const _sfc_main = {
       }
       return false;
     });
+    const getCurrentUnreadCount = () => {
+      return systemUnreadCount.value + groupUnreadCount.value;
+    };
     common_vendor.onMounted(async () => {
       try {
         const sysInfo = common_vendor.index.getSystemInfoSync();
@@ -62,8 +58,9 @@ const _sfc_main = {
       }
     });
     common_vendor.onShow(async () => {
+      console.log("页面显示，刷新消息列表");
       if (isLoggedIn.value) {
-        await loadUserMessages();
+        await loadUserMessages(true);
       }
     });
     common_vendor.onLoad(async () => {
@@ -143,14 +140,6 @@ const _sfc_main = {
         pullDistance.value = 0;
         isPulling.value = false;
       }
-    };
-    const getCurrentUnreadCount = () => {
-      if (activeTab.value === "system") {
-        return systemUnreadCount.value;
-      } else if (activeTab.value === "group") {
-        return groupUnreadCount.value;
-      }
-      return 0;
     };
     const goToLogin = () => {
       common_vendor.index.navigateTo({
@@ -269,13 +258,8 @@ const _sfc_main = {
     const markAllAsRead = async () => {
       if (!isLoggedIn.value)
         return;
-      let unreadMessages = [];
-      if (activeTab.value === "system") {
-        unreadMessages = systemMessages.value.filter((msg) => mesStore.isMessageUnread(msg));
-      } else if (activeTab.value === "group") {
-        unreadMessages = groupMessages.value.filter((msg) => mesStore.isMessageUnread(msg));
-      }
-      if (unreadMessages.length === 0) {
+      const totalUnread = systemUnreadCount.value + groupUnreadCount.value;
+      if (totalUnread === 0) {
         common_vendor.index.showToast({
           title: "已经没有未读消息了",
           icon: "none",
@@ -287,7 +271,7 @@ const _sfc_main = {
         const res = await new Promise((resolve) => {
           common_vendor.index.showModal({
             title: "确认操作",
-            content: `确定要将${unreadMessages.length}条未读消息标记为已读吗？`,
+            content: `确定要将所有${totalUnread}条未读消息标记为已读吗？`,
             success: resolve
           });
         });
@@ -297,21 +281,14 @@ const _sfc_main = {
           title: "处理中...",
           mask: true
         });
-        const promises = [];
-        unreadMessages.forEach((msg) => {
-          if (msg.type === "system") {
-            promises.push(mesStore.markSystemMessageAsRead(msg.id));
-          } else {
-            promises.push(mesStore.markGroupMessageAsRead(msg.id));
-          }
-        });
-        await Promise.allSettled(promises);
+        await newApis_mes.markAllAsReadmes();
         common_vendor.index.hideLoading();
         common_vendor.index.showToast({
-          title: `已标记${unreadMessages.length}条消息为已读`,
+          title: `已标记${totalUnread}条消息为已读`,
           icon: "success",
           duration: 2e3
         });
+        await loadUserMessages(true);
       } catch (error) {
         console.error("批量标记已读失败:", error);
         common_vendor.index.hideLoading();

@@ -1,30 +1,32 @@
 <template>
   <view class="news-card" @tap="handleClick">
-    <view class="news-image-container">
-      <image 
-        :src="newsData.cover_image_url" 
-        mode="aspectFill"
-        :lazy-load="true"
-        class="news-image"
-        @error="handleImageError"
-      />
-      <view class="image-overlay"></view>
-      <view class="category-tag" v-if="newsData.field_name">
-        {{ newsData.field_name }}
-      </view>
-    </view>
-    
-    <view class="news-content">
-      <view class="news-meta">
-        <text class="news-source">{{ newsData.article_source || '新闻来源' }}</text>
-        <text class="news-time">{{ formatTime(newsData.release_time) }}</text>
+    <view class="card-content">
+      <!-- 左侧图片区 -->
+      <view class="content-left">
+        <image 
+          :src="newsData.cover_image_url" 
+          mode="aspectFill"
+          :lazy-load="true"
+          class="news-image"
+          @error="handleImageError"
+        />
       </view>
       
-      <view class="news-title">{{ newsData.article_title }}</view>
-      
-      <view class="news-summary">{{ newsData.brief_content }}</view>
-      
-      
+      <!-- 右侧内容区 -->
+      <view class="content-right">
+        <view class="news-title">{{ newsData.article_title }}</view>
+        
+        <view class="news-summary">{{ newsData.brief_content }}</view>
+        
+        <view class="news-meta">
+          <view class="category-tag" v-if="newsData.field_name">
+            {{ newsData.field_name }}
+          </view>
+          <text class="news-source">{{ newsData.article_source || '新闻来源' }}</text>
+          <text class="news-divider">·</text>
+          <text class="news-time">{{ formatTime(newsData.release_time) }}</text>
+        </view>
+      </view>
     </view>
   </view>
 </template>
@@ -32,7 +34,6 @@
 <script setup>
 import { defineProps, defineEmits } from 'vue'
 
-// 定义props
 const props = defineProps({
   newsData: {
     type: Object,
@@ -44,27 +45,20 @@ const props = defineProps({
       article_source: '新闻来源',
       release_time: new Date(),
       field_name: '科技',
-      // views: 1234,
-      // likes: 89,
-      // comments: 23
     })
   }
 })
 
-// 定义emits
 const emit = defineEmits(['click'])
 
-// 处理点击事件
 const handleClick = () => {
   emit('click', props.newsData)
 }
 
-// 处理图片加载失败
 const handleImageError = () => {
   console.log('图片加载失败')
 }
 
-// 格式化时间
 const formatTime = (time) => {
   if (!time) return ''
   const now = new Date()
@@ -84,39 +78,34 @@ const formatTime = (time) => {
     return publishTime.toLocaleDateString()
   }
 }
-
-// 格式化数字
-const formatNumber = (num) => {
-  if (!num) return '0'
-  if (num >= 10000) {
-    return `${(num / 10000).toFixed(1)}万`
-  } else if (num >= 1000) {
-    return `${(num / 1000).toFixed(1)}k`
-  }
-  return num.toString()
-}
 </script>
 
 <style lang="scss" scoped>
 .news-card {
   background: #fff;
   border-radius: 16rpx;
-  margin-bottom: 1rpx;
-  margin-top: 24rpx;
+  margin-bottom: 24rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
   
   &:active {
     transform: translateY(2rpx);
-    box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
   }
 }
 
-.news-image-container {
-  position: relative;
-  width: 100%;
-  height: 400rpx;
+.card-content {
+  display: flex;
+  padding: 24rpx;
+  gap: 24rpx;
+}
+
+.content-left {
+  flex-shrink: 0;
+  width: 220rpx;
+  height: 220rpx;
+  border-radius: 12rpx;
   overflow: hidden;
   
   .news-image {
@@ -124,63 +113,22 @@ const formatNumber = (num) => {
     height: 100%;
     transition: transform 0.3s ease;
   }
-  
-  .image-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(0, 0, 0, 0.1) 60%,
-      rgba(0, 0, 0, 0.3) 100%
-    );
-  }
-  
-  .category-tag {
-    position: absolute;
-    top: 20rpx;
-    left: 20rpx;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-    padding: 8rpx 16rpx;
-    border-radius: 20rpx;
-    font-size: 24rpx;
-    font-weight: 500;
-    backdrop-filter: blur(10rpx);
-  }
 }
 
-.news-content {
-  padding: 24rpx;
-}
-
-.news-meta {
+.content-right {
+  flex: 1;
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16rpx;
-  
-  .news-source {
-    color: #667eea;
-    font-size: 24rpx;
-    font-weight: 500;
-  }
-  
-  .news-time {
-    color: #999;
-    font-size: 24rpx;
-  }
+  min-width: 0; // 防止flex子元素溢出
 }
 
 .news-title {
-  font-size: 36rpx;
+  font-size: 32rpx;
   font-weight: 700;
   color: #1a1a1a;
   line-height: 1.4;
-  margin-bottom: 16rpx;
+  margin-bottom: 12rpx;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -189,63 +137,66 @@ const formatNumber = (num) => {
 }
 
 .news-summary {
-  font-size: 28rpx;
+  font-size: 26rpx;
   color: #666;
   line-height: 1.5;
-  margin-bottom: 20rpx;
+  margin-bottom: 16rpx;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
 }
 
-.news-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 16rpx;
-  border-top: 1rpx solid #f0f0f0;
-}
-
-.news-stats {
-  display: flex;
-  gap: 24rpx;
-  
-  .stat-item {
-    display: flex;
-    align-items: center;
-    gap: 8rpx;
-    
-    .icon {
-      font-size: 24rpx;
-    }
-    
-    .stat-text {
-      font-size: 24rpx;
-      color: #999;
-    }
-  }
-}
-
-.read-more {
+.news-meta {
   display: flex;
   align-items: center;
   gap: 8rpx;
-  color: #667eea;
-  font-size: 26rpx;
-  font-weight: 500;
+  margin-top: auto;
   
-  .arrow {
+  .category-tag {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 6rpx 16rpx;
+    border-radius: 20rpx;
+    font-size: 22rpx;
+    font-weight: 500;
+    margin-right: 4rpx;
+  }
+  
+  .news-source {
+    color: #667eea;
+    font-size: 24rpx;
+    font-weight: 500;
+  }
+  
+  .news-divider {
+    color: #ddd;
+    font-size: 24rpx;
+  }
+  
+  .news-time {
+    color: #999;
+    font-size: 24rpx;
+  }
+}
+
+.content-right {
+  flex-shrink: 0;
+  width: 220rpx;
+  height: 220rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  
+  .news-image {
+    width: 100%;
+    height: 100%;
     transition: transform 0.3s ease;
   }
 }
 
-.news-card:active .read-more .arrow {
-  transform: translateX(4rpx);
-}
-
 .news-card:active .news-image {
-  transform: scale(1.02);
+  transform: scale(1.05);
 }
 </style>

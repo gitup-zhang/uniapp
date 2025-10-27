@@ -14,6 +14,6 @@ export function getmesgroup(id,params){
 	return http.get(`/message/byGroups/${id}`,params)
 }
 // 一键已读
-export function markAllAsRead(){
+export function markAllAsReadmes(){
 	return http.put('/message/markAllAsRead')
 }

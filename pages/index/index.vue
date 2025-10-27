@@ -74,15 +74,24 @@
           <swiper-item>
             <scroll-view class="content-scroll" scroll-y="true">
               <view class="content-list">
-                <view class="content-item" v-for="(item,index) in firstEight" :key="item.id" @click="onclickevent(item.id)">
-                  <view class="item-left">
-                    <view class="item-rank" :class="{ 'top-three': index < 3 }">{{ index + 1 }}</view>
-                    <view class="item-content">
-                      <text class="item-title">{{ item.title }}</text>
+                <template v-if="firstEight.length > 0">
+                  <view class="content-item" v-for="(item,index) in firstEight" :key="item.id" @click="onclickevent(item.id)">
+                    <view class="item-left">
+                      <view class="item-rank" :class="{ 'top-three': index < 3 }">{{ index + 1 }}</view>
+                      <view class="item-content">
+                        <text class="item-title">{{ item.title }}</text>
+                      </view>
                     </view>
+                    <view class="item-badge activity-badge">活动</view>
                   </view>
-                  <view class="item-badge activity-badge">活动</view>
-                </view>
+                </template>
+                <template v-else>
+                  <view class="empty-state">
+                    <view class="empty-icon">📅</view>
+                    <text class="empty-title">暂无热门活动</text>
+                    <text class="empty-desc">精彩活动即将上线，敬请期待</text>
+                  </view>
+                </template>
               </view>
             </scroll-view>
           </swiper-item>
@@ -91,15 +100,24 @@
           <swiper-item>
             <scroll-view class="content-scroll" scroll-y="true">
               <view class="content-list">
-                <view class="content-item" v-for="(item, index) in selected.policys" :key="item.article_id" @click="onclickactivity(item.article_id)">
-                  <view class="item-left">
-                    <view class="item-rank" :class="{ 'top-three': index < 3 }">{{ index + 1 }}</view>
-                    <view class="item-content">
-                      <text class="item-title">{{ item.article_title }}</text>
+                <template v-if="selected.policys && selected.policys.length > 0">
+                  <view class="content-item" v-for="(item, index) in selected.policys" :key="item.article_id" @click="onclickactivity(item.article_id)">
+                    <view class="item-left">
+                      <view class="item-rank" :class="{ 'top-three': index < 3 }">{{ index + 1 }}</view>
+                      <view class="item-content">
+                        <text class="item-title">{{ item.article_title }}</text>
+                      </view>
                     </view>
+                    <view class="item-badge policy-badge">政策</view>
                   </view>
-                  <view class="item-badge policy-badge">政策</view>
-                </view>
+                </template>
+                <template v-else>
+                  <view class="empty-state">
+                    <view class="empty-icon">📋</view>
+                    <text class="empty-title">暂无政策信息</text>
+                    <text class="empty-desc">最新政策内容正在整理中</text>
+                  </view>
+                </template>
               </view>
             </scroll-view>
           </swiper-item>
@@ -108,15 +126,24 @@
           <swiper-item>
             <scroll-view class="content-scroll" scroll-y="true">
               <view class="content-list">
-                <view class="content-item" v-for="(item, index) in selected.news" :key="item.article_id" @click="onclickactivity(item.article_id)">
-                  <view class="item-left">
-                    <view class="item-rank" :class="{ 'top-three': index < 3 }">{{ index + 1 }}</view>
-                    <view class="item-content">
-                      <text class="item-title">{{ item.article_title }}</text>
+                <template v-if="selected.news && selected.news.length > 0">
+                  <view class="content-item" v-for="(item, index) in selected.news" :key="item.article_id" @click="onclickactivity(item.article_id)">
+                    <view class="item-left">
+                      <view class="item-rank" :class="{ 'top-three': index < 3 }">{{ index + 1 }}</view>
+                      <view class="item-content">
+                        <text class="item-title">{{ item.article_title }}</text>
+                      </view>
                     </view>
+                    <view class="item-badge news-badge">新闻</view>
                   </view>
-                  <view class="item-badge news-badge">新闻</view>
-                </view>
+                </template>
+                <template v-else>
+                  <view class="empty-state">
+                    <view class="empty-icon">📰</view>
+                    <text class="empty-title">暂无新闻资讯</text>
+                    <text class="empty-desc">更多行业资讯即将发布</text>
+                  </view>
+                </template>
               </view>
             </scroll-view>
           </swiper-item>
@@ -208,7 +235,7 @@ onMounted(()=>{
 	//EventStore.getlisting(10)
 })
 onShow(()=>{
-	console.log("11111111111")
+	
 	//usenotice.getnoticestore()
 	selected.getselected()
 	selected.getevent()
@@ -510,5 +537,34 @@ onShow(()=>{
 
 .news-badge {
   background: linear-gradient(135deg, #4299e1, #3182ce);
+}
+
+/* 空状态样式 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 40rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 32rpx;
+  opacity: 0.6;
+}
+
+.empty-title {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 16rpx;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #999;
+  line-height: 1.6;
 }
 </style>
