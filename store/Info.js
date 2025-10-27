@@ -43,7 +43,7 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 		 await getinfo()
 		return res
 	}
-	const loginWithWeChat = async () => {
+	const loginWithWeChat = async (encryptedData,iv) => {
 	  try {
 	    // 1. 登录获取临时登录凭证 code
 	    const loginRes = await uni.login({provider: 'weixin'});
@@ -52,7 +52,7 @@ export const useInfoStore=defineStore('peopleinfo',()=>{
 	      const codes = loginRes.code;
 			console.log(codes)
 	      // 2. 发送 code 到你自己的后端
-	      const res = await getinfologin({code:codes})
+	      const res = await getinfologin({code:codes,encrypted_data:encryptedData,iv:iv})
 		  
 		  // token.value=res.token
 		  console.log("token:"+token.value)

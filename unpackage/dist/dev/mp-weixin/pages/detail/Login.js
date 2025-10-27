@@ -23,7 +23,7 @@ const _sfc_main = {
       common_vendor.index.navigateBack({
         fail: () => {
           common_vendor.index.switchTab({
-            url: "/pages/mine/mine"
+            url: "pages/mymessage/mymessage"
           });
         }
       });
@@ -39,19 +39,25 @@ const _sfc_main = {
       }
       try {
         isLogging.value = true;
-        const loginResult = await callPhoneLoginAPI({
-          code: e.detail.code,
-          encryptedData: e.detail.encryptedData,
-          iv: e.detail.iv
-        });
-        await userInfo.saveLoginInfo(loginResult);
-        common_vendor.index.showToast({
-          title: "登录成功",
-          icon: "success"
-        });
-        setTimeout(() => {
-          goBack();
-        }, 1500);
+        console.log("手机号信息:", e);
+        const loginResult = await userInfo.loginWithWeChat(
+          e.detail.encryptedData,
+          e.detail.iv
+        );
+        if (loginResult) {
+          common_vendor.index.showToast({
+            title: "登录成功",
+            icon: "success"
+          });
+          setTimeout(() => {
+            goBack();
+          }, 1500);
+        } else {
+          common_vendor.index.showToast({
+            title: "登录失败,请重试",
+            icon: "error"
+          });
+        }
       } catch (error) {
         console.error("手机号登录失败:", error);
         common_vendor.index.showToast({
@@ -61,25 +67,6 @@ const _sfc_main = {
       } finally {
         isLogging.value = false;
       }
-    };
-    const callPhoneLoginAPI = async (data) => {
-      return new Promise((resolve, reject) => {
-        common_vendor.index.request({
-          url: "https://your-api-domain.com/api/phone-login",
-          method: "POST",
-          data,
-          success: (res) => {
-            if (res.data.success) {
-              resolve(res.data.data);
-            } else {
-              reject(new Error(res.data.message || "登录失败"));
-            }
-          },
-          fail: (error) => {
-            reject(error);
-          }
-        });
-      });
     };
     const showUserAgreement = () => {
       common_vendor.index.navigateTo({

@@ -85,7 +85,7 @@ const goBack = () => {
     fail: () => {
       // 如果无法返回，则跳转到首页或者个人中心
       uni.switchTab({
-        url: '/pages/mine/mine'
+        url: 'pages/mymessage/mymessage'
       })
     }
   })
@@ -135,16 +135,16 @@ const handlePhoneAuth = async (e) => {
   
   try {
     isLogging.value = true
+	console.log("手机号信息:",e)
     
     // 调用后端接口，传递加密数据
-    const loginResult = await callPhoneLoginAPI({
-      code: e.detail.code,
-      encryptedData: e.detail.encryptedData,
-      iv: e.detail.iv
-    })
-    
-    // 保存登录信息
-    await userInfo.saveLoginInfo(loginResult)
+    const loginResult = await userInfo.loginWithWeChat(
+       e.detail.encryptedData,
+       e.detail.iv
+    )
+	if(loginResult){
+		 // 保存登录信息
+    // await userInfo.saveLoginInfo(loginResult)
     
     uni.showToast({
       title: '登录成功',
@@ -155,6 +155,14 @@ const handlePhoneAuth = async (e) => {
     setTimeout(() => {
       goBack()
     }, 1500)
+	}else{
+		uni.showToast({
+		  title: '登录失败,请重试',
+		  icon: 'error'
+		})
+	}
+    
+   
     
   } catch (error) {
     console.error('手机号登录失败:', error)
@@ -168,25 +176,7 @@ const handlePhoneAuth = async (e) => {
 }
 
 // 手机号登录API
-const callPhoneLoginAPI = async (data) => {
-  return new Promise((resolve, reject) => {
-    uni.request({
-      url: 'https://your-api-domain.com/api/phone-login',
-      method: 'POST',
-      data,
-      success: (res) => {
-        if (res.data.success) {
-          resolve(res.data.data)
-        } else {
-          reject(new Error(res.data.message || '登录失败'))
-        }
-      },
-      fail: (error) => {
-        reject(error)
-      }
-    })
-  })
-}
+
 
 // 显示用户协议
 const showUserAgreement = () => {

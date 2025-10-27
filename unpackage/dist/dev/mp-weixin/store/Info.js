@@ -29,13 +29,13 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
     await getinfo();
     return res;
   };
-  const loginWithWeChat = async () => {
+  const loginWithWeChat = async (encryptedData, iv) => {
     try {
       const loginRes = await common_vendor.index.login({ provider: "weixin" });
       if (loginRes.errMsg === "login:ok") {
         const codes = loginRes.code;
         console.log(codes);
-        const res = await newApis_info.getinfologin({ code: codes });
+        const res = await newApis_info.getinfologin({ code: codes, encrypted_data: encryptedData, iv });
         console.log("token:" + token.value);
         if (res.code === 200) {
           signal.value = true;
