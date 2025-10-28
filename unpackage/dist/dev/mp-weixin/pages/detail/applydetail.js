@@ -22,44 +22,20 @@ const _sfc_main = {
     let id = common_vendor.ref();
     const isEditing = common_vendor.ref(false);
     const isSubmitted = common_vendor.ref(false);
-    const originalPhone = common_vendor.ref("");
-    const needPhoneVerification = common_vendor.ref(false);
     const formData = common_vendor.reactive({
       name: "",
       phone: "",
-      verifyCode: "",
       email: "",
       unit: "",
       sectoral: "",
       industryIndex: -1,
       // 行业选择索引
       career: ""
-      // 职业改为字符串输入
+      // 职业
     });
     function hasUserId(id2) {
       return EventStore.eventdetail.user_info.some((item) => item.code === id2);
     }
-    const countDown = common_vendor.ref(0);
-    const isCountingDown = common_vendor.computed(() => countDown.value > 0);
-    const countDownText = common_vendor.computed(() => {
-      return isCountingDown.value ? `${countDown.value}s` : "发送验证码";
-    });
-    const canSendCode = common_vendor.computed(() => {
-      return formData.phone && /^1[3-9]\d{9}$/.test(formData.phone);
-    });
-    common_vendor.computed(() => {
-      const today = /* @__PURE__ */ new Date();
-      return today.toISOString().split("T")[0];
-    });
-    const onPhoneInput = () => {
-      if (isEditing.value && formData.phone !== originalPhone.value && formData.phone) {
-        needPhoneVerification.value = true;
-        formData.verifyCode = "";
-      } else if (formData.phone === originalPhone.value) {
-        needPhoneVerification.value = false;
-        formData.verifyCode = "";
-      }
-    };
     const initFormData = () => {
       const userInfo = UserStore.info || {};
       formData.name = userInfo.name || "";
@@ -68,45 +44,69 @@ const _sfc_main = {
       formData.unit = userInfo.unit || "";
       formData.sectoral = userInfo.department || "";
       formData.career = userInfo.position || "";
-      originalPhone.value = formData.phone;
       if (userInfo.industry) {
         console.log("获取到的行业信息：", userInfo.industry);
         const industryIndex = fieldstore.industory.findIndex((option) => option === userInfo.industry);
-        console.log("industryIndex");
+        console.log("industryIndex:", industryIndex);
         formData.industryIndex = industryIndex !== -1 ? industryIndex : -1;
       }
       isSubmitted.value = !!(userInfo.name && userInfo.phone_number && userInfo.email);
     };
+    const validateSaveForm = () => {
+      if (hasUserId("name")) {
+        if (!formData.name.trim()) {
+          common_vendor.index.showToast({ title: "请输入姓名", icon: "none" });
+          return false;
+        }
+        if (formData.name.trim().length < 2) {
+          common_vendor.index.showToast({ title: "姓名至少需要2个字符", icon: "none" });
+          return false;
+        }
+      }
+      if (hasUserId("email")) {
+        if (!formData.email.trim()) {
+          common_vendor.index.showToast({ title: "请输入邮箱地址", icon: "none" });
+          return false;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          common_vendor.index.showToast({ title: "请输入正确的邮箱格式", icon: "none" });
+          return false;
+        }
+      }
+      if (hasUserId("unit")) {
+        if (!formData.unit.trim()) {
+          common_vendor.index.showToast({ title: "请输入单位名称", icon: "none" });
+          return false;
+        }
+      }
+      if (hasUserId("position")) {
+        if (!formData.career.trim()) {
+          common_vendor.index.showToast({ title: "请输入职业", icon: "none" });
+          return false;
+        }
+      }
+      return true;
+    };
     const saveUserInfo = async () => {
+      var _a;
+      if (!validateSaveForm()) {
+        return;
+      }
       try {
         common_vendor.index.showLoading({ title: "保存中..." });
         const requestData = {
           name: formData.name.trim(),
-          phone_number: formData.phone,
-          email: formData.email,
+          email: formData.email.trim(),
           unit: formData.unit.trim(),
           department: formData.sectoral.trim(),
           position: formData.career.trim(),
-          // 职业直接使用输入的字符串
           industry: formData.industryIndex !== -1 ? fieldstore.industory[formData.industryIndex] : ""
         };
-        if (needPhoneVerification.value) {
-          if (!formData.verifyCode) {
-            common_vendor.index.hideLoading();
-            common_vendor.index.showToast({
-              title: "请输入验证码",
-              icon: "none"
-            });
-            return;
-          }
-          requestData.verify_code = formData.verifyCode;
-        }
+        console.log("提交保存数据:", requestData);
         const response = await UserStore.updateinfo(requestData);
-        console.log("response:", response);
+        console.log("保存响应:", response);
         if (response.code === 200) {
-          originalPhone.value = formData.phone;
-          needPhoneVerification.value = false;
-          formData.verifyCode = "";
           isEditing.value = false;
           common_vendor.index.hideLoading();
           common_vendor.index.showToast({
@@ -114,7 +114,7 @@ const _sfc_main = {
             icon: "success"
           });
         } else {
-          throw new Error(response.data.message || "保存失败");
+          throw new Error(((_a = response.data) == null ? void 0 : _a.message) || "保存失败");
         }
       } catch (error) {
         console.error("保存用户信息失败:", error);
@@ -140,46 +140,7 @@ const _sfc_main = {
           }
         });
       } else {
-        if (validateFormData()) {
-          await saveUserInfo();
-        }
-      }
-    };
-    const sendVerifyCode = async () => {
-      if (!formData.phone) {
-        common_vendor.index.showToast({
-          title: "请先输入手机号码",
-          icon: "none"
-        });
-        return;
-      }
-      if (!/^1[3-9]\d{9}$/.test(formData.phone)) {
-        common_vendor.index.showToast({
-          title: "请输入正确的手机号码",
-          icon: "none"
-        });
-        return;
-      }
-      try {
-        common_vendor.index.showLoading({ title: "发送中..." });
-        countDown.value = 60;
-        const timer = setInterval(() => {
-          countDown.value--;
-          if (countDown.value <= 0) {
-            clearInterval(timer);
-          }
-        }, 1e3);
-        common_vendor.index.hideLoading();
-        common_vendor.index.showToast({
-          title: "验证码已发送",
-          icon: "success"
-        });
-      } catch (error) {
-        common_vendor.index.hideLoading();
-        common_vendor.index.showToast({
-          title: "发送失败，请重试",
-          icon: "none"
-        });
+        await saveUserInfo();
       }
     };
     const onIndustryChange = (e) => {
@@ -188,58 +149,49 @@ const _sfc_main = {
     function onBack() {
       common_vendor.index.navigateBack();
     }
-    const validateFormData = () => {
-      if (!formData.name.trim() && hasUserId("name")) {
-        common_vendor.index.showToast({ title: "请输入姓名", icon: "none" });
-        return false;
-      }
-      if (!formData.phone && hasUserId("phone_number")) {
-        common_vendor.index.showToast({ title: "请输入手机号码", icon: "none" });
-        return false;
-      }
-      if (!/^1[3-9]\d{9}$/.test(formData.phone)) {
-        common_vendor.index.showToast({ title: "请输入正确的手机号码", icon: "none" });
-        return false;
-      }
-      if (needPhoneVerification.value && !formData.verifyCode) {
-        common_vendor.index.showToast({ title: "请输入验证码", icon: "none" });
-        return false;
-      }
-      if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && hasUserId("email")) {
-        common_vendor.index.showToast({ title: "请输入正确的邮箱格式", icon: "none" });
-        return false;
-      }
-      return true;
-    };
     const validateForm = () => {
-      if (!formData.name.trim() && hasUserId("name")) {
-        common_vendor.index.showToast({ title: "请输入姓名", icon: "none" });
-        return false;
+      if (hasUserId("name")) {
+        if (!formData.name.trim()) {
+          common_vendor.index.showToast({ title: "请输入姓名", icon: "none" });
+          return false;
+        }
+        if (formData.name.trim().length < 2) {
+          common_vendor.index.showToast({ title: "姓名至少需要2个字符", icon: "none" });
+          return false;
+        }
       }
-      if (!formData.phone && hasUserId("phone_number")) {
-        common_vendor.index.showToast({ title: "请输入手机号码", icon: "none" });
-        return false;
+      if (hasUserId("phone_number")) {
+        if (!formData.phone) {
+          common_vendor.index.showToast({ title: "请绑定手机号码", icon: "none" });
+          return false;
+        }
+        if (!/^1[3-9]\d{9}$/.test(formData.phone)) {
+          common_vendor.index.showToast({ title: "手机号码格式不正确", icon: "none" });
+          return false;
+        }
       }
-      if (!/^1[3-9]\d{9}$/.test(formData.phone)) {
-        common_vendor.index.showToast({ title: "请输入正确的手机号码", icon: "none" });
-        return false;
+      if (hasUserId("email")) {
+        if (!formData.email.trim()) {
+          common_vendor.index.showToast({ title: "请输入邮箱地址", icon: "none" });
+          return false;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          common_vendor.index.showToast({ title: "请输入正确的邮箱格式", icon: "none" });
+          return false;
+        }
       }
-      if (!formData.email && hasUserId("email")) {
-        common_vendor.index.showToast({ title: "请输入邮箱地址", icon: "none" });
-        return false;
+      if (hasUserId("unit")) {
+        if (!formData.unit.trim()) {
+          common_vendor.index.showToast({ title: "请输入单位名称", icon: "none" });
+          return false;
+        }
       }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        common_vendor.index.showToast({ title: "请输入正确的邮箱格式", icon: "none" });
-        return false;
-      }
-      if (!formData.unit.trim() && hasUserId("unit")) {
-        common_vendor.index.showToast({ title: "请输入单位名称", icon: "none" });
-        return false;
-      }
-      if (!formData.career.trim() && hasUserId("position")) {
-        common_vendor.index.showToast({ title: "请输入职业", icon: "none" });
-        return false;
+      if (hasUserId("position")) {
+        if (!formData.career.trim()) {
+          common_vendor.index.showToast({ title: "请输入职业", icon: "none" });
+          return false;
+        }
       }
       return true;
     };
@@ -255,8 +207,8 @@ const _sfc_main = {
         return;
       common_vendor.index.showLoading({ title: "提交中..." });
       try {
-        console.log("报名的id:", typeof parseInt(id, 10));
-        const res = await newApis_events.activityapply({ "event_id": parseInt(id, 10) });
+        console.log("报名的id:", typeof parseInt(id.value, 10));
+        const res = await newApis_events.activityapply({ "event_id": parseInt(id.value, 10) });
         console.log(res);
         if (res.code === 200) {
           console.log("报名成功");
@@ -283,7 +235,7 @@ const _sfc_main = {
     });
     common_vendor.onLoad(async (option) => {
       console.log("申请详细option:", option);
-      id = decodeURIComponent(option.id);
+      id.value = decodeURIComponent(option.id);
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -318,73 +270,59 @@ const _sfc_main = {
         s: common_vendor.o(($event) => formData.name = $event.detail.value)
       } : {}, {
         t: hasUserId("phone_number")
-      }, hasUserId("phone_number") ? common_vendor.e({
-        v: !isEditing.value,
-        w: !isEditing.value ? 1 : "",
-        x: isEditing.value ? 1 : "",
-        y: common_vendor.o([($event) => formData.phone = $event.detail.value, onPhoneInput]),
-        z: formData.phone,
-        A: needPhoneVerification.value && isEditing.value
-      }, needPhoneVerification.value && isEditing.value ? {
-        B: common_vendor.t(countDownText.value),
-        C: common_vendor.o(sendVerifyCode),
-        D: isCountingDown.value || !canSendCode.value
-      } : {}) : {}, {
-        E: needPhoneVerification.value && isEditing.value
-      }, needPhoneVerification.value && isEditing.value ? {
-        F: formData.verifyCode,
-        G: common_vendor.o(($event) => formData.verifyCode = $event.detail.value)
+      }, hasUserId("phone_number") ? {
+        v: common_vendor.t(formData.phone || "未绑定")
       } : {}, {
-        H: hasUserId("email")
+        w: hasUserId("email")
       }, hasUserId("email") ? {
-        I: !isEditing.value,
-        J: !isEditing.value ? 1 : "",
-        K: isEditing.value ? 1 : "",
-        L: formData.email,
-        M: common_vendor.o(($event) => formData.email = $event.detail.value)
+        x: !isEditing.value,
+        y: !isEditing.value ? 1 : "",
+        z: isEditing.value ? 1 : "",
+        A: formData.email,
+        B: common_vendor.o(($event) => formData.email = $event.detail.value)
       } : {}) : {}, {
-        N: hasUserId("unit") || hasUserId("department") || hasUserId("industry") || hasUserId("position")
+        C: hasUserId("unit") || hasUserId("department") || hasUserId("industry") || hasUserId("position")
       }, hasUserId("unit") || hasUserId("department") || hasUserId("industry") || hasUserId("position") ? common_vendor.e({
-        O: hasUserId("unit")
+        D: hasUserId("unit")
       }, hasUserId("unit") ? {
-        P: !isEditing.value,
-        Q: !isEditing.value ? 1 : "",
-        R: isEditing.value ? 1 : "",
-        S: formData.unit,
-        T: common_vendor.o(($event) => formData.unit = $event.detail.value)
+        E: !isEditing.value,
+        F: !isEditing.value ? 1 : "",
+        G: isEditing.value ? 1 : "",
+        H: formData.unit,
+        I: common_vendor.o(($event) => formData.unit = $event.detail.value)
       } : {}, {
-        U: hasUserId("department")
+        J: hasUserId("department")
       }, hasUserId("department") ? {
-        V: !isEditing.value,
-        W: !isEditing.value ? 1 : "",
-        X: isEditing.value ? 1 : "",
-        Y: formData.sectoral,
-        Z: common_vendor.o(($event) => formData.sectoral = $event.detail.value)
+        K: !isEditing.value,
+        L: !isEditing.value ? 1 : "",
+        M: isEditing.value ? 1 : "",
+        N: formData.sectoral,
+        O: common_vendor.o(($event) => formData.sectoral = $event.detail.value)
       } : {}, {
-        aa: hasUserId("industry")
+        P: hasUserId("industry")
       }, hasUserId("industry") ? common_vendor.e({
-        ab: common_vendor.t(formData.industryIndex === -1 ? "请选择行业" : common_vendor.unref(fieldstore).industory[formData.industryIndex]),
-        ac: formData.industryIndex === -1 ? 1 : "",
-        ad: isEditing.value
+        Q: common_vendor.t(formData.industryIndex === -1 ? "请选择行业" : common_vendor.unref(fieldstore).industory[formData.industryIndex]),
+        R: formData.industryIndex === -1 ? 1 : "",
+        S: isEditing.value
       }, isEditing.value ? {} : {}, {
-        ae: !isEditing.value ? 1 : "",
-        af: isEditing.value ? 1 : "",
-        ag: common_vendor.unref(fieldstore).industory,
-        ah: formData.industryIndex,
-        ai: common_vendor.o(onIndustryChange),
-        aj: !isEditing.value
+        T: !isEditing.value ? 1 : "",
+        U: isEditing.value ? 1 : "",
+        V: common_vendor.unref(fieldstore).industory,
+        W: formData.industryIndex,
+        X: common_vendor.o(onIndustryChange),
+        Y: !isEditing.value
       }) : {}, {
-        ak: hasUserId("position")
+        Z: hasUserId("position")
       }, hasUserId("position") ? {
-        al: !isEditing.value,
-        am: !isEditing.value ? 1 : "",
-        an: isEditing.value ? 1 : "",
-        ao: formData.career,
-        ap: common_vendor.o(($event) => formData.career = $event.detail.value)
+        aa: !isEditing.value,
+        ab: !isEditing.value ? 1 : "",
+        ac: isEditing.value ? 1 : "",
+        ad: formData.career,
+        ae: common_vendor.o(($event) => formData.career = $event.detail.value)
       } : {}) : {}, {
-        aq: common_vendor.o(handleSubmit),
-        ar: isEditing.value,
-        as: isEditing.value ? 1 : ""
+        af: common_vendor.o(handleSubmit),
+        ag: isEditing.value,
+        ah: isEditing.value ? 1 : ""
       });
     };
   }

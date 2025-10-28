@@ -5,18 +5,18 @@ const utils_data = require("../../utils/data.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_section2 = common_vendor.resolveComponent("uni-section");
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_grid_item2 = common_vendor.resolveComponent("uni-grid-item");
   const _easycom_uni_grid2 = common_vendor.resolveComponent("uni-grid");
-  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  (_easycom_uni_nav_bar2 + _easycom_uni_section2 + _easycom_uni_grid_item2 + _easycom_uni_grid2 + _easycom_uni_icons2)();
+  (_easycom_uni_nav_bar2 + _easycom_uni_section2 + _easycom_uni_icons2 + _easycom_uni_grid_item2 + _easycom_uni_grid2)();
 }
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_section = () => "../../uni_modules/uni-section/components/uni-section/uni-section.js";
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_grid_item = () => "../../uni_modules/uni-grid/components/uni-grid-item/uni-grid-item.js";
 const _easycom_uni_grid = () => "../../uni_modules/uni-grid/components/uni-grid/uni-grid.js";
-const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_section + ActivityCard + _easycom_uni_grid_item + _easycom_uni_grid + _easycom_uni_icons + HorizontalActivityCard)();
+  (_easycom_uni_nav_bar + _easycom_uni_section + _easycom_uni_icons + ActivityCard + _easycom_uni_grid_item + _easycom_uni_grid + HorizontalActivityCard)();
 }
 const ActivityCard = () => "../../components/ActivityCard/ActivityCard.js";
 const HorizontalActivityCard = () => "../../components/HorizontalActivityCard/HorizontalActivityCard.js";
@@ -99,13 +99,18 @@ const _sfc_main = {
         }),
         c: hotActivities.value.length > 0
       }, hotActivities.value.length > 0 ? {
-        d: common_vendor.o(goMoreActivity)
+        d: common_vendor.p({
+          type: "right",
+          size: "14",
+          color: "#666"
+        }),
+        e: common_vendor.o(goMoreActivity)
       } : {}, {
-        e: hotActivities.value.length > 0
+        f: hotActivities.value.length > 0
       }, hotActivities.value.length > 0 ? {
-        f: common_vendor.f(hotActivities.value, (item, k0, i0) => {
+        g: common_vendor.f(hotActivities.value, (item, k0, i0) => {
           return {
-            a: "26b1a250-4-" + i0 + "," + ("26b1a250-3-" + i0),
+            a: "24bc9d41-5-" + i0 + "," + ("24bc9d41-4-" + i0),
             b: common_vendor.p({
               imgSrc: item.cover_image_url,
               title: item.title,
@@ -116,42 +121,47 @@ const _sfc_main = {
               status: item.event_status === "InProgress" ? "进行中" : "即将开始"
             }),
             c: item.id,
-            d: "26b1a250-3-" + i0 + ",26b1a250-2",
+            d: "24bc9d41-4-" + i0 + ",24bc9d41-3",
             e: common_vendor.p({
               index: item.id
             })
           };
         }),
-        g: common_vendor.o(changeHotActivity),
-        h: common_vendor.p({
+        h: common_vendor.o(changeHotActivity),
+        i: common_vendor.p({
           column: 2,
           highlight: false,
           ["show-border"]: false,
           square: false
         })
       } : {
-        i: common_vendor.p({
+        j: common_vendor.p({
           type: "calendar",
           size: "80",
-          color: "#ccc"
+          color: "#ddd"
         })
       }, {
-        j: common_vendor.p({
+        k: common_vendor.p({
           title: "历史活动回顾",
           titleFontSize: "20px",
           type: "line"
         }),
-        k: common_vendor.unref(EventStore).eventoutdate.length > 0
+        l: common_vendor.unref(EventStore).eventoutdate.length > 0
       }, common_vendor.unref(EventStore).eventoutdate.length > 0 ? {
-        l: common_vendor.o(goMorehistoryactivity)
+        m: common_vendor.p({
+          type: "right",
+          size: "14",
+          color: "#666"
+        }),
+        n: common_vendor.o(goMorehistoryactivity)
       } : {}, {
-        m: common_vendor.unref(EventStore).eventoutdate.length > 0
+        o: common_vendor.unref(EventStore).eventoutdate.length > 0
       }, common_vendor.unref(EventStore).eventoutdate.length > 0 ? {
-        n: common_vendor.f(common_vendor.unref(EventStore).eventoutdate, (item, k0, i0) => {
+        p: common_vendor.f(common_vendor.unref(EventStore).eventoutdate, (item, k0, i0) => {
           return {
             a: item.id,
             b: common_vendor.o(($event) => handleCardClick(item.id), item.id),
-            c: "26b1a250-7-" + i0,
+            c: "24bc9d41-9-" + i0,
             d: common_vendor.p({
               imgSrc: item.cover_image_url,
               title: item.title,
@@ -162,13 +172,14 @@ const _sfc_main = {
           };
         })
       } : {
-        o: common_vendor.p({
+        q: common_vendor.p({
           type: "reload",
           size: "80",
-          color: "#ccc"
+          color: "#ddd"
         })
       });
     };
   }
 };
-wx.createPage(_sfc_main);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-24bc9d41"]]);
+wx.createPage(MiniProgramPage);

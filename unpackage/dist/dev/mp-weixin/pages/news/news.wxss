@@ -1,69 +1,123 @@
 
-.page {
-  height: 100vh;
-  overflow-y: auto;
-  position: relative;
-  background-color: #f8f9fa;
+.page.data-v-24bc9d41 {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+  padding-bottom: 40rpx;
 }
-.navbar-title {
+.navbar-title.data-v-24bc9d41 {
   font-size: 20px;
   font-weight: bold;
   color: white;
+  letter-spacing: 1rpx;
 }
-.section-header {
+
+/* 热门活动容器 */
+.hot-activities-container.data-v-24bc9d41 {
+  background-color: #fff;
+  margin: 20rpx 20rpx 30rpx 20rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 20rpx rgba(0, 0, 0, 0.03);
+}
+
+/* 区域标题头部 */
+.section-header.data-v-24bc9d41 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20rpx;
+  padding: 24rpx 30rpx 16rpx 30rpx;
+  border-bottom: 1rpx solid #f5f5f5;
 }
-.more-link {
+
+/* 增大标题字体 */
+.section-header.data-v-24bc9d41 .uni-section__content-title {
+  font-size: 34rpx !important;
+  font-weight: 600;
+}
+.more-link.data-v-24bc9d41 {
+  display: flex;
+  align-items: center;
   color: #666;
-  font-size: 30rpx;
+  font-size: 26rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 30rpx;
+  transition: all 0.3s ease;
+}
+.more-link.data-v-24bc9d41:active {
+  background-color: #f5f5f5;
+  color: #dc2626;
+}
+
+/* 热门活动网格区域 */
+.hot-activities-grid.data-v-24bc9d41 {
+  padding: 0 10rpx 20rpx 10rpx;
 }
 
 /* 历史活动区域 */
-.history-section {
-  margin-top: 20rpx;
-  background-color: white;
-  border-top: 1rpx solid #f0f0f0;
+.history-section.data-v-24bc9d41 {
+  background-color: #fff;
+  margin: 0 20rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 20rpx rgba(0, 0, 0, 0.03);
+}
+.history-list.data-v-24bc9d41 {
+  padding: 0 0 20rpx 0;
 }
 
 /* 无数据状态样式 */
-.empty-state {
+.empty-state.data-v-24bc9d41 {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 100rpx 40rpx;
+  padding: 120rpx 40rpx;
   text-align: center;
+  background: linear-gradient(to bottom, #fafafa 0%, #ffffff 100%);
 }
-.empty-text {
+.empty-text.data-v-24bc9d41 {
   font-size: 32rpx;
   color: #999;
   margin-top: 30rpx;
   font-weight: 500;
+  letter-spacing: 1rpx;
 }
-.empty-desc {
-  font-size: 28rpx;
+.empty-desc.data-v-24bc9d41 {
+  font-size: 26rpx;
   color: #ccc;
   margin-top: 16rpx;
-  line-height: 1.4;
+  line-height: 1.6;
+  max-width: 400rpx;
 }
 
-/* 网格布局优化 */
-.uni-grid-item {
-  padding: 10rpx;
+/* 网格项优化 */
+.uni-grid-item.data-v-24bc9d41 {
+  padding: 0;
 }
 
 /* 响应式调整 */
 @media screen and (max-width: 750rpx) {
-.empty-state {
-    padding: 80rpx 20rpx;
+.hot-activities-container.data-v-24bc9d41,
+  .history-section.data-v-24bc9d41 {
+    margin-left: 15rpx;
+    margin-right: 15rpx;
+    border-radius: 16rpx;
 }
-.empty-text {
+.section-header.data-v-24bc9d41 {
+    padding: 20rpx 25rpx 14rpx 25rpx;
+}
+.section-header.data-v-24bc9d41 .uni-section__content-title {
+    font-size: 32rpx !important;
+}
+.empty-state.data-v-24bc9d41 {
+    padding: 100rpx 30rpx;
+}
+.empty-text.data-v-24bc9d41 {
     font-size: 30rpx;
 }
-.empty-desc {
-    font-size: 26rpx;
+.empty-desc.data-v-24bc9d41 {
+    font-size: 24rpx;
 }
 }
+
+

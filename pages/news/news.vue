@@ -8,44 +8,52 @@
     </uni-nav-bar>
 	
     <!-- 热门活动展示区域 -->
-    <view class="section-header">
-      <uni-section title="热门活动报名中" titleFontSize="20px" type="line" />
-      <text class="more-link" @click="goMoreActivity" v-if="hotActivities.length > 0">更多活动</text>
-    </view>
+    <view class="hot-activities-container">
+      <view class="section-header">
+        <uni-section title="热门活动报名中" titleFontSize="20px" type="line" />
+        <text class="more-link" @click="goMoreActivity" v-if="hotActivities.length > 0">
+          更多活动
+          <uni-icons type="right" size="14" color="#666"></uni-icons>
+        </text>
+      </view>
 	
-    <!-- 热门活动列表 -->
-    <view v-if="hotActivities.length > 0">
-      <uni-grid :column="2" :highlight="false" :show-border="false" @change="changeHotActivity" :square="false">
-        <uni-grid-item v-for="item in hotActivities" :index="item.id" :key="item.id">
-          <ActivityCard
-            :imgSrc="item.cover_image_url"
-            :title="item.title"
-            :date="formatEventDate(item.event_start_time,item.event_end_time)"
-            :location="item.event_address"
-            :isJoined="false"
-            :fee="item.registration_fee"
-            :status="item.event_status === 'InProgress' ? '进行中' : '即将开始'"
-          />
-        </uni-grid-item>
-      </uni-grid>
-    </view>
-    
-    <!-- 热门活动无数据状态 -->
-    <view v-else class="empty-state">
-      <uni-icons type="calendar" size="80" color="#ccc"></uni-icons>
-      <text class="empty-text">暂无热门活动</text>
-      <text class="empty-desc">精彩活动即将上线，敬请期待</text>
+      <!-- 热门活动列表 -->
+      <view v-if="hotActivities.length > 0" class="hot-activities-grid">
+        <uni-grid :column="2" :highlight="false" :show-border="false" @change="changeHotActivity" :square="false">
+          <uni-grid-item v-for="item in hotActivities" :index="item.id" :key="item.id">
+            <ActivityCard
+              :imgSrc="item.cover_image_url"
+              :title="item.title"
+              :date="formatEventDate(item.event_start_time,item.event_end_time)"
+              :location="item.event_address"
+              :isJoined="false"
+              :fee="item.registration_fee"
+              :status="item.event_status === 'InProgress' ? '进行中' : '即将开始'"
+            />
+          </uni-grid-item>
+        </uni-grid>
+      </view>
+      
+      <!-- 热门活动无数据状态 -->
+      <view v-else class="empty-state">
+        <uni-icons type="calendar" size="80" color="#ddd"></uni-icons>
+        <text class="empty-text">暂无热门活动</text>
+        <text class="empty-desc">精彩活动即将上线，敬请期待</text>
+      </view>
     </view>
 
     <!-- 历史活动区域 -->
     <view class="history-section">
       <view class="section-header">
         <uni-section title="历史活动回顾" titleFontSize="20px" type="line" />
-        <text class="more-link" @click="goMorehistoryactivity" v-if="EventStore.eventoutdate.length > 0">查看更多</text>
+        <text class="more-link" @click="goMorehistoryactivity" v-if="EventStore.eventoutdate.length > 0">
+          查看更多
+          <uni-icons type="right" size="14" color="#666"></uni-icons>
+        </text>
       </view>
       
       <!-- 历史活动列表 -->
-      <view v-if="EventStore.eventoutdate.length > 0">
+      <view v-if="EventStore.eventoutdate.length > 0" class="history-list">
         <HorizontalActivityCard v-for="item in EventStore.eventoutdate" 
           :key="item.id"
           :imgSrc="item.cover_image_url"
@@ -59,7 +67,7 @@
       
       <!-- 历史活动无数据状态 -->
       <view v-else class="empty-state">
-        <uni-icons type="reload" size="80" color="#ccc"></uni-icons>
+        <uni-icons type="reload" size="80" color="#ddd"></uni-icons>
         <text class="empty-text">暂无历史活动</text>
         <text class="empty-desc">活动结束后会在这里显示</text>
       </view>
@@ -159,37 +167,75 @@ onShow(()=>{
 })
 </script>
 
-<style>
+<style scoped>
 .page {
-  height: 100vh;
-  overflow-y: auto;
-  position: relative;
-  background-color: #f8f9fa;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+  padding-bottom: 40rpx;
 }
 
 .navbar-title {
   font-size: 20px;
   font-weight: bold;
   color: white;
+  letter-spacing: 1rpx;
 }
 
+/* 热门活动容器 */
+.hot-activities-container {
+  background-color: #fff;
+  margin: 20rpx 20rpx 30rpx 20rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 20rpx rgba(0, 0, 0, 0.03);
+}
+
+/* 区域标题头部 */
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20rpx;
+  padding: 24rpx 30rpx 16rpx 30rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+/* 增大标题字体 */
+.section-header :deep(.uni-section__content-title) {
+  font-size: 34rpx !important;
+  font-weight: 600;
 }
 
 .more-link {
+  display: flex;
+  align-items: center;
   color: #666;
-  font-size: 30rpx;
+  font-size: 26rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 30rpx;
+  transition: all 0.3s ease;
+}
+
+.more-link:active {
+  background-color: #f5f5f5;
+  color: #dc2626;
+}
+
+/* 热门活动网格区域 */
+.hot-activities-grid {
+  padding: 0 10rpx 20rpx 10rpx;
 }
 
 /* 历史活动区域 */
 .history-section {
-  margin-top: 20rpx;
-  background-color: white;
-  border-top: 1rpx solid #f0f0f0;
+  background-color: #fff;
+  margin: 0 20rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 20rpx rgba(0, 0, 0, 0.03);
+}
+
+.history-list {
+  padding: 0 0 20rpx 0;
 }
 
 /* 无数据状态样式 */
@@ -198,8 +244,9 @@ onShow(()=>{
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 100rpx 40rpx;
+  padding: 120rpx 40rpx;
   text-align: center;
+  background: linear-gradient(to bottom, #fafafa 0%, #ffffff 100%);
 }
 
 .empty-text {
@@ -207,24 +254,41 @@ onShow(()=>{
   color: #999;
   margin-top: 30rpx;
   font-weight: 500;
+  letter-spacing: 1rpx;
 }
 
 .empty-desc {
-  font-size: 28rpx;
+  font-size: 26rpx;
   color: #ccc;
   margin-top: 16rpx;
-  line-height: 1.4;
+  line-height: 1.6;
+  max-width: 400rpx;
 }
 
-/* 网格布局优化 */
+/* 网格项优化 */
 .uni-grid-item {
-  padding: 10rpx;
+  padding: 0;
 }
 
 /* 响应式调整 */
 @media screen and (max-width: 750rpx) {
+  .hot-activities-container,
+  .history-section {
+    margin-left: 15rpx;
+    margin-right: 15rpx;
+    border-radius: 16rpx;
+  }
+  
+  .section-header {
+    padding: 20rpx 25rpx 14rpx 25rpx;
+  }
+  
+  .section-header :deep(.uni-section__content-title) {
+    font-size: 32rpx !important;
+  }
+  
   .empty-state {
-    padding: 80rpx 20rpx;
+    padding: 100rpx 30rpx;
   }
   
   .empty-text {
@@ -232,7 +296,9 @@ onShow(()=>{
   }
   
   .empty-desc {
-    font-size: 26rpx;
+    font-size: 24rpx;
   }
 }
+
+
 </style>

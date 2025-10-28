@@ -57,51 +57,20 @@
             />
           </view>
 
-          <!-- 手机号码 -->
-          <view class="form-item"  v-if="hasUserId('phone_number')">
+          <!-- 手机号码（仅显示，不可编辑） -->
+          <view class="form-item" v-if="hasUserId('phone_number')">
             <view class="label">
               <text>手机号码</text>
               <text class="required">*</text>
             </view>
-            <view class="phone-input-wrapper">
-              <input 
-                class="input phone-input" 
-                v-model="formData.phone" 
-                placeholder="请输入手机号码"
-                placeholder-class="placeholder"
-                type="number"
-                :disabled="!isEditing"
-                :class="{ 'disabled': !isEditing, 'editing': isEditing }"
-                @input="onPhoneInput"
-              />
-              <button 
-                class="verify-btn" 
-                @click="sendVerifyCode" 
-                :disabled="isCountingDown || !canSendCode"
-                v-if="needPhoneVerification && isEditing"
-              >
-                {{ countDownText }}
-              </button>
+            <view class="phone-display">
+              <text class="phone-text">{{ formData.phone || '未绑定' }}</text>
+              <text class="phone-tip">手机号不可修改</text>
             </view>
-          </view>
-
-          <!-- 验证码 - 只在编辑模式下修改手机号时显示 -->
-          <view class="form-item" v-if="needPhoneVerification && isEditing">
-            <view class="label">
-              <text>验证码</text>
-              <text class="required">*</text>
-            </view>
-            <input 
-              class="input verify-code-input" 
-              v-model="formData.verifyCode" 
-              placeholder="请输入验证码"
-              placeholder-class="placeholder"
-              type="number"
-            />
           </view>
 
           <!-- 邮箱 -->
-          <view class="form-item"  v-if="hasUserId('email')">
+          <view class="form-item" v-if="hasUserId('email')">
             <view class="label">
               <text>邮箱</text>
               <text class="required">*</text>
@@ -116,8 +85,6 @@
               :class="{ 'disabled': !isEditing, 'editing': isEditing }"
             />
           </view>
-
-         
         </view>
 
         <!-- 工作信息组 -->
@@ -125,7 +92,7 @@
           <view class="group-title">工作信息</view>
           
           <!-- 单位 -->
-          <view class="form-item"  v-if="hasUserId('unit')">
+          <view class="form-item" v-if="hasUserId('unit')">
             <view class="label">
               <text>单位</text>
               <text class="required">*</text>
@@ -141,7 +108,7 @@
           </view>
 
           <!-- 部门 -->
-          <view class="form-item"  v-if="hasUserId('department')">
+          <view class="form-item" v-if="hasUserId('department')">
             <view class="label">部门</view>
             <input 
               class="input" 
@@ -154,7 +121,7 @@
           </view>
 
           <!-- 行业 -->
-          <view class="form-item"  v-if="hasUserId('industry')">
+          <view class="form-item" v-if="hasUserId('industry')">
             <view class="label">行业</view>
             <picker 
               mode="selector" 
@@ -172,8 +139,8 @@
             </picker>
           </view>
 
-          <!-- 职业 - 修改为输入框 -->
-          <view class="form-item"  v-if="hasUserId('position')">
+          <!-- 职业 -->
+          <view class="form-item" v-if="hasUserId('position')">
             <view class="label">
               <text>职业</text>
               <text class="required">*</text>
@@ -207,73 +174,40 @@
 
 <script setup>
 import { onLoad } from '@dcloudio/uni-app'
-import {ref,onMounted,reactive,computed} from 'vue'
-import {useEventstore} from '@/store/Event.js'
-import {useInfoStore} from '@/store/Info.js' 
-import {formatEventDate,Dataformat} from '@/utils/data.js'
+import { ref, onMounted, reactive, computed } from 'vue'
+import { useEventstore } from '@/store/Event.js'
+import { useInfoStore } from '@/store/Info.js' 
+import { formatEventDate, Dataformat } from '@/utils/data.js'
 import { onShow } from '@dcloudio/uni-app'
-import {activityapply} from '@/new-apis/events.js'
-import {usefieldstore} from '@/store/field.js'
+import { activityapply } from '@/new-apis/events.js'
+import { usefieldstore } from '@/store/field.js'
 
-const fieldstore=usefieldstore()
-const EventStore=useEventstore()
-const UserStore=useInfoStore()
+const fieldstore = usefieldstore()
+const EventStore = useEventstore()
+const UserStore = useInfoStore()
 
 // 跳转到的活动id
-let id=ref()
+let id = ref()
 
 // 编辑状态
 const isEditing = ref(false)
 // 是否已提交过报名
 const isSubmitted = ref(false)
-// 原始手机号（用于判断是否修改了手机号）
-const originalPhone = ref('')
-// 是否需要手机号验证
-const needPhoneVerification = ref(false)
 
 // 表单数据
 const formData = reactive({
   name: '',
   phone: '',
-  verifyCode: '',
   email: '',
   unit: '',
   sectoral: '',
   industryIndex: -1, // 行业选择索引
-  career: '', // 职业改为字符串输入
+  career: '', // 职业
 })
+
 // 判断填写字段是否需要
 function hasUserId(id) {
   return EventStore.eventdetail.user_info.some(item => item.code === id)
-}
-// 验证码倒计时相关
-const countDown = ref(0)
-const isCountingDown = computed(() => countDown.value > 0)
-const countDownText = computed(() => {
-  return isCountingDown.value ? `${countDown.value}s` : '发送验证码'
-})
-
-// 是否可以发送验证码
-const canSendCode = computed(() => {
-  return formData.phone && /^1[3-9]\d{9}$/.test(formData.phone)
-})
-
-// 最大日期（今天）
-const maxDate = computed(() => {
-  const today = new Date()
-  return today.toISOString().split('T')[0]
-})
-
-// 监听手机号输入变化
-const onPhoneInput = () => {
-  // 如果是编辑模式且手机号发生变化，需要验证码
-  if (isEditing.value && formData.phone !== originalPhone.value && formData.phone) {
-    needPhoneVerification.value = true
-    formData.verifyCode = '' // 清空验证码
-  } else if (formData.phone === originalPhone.value) {
-    needPhoneVerification.value = false
-    formData.verifyCode = ''
-  }
 }
 
 // 初始化表单数据（从pinia中获取已有的用户信息）
@@ -286,16 +220,13 @@ const initFormData = () => {
   formData.email = userInfo.email || ''
   formData.unit = userInfo.unit || ''
   formData.sectoral = userInfo.department || ''
-  formData.career = userInfo.position || '' // 职业直接赋值字符串
-  
-  // 记录原始手机号
-  originalPhone.value = formData.phone
+  formData.career = userInfo.position || ''
   
   // 只处理行业索引
   if (userInfo.industry) {
-	  console.log("获取到的行业信息：",userInfo.industry)
+    console.log("获取到的行业信息：", userInfo.industry)
     const industryIndex = fieldstore.industory.findIndex(option => option === userInfo.industry)
-	console.log("industryIndex")
+    console.log("industryIndex:", industryIndex)
     formData.industryIndex = industryIndex !== -1 ? industryIndex : -1
   }
   
@@ -303,46 +234,80 @@ const initFormData = () => {
   isSubmitted.value = !!(userInfo.name && userInfo.phone_number && userInfo.email)
 }
 
+// 保存表单验证（编辑保存时使用）
+const validateSaveForm = () => {
+  // 验证姓名
+  if (hasUserId('name')) {
+    if (!formData.name.trim()) {
+      uni.showToast({ title: '请输入姓名', icon: 'none' })
+      return false
+    }
+    if (formData.name.trim().length < 2) {
+      uni.showToast({ title: '姓名至少需要2个字符', icon: 'none' })
+      return false
+    }
+  }
+
+  // 验证邮箱
+  if (hasUserId('email')) {
+    if (!formData.email.trim()) {
+      uni.showToast({ title: '请输入邮箱地址', icon: 'none' })
+      return false
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      uni.showToast({ title: '请输入正确的邮箱格式', icon: 'none' })
+      return false
+    }
+  }
+
+  // 验证单位
+  if (hasUserId('unit')) {
+    if (!formData.unit.trim()) {
+      uni.showToast({ title: '请输入单位名称', icon: 'none' })
+      return false
+    }
+  }
+
+  // 验证职业
+  if (hasUserId('position')) {
+    if (!formData.career.trim()) {
+      uni.showToast({ title: '请输入职业', icon: 'none' })
+      return false
+    }
+  }
+
+  return true
+}
+
 // 保存用户信息到服务器
 const saveUserInfo = async () => {
+  // 先进行表单校验
+  if (!validateSaveForm()) {
+    return
+  }
+
   try {
     uni.showLoading({ title: '保存中...' })
     
-    // 构建请求数据，转换表单数据为API格式
+    // 构建请求数据，转换表单数据为API格式（不包含手机号）
     const requestData = {
       name: formData.name.trim(),
-      phone_number: formData.phone,
-      email: formData.email,
+      email: formData.email.trim(),
       unit: formData.unit.trim(),
       department: formData.sectoral.trim(),
-      position: formData.career.trim(), // 职业直接使用输入的字符串
+      position: formData.career.trim(),
       industry: formData.industryIndex !== -1 ? fieldstore.industory[formData.industryIndex] : ''
     }
     
-    // 如果需要手机验证码，添加验证码字段
-    if (needPhoneVerification.value) {
-      if (!formData.verifyCode) {
-        uni.hideLoading()
-        uni.showToast({
-          title: '请输入验证码',
-          icon: 'none'
-        })
-        return
-      }
-      requestData.verify_code = formData.verifyCode
-    }
+    console.log('提交保存数据:', requestData)
     
-    // 发送网络请求 - 请根据你的实际API地址修改
+    // 发送网络请求
     const response = await UserStore.updateinfo(requestData)
-	console.log("response:",response)
+    console.log("保存响应:", response)
     
     // 检查响应结果
-    if (response.code === 200 ) { // 根据你的API响应格式调整
-      // 请求成功，更新原始手机号
-      originalPhone.value = formData.phone
-      needPhoneVerification.value = false
-      formData.verifyCode = ''
-      
+    if (response.code === 200) {
       isEditing.value = false
       uni.hideLoading()
       uni.showToast({
@@ -350,8 +315,7 @@ const saveUserInfo = async () => {
         icon: 'success'
       })
     } else {
-      // 请求失败
-      throw new Error(response.data.message || '保存失败')
+      throw new Error(response.data?.message || '保存失败')
     }
     
   } catch (error) {
@@ -381,57 +345,8 @@ const handleEdit = async () => {
       }
     })
   } else {
-    // 点击保存按钮
-    if (validateFormData()) {
-      await saveUserInfo()
-    }
-  }
-}
-
-// 发送验证码
-const sendVerifyCode = async () => {
-  if (!formData.phone) {
-    uni.showToast({
-      title: '请先输入手机号码',
-      icon: 'none'
-    })
-    return
-  }
-
-  if (!/^1[3-9]\d{9}$/.test(formData.phone)) {
-    uni.showToast({
-      title: '请输入正确的手机号码',
-      icon: 'none'
-    })
-    return
-  }
-
-  try {
-    uni.showLoading({ title: '发送中...' })
-    
-    // 这里调用实际的发送验证码API
-    // const response = await apiSendVerifyCode(formData.phone)
-    
-    // 开始倒计时
-    countDown.value = 60
-    const timer = setInterval(() => {
-      countDown.value--
-      if (countDown.value <= 0) {
-        clearInterval(timer)
-      }
-    }, 1000)
-
-    uni.hideLoading()
-    uni.showToast({
-      title: '验证码已发送',
-      icon: 'success'
-    })
-  } catch (error) {
-    uni.hideLoading()
-    uni.showToast({
-      title: '发送失败，请重试',
-      icon: 'none'
-    })
+    // 点击保存按钮，直接调用保存函数（内部已包含校验）
+    await saveUserInfo()
   }
 }
 
@@ -442,84 +357,69 @@ const onIndustryChange = (e) => {
 
 // 返回函数
 function onBack() {
-  uni.navigateBack();
+  uni.navigateBack()
 }
 
-// 表单数据验证（用于保存时）
-const validateFormData = () => {
-  if (!formData.name.trim()&&hasUserId('name')) {
-    uni.showToast({ title: '请输入姓名', icon: 'none' })
-    return false
-  }
-
-  if (!formData.phone&&hasUserId('phone_number')) {
-    uni.showToast({ title: '请输入手机号码', icon: 'none' })
-    return false
-  }
-
-  if (!/^1[3-9]\d{9}$/.test(formData.phone)) {
-    uni.showToast({ title: '请输入正确的手机号码', icon: 'none' })
-    return false
-  }
-
-  // 如果需要验证码验证
-  if (needPhoneVerification.value && !formData.verifyCode) {
-    uni.showToast({ title: '请输入验证码', icon: 'none' })
-    return false
-  }
-
-  if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)&&hasUserId('email')) {
-    uni.showToast({ title: '请输入正确的邮箱格式', icon: 'none' })
-    return false
-  }
-
-  return true
-}
-
-// 表单提交验证（报名时使用，不需要验证码）
+// 表单提交验证（报名时使用）
 const validateForm = () => {
-  if (!formData.name.trim()&&hasUserId('name')) {
-    uni.showToast({ title: '请输入姓名', icon: 'none' })
-    return false
+  // 验证姓名
+  if (hasUserId('name')) {
+    if (!formData.name.trim()) {
+      uni.showToast({ title: '请输入姓名', icon: 'none' })
+      return false
+    }
+    if (formData.name.trim().length < 2) {
+      uni.showToast({ title: '姓名至少需要2个字符', icon: 'none' })
+      return false
+    }
   }
 
-  if (!formData.phone&&hasUserId('phone_number')) {
-    uni.showToast({ title: '请输入手机号码', icon: 'none' })
-    return false
+  // 验证手机号
+  if (hasUserId('phone_number')) {
+    if (!formData.phone) {
+      uni.showToast({ title: '请绑定手机号码', icon: 'none' })
+      return false
+    }
+    if (!/^1[3-9]\d{9}$/.test(formData.phone)) {
+      uni.showToast({ title: '手机号码格式不正确', icon: 'none' })
+      return false
+    }
   }
 
-  if (!/^1[3-9]\d{9}$/.test(formData.phone)) {
-    uni.showToast({ title: '请输入正确的手机号码', icon: 'none' })
-    return false
+  // 验证邮箱
+  if (hasUserId('email')) {
+    if (!formData.email.trim()) {
+      uni.showToast({ title: '请输入邮箱地址', icon: 'none' })
+      return false
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      uni.showToast({ title: '请输入正确的邮箱格式', icon: 'none' })
+      return false
+    }
   }
 
-  if (!formData.email&&hasUserId('email')) {
-    uni.showToast({ title: '请输入邮箱地址', icon: 'none' })
-    return false
+  // 验证单位
+  if (hasUserId('unit')) {
+    if (!formData.unit.trim()) {
+      uni.showToast({ title: '请输入单位名称', icon: 'none' })
+      return false
+    }
   }
 
-  // 邮箱格式验证
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(formData.email)) {
-    uni.showToast({ title: '请输入正确的邮箱格式', icon: 'none' })
-    return false
-  }
-
-  if (!formData.unit.trim()&&hasUserId('unit')) {
-    uni.showToast({ title: '请输入单位名称', icon: 'none' })
-    return false
-  }
-
-  if (!formData.career.trim()&&hasUserId('position')) {
-    uni.showToast({ title: '请输入职业', icon: 'none' })
-    return false
+  // 验证职业
+  if (hasUserId('position')) {
+    if (!formData.career.trim()) {
+      uni.showToast({ title: '请输入职业', icon: 'none' })
+      return false
+    }
   }
 
   return true
 }
 
 // 提交表单
-const handleSubmit = async() => {
+const handleSubmit = async () => {
   if (isEditing.value) {
     uni.showToast({
       title: '请先保存编辑的内容',
@@ -532,43 +432,40 @@ const handleSubmit = async() => {
 
   uni.showLoading({ title: '提交中...' })
 
-  // 模拟提交
-  try{
-	  // id转成int  number型
-	  console.log("报名的id:",typeof( parseInt(id, 10)))
-	  const res = await activityapply({"event_id":parseInt(id, 10)})
-	  console.log(res)
-	  if(res.code===200){
-		  console.log("报名成功")
-		uni.showToast({
-		      title: '报名成功！',
-		      icon: 'success'
-		    })
-	  }
-	   uni.navigateBack()
-  }catch(e){
-	  uni.showToast({
-	    title: e.data.message,
-	    icon: 'none'
-	  })
-	  console.log(e.data.message)
-  }finally{
-	  uni.hideLoading()
+  try {
+    console.log("报名的id:", typeof(parseInt(id.value, 10)))
+    const res = await activityapply({ "event_id": parseInt(id.value, 10) })
+    console.log(res)
+    if (res.code === 200) {
+      console.log("报名成功")
+      uni.showToast({
+        title: '报名成功！',
+        icon: 'success'
+      })
+    }
+    uni.navigateBack()
+  } catch (e) {
+    uni.showToast({
+      title: e.data.message,
+      icon: 'none'
+    })
+    console.log(e.data.message)
+  } finally {
+    uni.hideLoading()
   }
     
-    isSubmitted.value = true
+  isSubmitted.value = true
 }
 
 // 在组件挂载时调用初始化函数
-onMounted(async() => {
-	await  fieldstore.getindustory()
+onMounted(async () => {
+  await fieldstore.getindustory()
   initFormData()
-  
 })
 
-onLoad(async(option) => {
-	console.log("申请详细option:",option)
-	id = decodeURIComponent(option.id)
+onLoad(async (option) => {
+  console.log("申请详细option:", option)
+  id.value = decodeURIComponent(option.id)
 })
 </script>
 
@@ -757,48 +654,37 @@ onLoad(async(option) => {
       border-color: #667eea;
       box-shadow: 0 0 0 4rpx rgba(102, 126, 234, 0.1);
     }
-    
-    &.phone-input {
-      width: calc(100% - 220rpx);
-    }
   }
   
   .placeholder {
     color: #cccccc;
   }
   
-  .phone-input-wrapper {
+  // 手机号显示区域
+  .phone-display {
+    width: 100%;
+    height: 88rpx;
+    background-color: #f0f0f0;
+    border: 2rpx solid transparent;
+    border-radius: 12rpx;
+    padding: 0 20rpx;
     display: flex;
     align-items: center;
-    gap: 20rpx;
+    justify-content: space-between;
+    box-sizing: border-box;
     
-    .verify-btn {
-      width: 200rpx;
-      height: 88rpx;
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-      color: #ffffff;
+    .phone-text {
+      font-size: 28rpx;
+      color: #333333;
+      font-weight: 500;
+    }
+    
+    .phone-tip {
       font-size: 24rpx;
-      border-radius: 12rpx;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      white-space: nowrap;
-      flex-shrink: 0;
-      box-shadow: 0 2rpx 8rpx rgba(255, 107, 107, 0.3);
-      transition: all 0.3s ease;
-      
-      &.disabled,
-      &:disabled {
-        background: #cccccc;
-        color: #999999;
-        box-shadow: none;
-      }
-      
-      &:not(:disabled):not(.disabled):active {
-        background: linear-gradient(135deg, #ee5a52 0%, #de4343 100%);
-        transform: translateY(1rpx);
-      }
+      color: #999999;
+      background: rgba(255, 71, 87, 0.1);
+      padding: 4rpx 12rpx;
+      border-radius: 20rpx;
     }
   }
   
