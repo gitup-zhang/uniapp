@@ -477,7 +477,7 @@ const markAllAsRead = async () => {
     const res = await new Promise((resolve) => {
       uni.showModal({
         title: '确认操作',
-        content: `确定要将所有${totalUnread}条未读消息标记为已读吗？`,
+        content: `确定要将所有${totalUnread}群组的未读消息标记为已读吗？`,
         success: resolve
       })
     })

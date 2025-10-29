@@ -271,7 +271,7 @@ const _sfc_main = {
         const res = await new Promise((resolve) => {
           common_vendor.index.showModal({
             title: "确认操作",
-            content: `确定要将所有${totalUnread}条未读消息标记为已读吗？`,
+            content: `确定要将所有${totalUnread}群组的未读消息标记为已读吗？`,
             success: resolve
           });
         });
