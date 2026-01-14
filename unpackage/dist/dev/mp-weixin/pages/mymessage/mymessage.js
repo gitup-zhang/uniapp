@@ -104,9 +104,6 @@ const _sfc_main = {
       var _a;
       (_a = loadingPopup.value) == null ? void 0 : _a.close();
     };
-    const onAction = (data) => {
-      console.log("活动操作:", data);
-    };
     const onCancel = async (data) => {
       common_vendor.index.showModal({
         title: "确认取消",
@@ -188,33 +185,32 @@ const _sfc_main = {
         s: common_vendor.o(viewAllActivities),
         t: hasActivities.value
       }, hasActivities.value ? {
-        v: common_vendor.o(onAction),
-        w: common_vendor.o(onCancel),
-        x: common_vendor.p({
+        v: common_vendor.o(onCancel),
+        w: common_vendor.p({
           activityData: myActivityData.value
         })
       } : {
-        y: common_vendor.p({
+        x: common_vendor.p({
           type: "search",
           size: "16",
           color: "#fff"
         }),
-        z: common_vendor.o(discoverActivities),
-        A: common_vendor.p({
+        y: common_vendor.o(discoverActivities),
+        z: common_vendor.p({
           type: "refresh",
           size: "16",
           color: "#667eea"
         }),
-        B: common_vendor.o(refreshActivities)
+        A: common_vendor.o(refreshActivities)
       }), {
-        C: common_vendor.p({
+        B: common_vendor.p({
           status: "loading",
           ["content-text"]: loadingText.value
         }),
-        D: common_vendor.sr(loadingPopup, "a5a8e0a1-9", {
+        C: common_vendor.sr(loadingPopup, "a5a8e0a1-9", {
           "k": "loadingPopup"
         }),
-        E: common_vendor.p({
+        D: common_vendor.p({
           type: "center"
         })
       });

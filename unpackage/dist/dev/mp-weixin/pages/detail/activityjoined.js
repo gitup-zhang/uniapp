@@ -40,20 +40,6 @@ const _sfc_main = {
         });
       }
     };
-    const handleAction = (activityData) => {
-      console.log("操作活动:", activityData);
-      if (activeTab.value === "expired") {
-        common_vendor.index.showToast({
-          title: "活动已过期，无法操作",
-          icon: "none"
-        });
-        return;
-      }
-      common_vendor.index.showToast({
-        title: `执行: ${activityData.statusText}`,
-        icon: "success"
-      });
-    };
     const handleCancel = (activityData) => {
       console.log("取消报名:", activityData);
       if (activeTab.value === "expired") {
@@ -113,10 +99,9 @@ const _sfc_main = {
         m: common_vendor.f(currentActivityList.value, (activity, k0, i0) => {
           return {
             a: activity.id,
-            b: common_vendor.o(handleAction, activity.id),
-            c: common_vendor.o(handleCancel, activity.id),
-            d: "beed2d58-0-" + i0,
-            e: common_vendor.p({
+            b: common_vendor.o(handleCancel, activity.id),
+            c: "beed2d58-0-" + i0,
+            d: common_vendor.p({
               status: activeTab.value,
               activityData: activity
             })

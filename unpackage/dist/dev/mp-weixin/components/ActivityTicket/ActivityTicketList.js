@@ -20,7 +20,7 @@ const _sfc_main = {
       validator: (value) => ["active", "expired"].includes(value)
     }
   },
-  emits: ["action", "cancel", "viewDetails", "archive"],
+  emits: ["cancel"],
   setup(__props, { emit: __emit }) {
     const props = __props;
     const emit = __emit;
@@ -77,43 +77,6 @@ const _sfc_main = {
       const progress = Math.round(elapsed / total * 100);
       return Math.max(0, Math.min(100, progress));
     });
-    const checkInButtonConfig = common_vendor.computed(() => {
-      switch (timeStatus.value) {
-        case "not_started":
-          return {
-            text: "未开始",
-            icon: "⏰",
-            disabled: true,
-            class: "not-started"
-          };
-        case "ongoing":
-          return {
-            text: "签到",
-            icon: "✓",
-            disabled: false,
-            class: "primary"
-          };
-        case "expired":
-          return {
-            text: "已结束",
-            icon: "🔒",
-            disabled: true,
-            class: "expired"
-          };
-        default:
-          return {
-            text: "签到",
-            icon: "✓",
-            disabled: false,
-            class: "primary"
-          };
-      }
-    });
-    const handleAction = () => {
-      if (!checkInButtonConfig.value.disabled) {
-        emit("action", props.activityData);
-      }
-    };
     const handleCancel = () => {
       emit("cancel", props.activityData);
     };
@@ -131,18 +94,13 @@ const _sfc_main = {
         i: common_vendor.t(common_vendor.unref(utils_data.formatEventDate)(props.activityData.event_start_time, props.activityData.event_end_time)),
         j: !isExpired.value
       }, !isExpired.value ? {
-        k: common_vendor.t(checkInButtonConfig.value.icon),
-        l: common_vendor.t(checkInButtonConfig.value.text),
-        m: common_vendor.n(checkInButtonConfig.value.class),
-        n: checkInButtonConfig.value.disabled,
-        o: common_vendor.o(handleAction),
-        p: common_vendor.o(handleCancel)
+        k: common_vendor.o(handleCancel)
       } : {}, {
-        q: common_vendor.n(statusClass.value),
-        r: activityProgress.value + "%",
-        s: common_vendor.t(isExpired.value ? "活动已完成 100%" : `活动进度 ${activityProgress.value}%`),
-        t: common_vendor.n(statusClass.value),
-        v: common_vendor.n(statusClass.value)
+        l: common_vendor.n(statusClass.value),
+        m: activityProgress.value + "%",
+        n: common_vendor.t(isExpired.value ? "活动已完成 100%" : `活动进度 ${activityProgress.value}%`),
+        o: common_vendor.n(statusClass.value),
+        p: common_vendor.n(statusClass.value)
       });
     };
   }

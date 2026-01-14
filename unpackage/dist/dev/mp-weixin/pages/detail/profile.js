@@ -2,6 +2,7 @@
 const common_vendor = require("../../common/vendor.js");
 const store_Info = require("../../store/Info.js");
 const store_field = require("../../store/field.js");
+const newApis_info = require("../../new-apis/info.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
@@ -194,6 +195,7 @@ const _sfc_main = {
     };
     const logout = async () => {
       try {
+        await newApis_info.Wechatlayout();
         showLoading("正在退出...");
         await userInfo.deleteinfo();
         common_vendor.index.showToast({

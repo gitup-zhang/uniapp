@@ -446,7 +446,8 @@
   justify-content: center;
   gap: 24rpx;
 }
-.empty-activity .empty-card .empty-actions .discover-btn.data-v-a5a8e0a1, .empty-activity .empty-card .empty-actions .refresh-btn.data-v-a5a8e0a1 {
+.empty-activity .empty-card .empty-actions .discover-btn.data-v-a5a8e0a1,
+.empty-activity .empty-card .empty-actions .refresh-btn.data-v-a5a8e0a1 {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -457,13 +458,16 @@
   border: none;
   transition: all 0.3s ease;
 }
-.empty-activity .empty-card .empty-actions .discover-btn.data-v-a5a8e0a1::after, .empty-activity .empty-card .empty-actions .refresh-btn.data-v-a5a8e0a1::after {
+.empty-activity .empty-card .empty-actions .discover-btn.data-v-a5a8e0a1::after,
+.empty-activity .empty-card .empty-actions .refresh-btn.data-v-a5a8e0a1::after {
   border: none;
 }
-.empty-activity .empty-card .empty-actions .discover-btn text.data-v-a5a8e0a1, .empty-activity .empty-card .empty-actions .refresh-btn text.data-v-a5a8e0a1 {
+.empty-activity .empty-card .empty-actions .discover-btn text.data-v-a5a8e0a1,
+.empty-activity .empty-card .empty-actions .refresh-btn text.data-v-a5a8e0a1 {
   margin-left: 8rpx;
 }
-.empty-activity .empty-card .empty-actions .discover-btn.data-v-a5a8e0a1:active, .empty-activity .empty-card .empty-actions .refresh-btn.data-v-a5a8e0a1:active {
+.empty-activity .empty-card .empty-actions .discover-btn.data-v-a5a8e0a1:active,
+.empty-activity .empty-card .empty-actions .refresh-btn.data-v-a5a8e0a1:active {
   transform: scale(0.95);
 }
 .empty-activity .empty-card .empty-actions .discover-btn.data-v-a5a8e0a1 {
@@ -543,7 +547,8 @@
     flex-direction: column;
     gap: 16rpx;
 }
-.empty-card .empty-actions .discover-btn.data-v-a5a8e0a1, .empty-card .empty-actions .refresh-btn.data-v-a5a8e0a1 {
+.empty-card .empty-actions .discover-btn.data-v-a5a8e0a1,
+.empty-card .empty-actions .refresh-btn.data-v-a5a8e0a1 {
     width: 100%;
 }
 }

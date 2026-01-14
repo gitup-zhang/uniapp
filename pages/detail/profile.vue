@@ -283,6 +283,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useInfoStore } from '@/store/Info.js'
 import {usefieldstore} from '@/store/field.js'
+import {Wechatlayout} from '@/new-apis/info.js'
 
 
 // Store 和基础数据
@@ -519,6 +520,7 @@ const confirmLogout = () => {
 // 退出登录
 const logout = async () => {
   try {
+	  await Wechatlayout()
     showLoading('正在退出...')
     
     // 清空本地存储

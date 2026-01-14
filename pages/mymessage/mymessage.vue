@@ -7,49 +7,50 @@
       <text class="nav-title">个人信息</text>
       <view class="nav-right"></view>
     </view>
-    
+
     <!-- 未登录状态 - 简约登录引导 -->
     <view v-if="!userInfo.signal" class="not-login-container">
       <view class="not-login-card">
         <!-- Logo区域 -->
         <view class="logo-section">
-          <image class="logo-image" src="/static/logo.jpg" mode="aspectFit"/>
+          <image class="logo-image" src="/static/logo.jpg" mode="aspectFit" />
           <text class="app-title">智源齐说</text>
-          
         </view>
-        
+
         <!-- 登录提示 -->
         <view class="login-prompt">
           <view class="prompt-content">
             <text class="prompt-title">欢迎来到智源齐说</text>
-            <text class="prompt-desc">登录后可查看个人信息、管理活动等更多功能</text>
+            <text class="prompt-desc"
+              >登录后可查看个人信息、管理活动等更多功能</text
+            >
           </view>
-          
+
           <!-- 登录按钮 -->
           <button class="goto-login-btn" @click="goToLogin">
             <view class="btn-content">
-              <uni-icons type="person" size="20" color="#fff"/>
+              <uni-icons type="person" size="20" color="#fff" />
               <text>立即登录</text>
             </view>
           </button>
-          
+
           <!-- 功能预览 -->
           <view class="features-preview">
             <view class="feature-item">
-              <uni-icons type="calendar" size="24" color="#667eea"/>
+              <uni-icons type="calendar" size="24" color="#667eea" />
               <text>活动管理</text>
             </view>
             <view class="feature-item">
-              <uni-icons type="person" size="24" color="#667eea"/>
+              <uni-icons type="person" size="24" color="#667eea" />
               <text>个人资料</text>
             </view>
             <view class="feature-item">
-              <uni-icons type="chat" size="24" color="#667eea"/>
+              <uni-icons type="chat" size="24" color="#667eea" />
               <text>消息通知</text>
             </view>
           </view>
         </view>
-        
+
         <!-- 装饰元素 -->
         <view class="decoration">
           <view class="deco-circle deco-1"></view>
@@ -67,27 +68,31 @@
           <!-- 用户信息卡片 -->
           <view class="user-card" @click="goToProfile">
             <view class="avatar-section">
-              <image 
-                class="user-avatar" 
-                :src="userInfo.info.avatar_url || '/static/icon/empty.png'" 
+              <image
+                class="user-avatar"
+                :src="userInfo.info.avatar_url || '/static/icon/empty.png'"
                 mode="aspectFill"
               />
               <view class="online-indicator">
                 <view class="indicator-dot"></view>
               </view>
             </view>
-            
+
             <view class="user-details">
-              <text class="user-name">{{ userInfo.info.nickname || '用户' }}</text>
-              <text class="user-phone">{{ formatPhoneNumber(userInfo.info.phone) }}</text>
+              <text class="user-name">{{
+                userInfo.info.nickname || "用户"
+              }}</text>
+              <text class="user-phone">{{
+                formatPhoneNumber(userInfo.info.phone)
+              }}</text>
             </view>
-            
+
             <view class="profile-enter">
-              <uni-icons type="right" size="18" color="rgba(255,255,255,0.8)"/>
+              <uni-icons type="right" size="18" color="rgba(255,255,255,0.8)" />
             </view>
           </view>
         </view>
-        
+
         <!-- 头部装饰 -->
         <view class="header-decoration">
           <view class="deco-circle deco-1"></view>
@@ -101,30 +106,40 @@
         <view class="stats-overview">
           <view class="stats-header">
             <view class="stats-icon-wrapper">
-              <image class="stats-icon" src="/static/icon/fire.png" mode="aspectFit"/>
+              <image
+                class="stats-icon"
+                src="/static/icon/fire.png"
+                mode="aspectFit"
+              />
             </view>
-           <view class="stats-info">
+            <view class="stats-info">
               <text class="stats-title">我的活动信息</text>
             </view>
           </view>
-          
+
           <view class="stats-grid">
             <view class="stat-item">
-              <text class="stat-number">{{ userInfo.eventcount.Eventbefore || 0 }}</text>
+              <text class="stat-number">{{
+                userInfo.eventcount.Eventbefore || 0
+              }}</text>
               <text class="stat-label">未开始</text>
             </view>
-            
+
             <view class="stat-divider"></view>
-            
+
             <view class="stat-item">
-              <text class="stat-number">{{ userInfo.eventcount.Eventing || 0 }}</text>
+              <text class="stat-number">{{
+                userInfo.eventcount.Eventing || 0
+              }}</text>
               <text class="stat-label">进行中</text>
             </view>
-            
+
             <view class="stat-divider"></view>
-            
+
             <view class="stat-item">
-              <text class="stat-number">{{ userInfo.eventcount.Evented || 0 }}</text>
+              <text class="stat-number">{{
+                userInfo.eventcount.Evented || 0
+              }}</text>
               <text class="stat-label">已过期</text>
             </view>
           </view>
@@ -134,41 +149,42 @@
         <view class="activity-section">
           <view class="section-header">
             <text class="section-title">我的活动</text>
-            <view class="section-more" @click="viewAllActivities" >
+            <view class="section-more" @click="viewAllActivities">
               <text class="more-text">查看全部</text>
-              <uni-icons type="right" size="14" color="#999"/>
+              <uni-icons type="right" size="14" color="#999" />
             </view>
           </view>
-          
+
           <!-- 有活动时显示活动卡片 -->
           <ActivityTicket
             v-if="hasActivities"
             :activityData="myActivityData"
-            @action="onAction"
             @cancel="onCancel"
           />
-          
+
           <!-- 没有活动时显示空状态 -->
           <view v-else class="empty-activity">
             <view class="empty-card">
               <!-- 空状态文案 -->
               <view class="empty-content">
                 <text class="empty-title">暂无活动</text>
-                <text class="empty-desc">您还没有参加任何活动，快去发现精彩活动吧！</text>
+                <text class="empty-desc"
+                  >您还没有参加任何活动，快去发现精彩活动吧！</text
+                >
               </view>
-              
+
               <!-- 操作按钮 -->
               <view class="empty-actions">
                 <button class="discover-btn" @click="discoverActivities">
-                  <uni-icons type="search" size="16" color="#fff"/>
+                  <uni-icons type="search" size="16" color="#fff" />
                   <text>发现活动</text>
                 </button>
                 <button class="refresh-btn" @click="refreshActivities">
-                  <uni-icons type="refresh" size="16" color="#667eea"/>
+                  <uni-icons type="refresh" size="16" color="#667eea" />
                   <text>刷新</text>
                 </button>
               </view>
-              
+
               <!-- 装饰元素 -->
               <view class="empty-decoration">
                 <view class="deco-dot deco-1"></view>
@@ -182,184 +198,178 @@
     </view>
 
     <!-- 加载提示 -->
-   <uni-popup ref="loadingPopup" type="center">
+    <uni-popup ref="loadingPopup" type="center">
       <view class="loading-container">
-        <uni-load-more status="loading" :content-text="loadingText"/>
+        <uni-load-more status="loading" :content-text="loadingText" />
       </view>
     </uni-popup>
   </view>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive } from 'vue'
-import { onLoad, onShow } from '@dcloudio/uni-app'
-import { useInfoStore } from '@/store/Info.js'
-import ActivityTicket from '../../components/ActivityTicket/ActivityTicket.vue'
-import { cancelapply } from '@/new-apis/events.js'
-import { useEventstore } from '@/store/Event.js'
+import { ref, computed, onMounted, reactive } from "vue";
+import { onLoad, onShow } from "@dcloudio/uni-app";
+import { useInfoStore } from "@/store/Info.js";
+import ActivityTicket from "../../components/ActivityTicket/ActivityTicket.vue";
+import { cancelapply } from "@/new-apis/events.js";
+import { useEventstore } from "@/store/Event.js";
 
 // Store 和基础数据
-const userInfo = useInfoStore()
-const SYSTEMINFO = uni.getSystemInfoSync()
-const statusBarHeight = ref(SYSTEMINFO.statusBarHeight)
+const userInfo = useInfoStore();
+const SYSTEMINFO = uni.getSystemInfoSync();
+const statusBarHeight = ref(SYSTEMINFO.statusBarHeight);
 
 // 弹窗引用
-const loadingPopup = ref(null)
+const loadingPopup = ref(null);
 
 // 加载状态
-const loadingText = ref({ more: '加载中...' })
+const loadingText = ref({ more: "加载中..." });
 
 // 活动数据和状态
-const myActivityData = ref(null) // 改为 null 表示没有活动
+const myActivityData = ref(null); // 改为 null 表示没有活动
 
 const hasActivities = computed(() => {
-  return myActivityData.value && Object.keys(myActivityData.value).length > 0
-})
+  return myActivityData.value && Object.keys(myActivityData.value).length > 0;
+});
 
 // 页面挂载
 onMounted(() => {
-  initPage()
-})
+  initPage();
+});
 
-onShow(async() => {
-  console.log("已加载")
-  initPage()
-})
+onShow(async () => {
+  console.log("已加载");
+  initPage();
+});
 
 // 初始化页面
 const initPage = async () => {
   try {
     if (userInfo.signal) {
-      await refreshUserData()
+      await refreshUserData();
     }
   } catch (error) {
-    console.error('页面初始化失败:', error)
+    console.error("页面初始化失败:", error);
   }
-}
+};
 
 // 刷新用户数据
 const refreshUserData = async () => {
   try {
-    await userInfo.getinfo()
-    await userInfo.userapply()
+    await userInfo.getinfo();
+    await userInfo.userapply();
     // 这里可以添加获取活动数据的逻辑
-    await loadUserActivities()
+    await loadUserActivities();
   } catch (error) {
-    console.error('获取用户信息失败:', error)
+    console.error("获取用户信息失败:", error);
   }
-}
+};
 
 // 加载用户活动数据
 const loadUserActivities = async () => {
   try {
     // 这里模拟从API获取活动数据
-    myActivityData.value = (userInfo.applyactivity?.length > 0) 
-      ? userInfo.applyactivity[0] 
-      : null;
+    myActivityData.value =
+      userInfo.applyactivity?.length > 0 ? userInfo.applyactivity[0] : null;
   } catch (error) {
-    console.error('获取活动数据失败:', error)
-    myActivityData.value = null
+    console.error("获取活动数据失败:", error);
+    myActivityData.value = null;
   }
-}
+};
 
 // 格式化手机号显示
 const formatPhoneNumber = (phone) => {
-  if (!phone) return ''
-  return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
-}
+  if (!phone) return "";
+  return phone.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
+};
 
 // 跳转到登录页面
 const goToLogin = () => {
   uni.navigateTo({
-    url: '/pages/detail/Login'
-  })
-}
+    url: "/pages/detail/Login",
+  });
+};
 
 // 跳转到个人资料页面
 const goToProfile = () => {
   uni.navigateTo({
-    url: '/pages/detail/profile'
-  })
-}
+    url: "/pages/detail/profile",
+  });
+};
 
 // 空状态相关方法
 const discoverActivities = () => {
   uni.switchTab({
-    url: '../news/news'
+    url: "../news/news",
   });
-}
+};
 
 const refreshActivities = async () => {
   try {
-    initPage()
-    
+    initPage();
+
     uni.showToast({
-      title: '刷新完成',
-      icon: 'success'
-    })
+      title: "刷新完成",
+      icon: "success",
+    });
   } catch (error) {
-    console.error('刷新活动失败:', error)
+    console.error("刷新活动失败:", error);
     uni.showToast({
-      title: '刷新失败',
-      icon: 'error'
-    })
+      title: "刷新失败",
+      icon: "error",
+    });
   } finally {
-    hideLoading()
+    hideLoading();
   }
-}
+};
 
 // 显示加载提示
-const showLoading = (text = '加载中...') => {
-  loadingText.value.more = text
-  loadingPopup.value?.open()
-}
+const showLoading = (text = "加载中...") => {
+  loadingText.value.more = text;
+  loadingPopup.value?.open();
+};
 
 // 隐藏加载提示
 const hideLoading = () => {
-  loadingPopup.value?.close()
-}
+  loadingPopup.value?.close();
+};
 
-// 活动相关事件处理
-const onAction = (data) => {
-  console.log('活动操作:', data)
-}
-
-const onCancel = async(data) => {
+const onCancel = async (data) => {
   uni.showModal({
-    title: '确认取消',
+    title: "确认取消",
     content: `确定要取消报名"${data.title}"吗？`,
     success: (res) => {
       if (res.confirm) {
-        cancelSignUp(data)
+        cancelSignUp(data);
       }
-    }
-  })
-}
+    },
+  });
+};
 
 // 取消报名的具体实现
 const cancelSignUp = async (activityData) => {
   try {
-    await cancelapply(activityData.id)
-    initPage()
-    
+    await cancelapply(activityData.id);
+    initPage();
+
     uni.showToast({
-      title: '取消报名成功',
-      icon: 'success'
-    })
+      title: "取消报名成功",
+      icon: "success",
+    });
   } catch (error) {
-    console.error('取消报名失败:', error.data)
+    console.error("取消报名失败:", error.data);
     uni.showToast({
       title: error.data.message,
-      icon: 'none'
-    })
+      icon: "none",
+    });
   }
-}
+};
 
 const viewAllActivities = () => {
   uni.navigateTo({
-    url: '/pages/detail/activityjoined'
-  })
-}
+    url: "/pages/detail/activityjoined",
+  });
+};
 </script>
 
 <style lang="scss" scoped>
@@ -491,7 +501,7 @@ const viewAllActivities = () => {
     .btn-content {
       display: flex;
       align-items: center;
-      
+
       text {
         margin-left: 12rpx;
       }
@@ -508,7 +518,7 @@ const viewAllActivities = () => {
       flex-direction: column;
       align-items: center;
       flex: 1;
-      
+
       text {
         font-size: 24rpx;
         color: #666;
@@ -531,7 +541,11 @@ const viewAllActivities = () => {
   .deco-circle {
     position: absolute;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(102, 126, 234, 0.1) 0%,
+      rgba(118, 75, 162, 0.1) 100%
+    );
     animation: float 6s ease-in-out infinite;
 
     &.deco-1 {
@@ -561,7 +575,8 @@ const viewAllActivities = () => {
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) rotate(0deg);
     opacity: 0.3;
   }
@@ -696,8 +711,13 @@ const viewAllActivities = () => {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .main-content {
@@ -853,7 +873,8 @@ const viewAllActivities = () => {
       justify-content: center;
       gap: 24rpx;
 
-      .discover-btn, .refresh-btn {
+      .discover-btn,
+      .refresh-btn {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -906,7 +927,11 @@ const viewAllActivities = () => {
       .deco-dot {
         position: absolute;
         border-radius: 50%;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        background: linear-gradient(
+          135deg,
+          rgba(102, 126, 234, 0.1) 0%,
+          rgba(118, 75, 162, 0.1) 100%
+        );
         animation: float 6s ease-in-out infinite;
 
         &.deco-1 {
@@ -954,11 +979,11 @@ const viewAllActivities = () => {
     margin: 0 20rpx;
     padding: 40rpx 24rpx;
   }
-  
+
   .header {
     padding: 24rpx;
   }
-  
+
   .main-content {
     padding: 24rpx;
   }
@@ -970,7 +995,8 @@ const viewAllActivities = () => {
       flex-direction: column;
       gap: 16rpx;
 
-      .discover-btn, .refresh-btn {
+      .discover-btn,
+      .refresh-btn {
         width: 100%;
       }
     }
@@ -982,23 +1008,23 @@ const viewAllActivities = () => {
 //   .main-content {
 //     background: #1a1a1a;
 //   }
-  
+
 //   .stats-overview {
 //     background: #2d2d2d;
-    
+
 //     .stats-title {
 //       color: #fff;
 //     }
-    
+
 //     .stat-number {
 //       color: #fff;
 //     }
-    
+
 //     .stat-label {
 //       color: #ccc;
 //     }
 //   }
-  
+
 //   .section-title {
 //     color: #fff;
 //   }

@@ -4,7 +4,9 @@ const newApis_info = require("../new-apis/info.js");
 const newApis_events = require("../new-apis/events.js");
 const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
   let info = common_vendor.ref({});
-  const token = common_vendor.ref("");
+  const accessToken = common_vendor.ref("");
+  const refreshToken = common_vendor.ref("");
+  const sessionSign = common_vendor.ref("");
   const signal = common_vendor.ref(false);
   const isapply = common_vendor.ref(false);
   const applyactivity = common_vendor.ref([]);
@@ -14,10 +16,73 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
     Eventing: 0,
     Evented: 0
   });
-  const setToken = (t) => {
-    token.value = t;
+  const setTokens = (access, refresh, session) => {
+    accessToken.value = access;
+    refreshToken.value = refresh;
+    sessionSign.value = session;
     signal.value = true;
-    common_vendor.index.setStorageSync("token", t);
+    common_vendor.index.setStorageSync("accessToken", access);
+    common_vendor.index.setStorageSync("refreshToken", refresh);
+    common_vendor.index.setStorageSync("sessionSign", session);
+  };
+  const loadTokensFromStorage = () => {
+    try {
+      const access = common_vendor.index.getStorageSync("accessToken");
+      const refresh = common_vendor.index.getStorageSync("refreshToken");
+      const session = common_vendor.index.getStorageSync("sessionSign");
+      if (access && refresh && session) {
+        accessToken.value = access;
+        refreshToken.value = refresh;
+        sessionSign.value = session;
+        signal.value = true;
+        return true;
+      }
+    } catch (e) {
+      console.error("加载Token失败:", e);
+    }
+    return false;
+  };
+  const refreshAccessToken = async () => {
+    try {
+      console.log("开始刷新Token...");
+      const res = await common_vendor.index.request({
+        url: "http://47.113.194.28:8080/api/user/refreshToken",
+        // 替换为你的刷新接口
+        method: "POST",
+        header: {
+          "Content-Type": "application/json"
+        },
+        data: {
+          refresh_token: refreshToken.value,
+          session_sign: sessionSign.value
+        }
+      });
+      if (res.data.code === 200) {
+        setTokens(
+          res.data.access_token,
+          res.data.refresh_token,
+          sessionSign.value
+          // session_sign 可能不会改变，使用原值或新值
+        );
+        console.log("Token刷新成功");
+        return true;
+      } else if (res.data.code === 40003) {
+        console.log("刷新令牌过期，需要重新登录");
+        deleteinfo();
+        common_vendor.index.showToast({
+          title: "登录已过期，请重新登录",
+          icon: "none"
+        });
+        common_vendor.index.navigateTo({
+          url: "/pages/login/login"
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error("刷新Token失败:", error);
+      deleteinfo();
+      return false;
+    }
   };
   const getinfo = async () => {
     signal.value = true;
@@ -34,26 +99,48 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
       const loginRes = await common_vendor.index.login({ provider: "weixin" });
       if (loginRes.errMsg === "login:ok") {
         const codes = loginRes.code;
-        console.log(codes);
-        const res = await newApis_info.getinfologin({ code: codes, encrypted_data: encryptedData, iv });
-        console.log("token:" + token.value);
+        console.log("微信code:", codes);
+        const res = await newApis_info.getinfologin({
+          code: codes,
+          encrypted_data: encryptedData,
+          iv
+        });
+        console.log("登录响应:", res);
         if (res.code === 200) {
+          setTokens(
+            res.access_token,
+            res.refresh_token,
+            res.session_sign
+          );
           signal.value = true;
-          setToken(res.token);
           console.log("登录成功");
           return true;
+        } else {
+          common_vendor.index.showToast({
+            title: res.message || "登录失败",
+            icon: "none"
+          });
+          return false;
         }
       }
     } catch (err) {
       console.error("登录失败", err);
+      common_vendor.index.showToast({
+        title: "登录失败，请重试",
+        icon: "none"
+      });
       return false;
     }
   };
   function deleteinfo() {
-    token.value = "";
+    accessToken.value = "";
+    refreshToken.value = "";
+    sessionSign.value = "";
     signal.value = false;
     info.value = {};
-    common_vendor.index.removeStorageSync("token");
+    common_vendor.index.removeStorageSync("accessToken");
+    common_vendor.index.removeStorageSync("refreshToken");
+    common_vendor.index.removeStorageSync("sessionSign");
   }
   const uploadimage = async (filepath) => {
     return new Promise((resolve, reject) => {
@@ -63,11 +150,10 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
         name: "file",
         formData: {
           biz_type: "AVATAR"
-          // 添加额外字段
         },
         header: {
           "Content-Type": "multipart/form-data",
-          Authorization: token.value ? `Bearer ${token.value}` : ""
+          Authorization: accessToken.value ? `Bearer ${accessToken.value}` : ""
         },
         success: (res) => {
           try {
@@ -98,7 +184,11 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
         const { encryptedData, iv } = userRes;
         console.log(encryptedData);
         try {
-          const res = await newApis_info.getinfoprofile({ encryptedData, iv, token: token.value });
+          const res = await newApis_info.getinfoprofile({
+            encryptedData,
+            iv,
+            token: accessToken.value
+          });
           console.log(res);
         } catch (error) {
           console.error("请求出错:", error);
@@ -152,7 +242,9 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
   };
   return {
     info,
-    token,
+    accessToken,
+    refreshToken,
+    sessionSign,
     signal,
     getinfo,
     deleteinfo,
@@ -161,7 +253,9 @@ const useInfoStore = common_vendor.defineStore("peopleinfo", () => {
     getUserProfile,
     updateinfo,
     uploadimage,
-    setToken,
+    setTokens,
+    loadTokensFromStorage,
+    refreshAccessToken,
     IsRegistered,
     isapply,
     userapply,

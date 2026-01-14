@@ -28,17 +28,18 @@ const _sfc_main = {
   setup(__props) {
     common_vendor.onLaunch(async () => {
       const infoStore = store_Info.useInfoStore();
-      const localToken = common_vendor.index.getStorageSync("token");
-      if (localToken) {
-        infoStore.token = localToken;
-        infoStore.signal = true;
+      const hasToken = infoStore.loadTokensFromStorage();
+      if (hasToken) {
+        console.log("Token已恢复，尝试获取用户信息...");
         try {
           await infoStore.getinfo();
           console.log("登录状态恢复成功");
         } catch (e) {
-          console.log(e);
-          console.log("用户信息拉取失败，清除登录状态");
-          infoStore.deleteinfo();
+          console.error("用户信息拉取失败:", e);
+          if (e.message !== "登录已过期" && e.message !== "Token刷新失败") {
+            console.log("清除登录状态");
+            infoStore.deleteinfo();
+          }
         }
       } else {
         console.log("本地无登录状态");

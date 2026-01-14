@@ -11,15 +11,17 @@
         <text class="expired-text">已过期</text>
       </view>
     </view>
-    
+
     <view class="card-content">
       <!-- 左侧内容区 -->
       <view class="content-left">
         <view class="title-section">
           <text class="title">{{ props.activityData.title }}</text>
-          <text class="subtitle">{{ isExpired ? '活动已结束' : '精彩活动等你参与' }}</text>
+          <text class="subtitle">{{
+            isExpired ? "活动已结束" : "精彩活动等你参与"
+          }}</text>
         </view>
-        
+
         <view class="info-list">
           <view class="info-item">
             <view :class="['icon-wrapper', 'location', statusClass]">
@@ -30,18 +32,23 @@
               <text class="value">{{ props.activityData.event_address }}</text>
             </view>
           </view>
-          
+
           <view class="info-item">
             <view :class="['icon-wrapper', 'date', statusClass]">
               <text class="icon">📅</text>
             </view>
             <view class="text-content">
               <text class="label">活动时间</text>
-              <text class="value">{{ formatEventDate(props.activityData.event_start_time, props.activityData.event_end_time) }}</text>
+              <text class="value">{{
+                formatEventDate(
+                  props.activityData.event_start_time,
+                  props.activityData.event_end_time
+                )
+              }}</text>
             </view>
           </view>
         </view>
-        
+
         <!-- 参与人数信息 -->
         <!-- <view :class="['participants-info', statusClass]">
           <view class="avatars">
@@ -53,54 +60,36 @@
           <text class="participants-text">{{ isExpired ? '共102人参与过' : '已有102人参与' }}</text>
         </view> -->
       </view>
-      
+
       <!-- 右侧按钮区 -->
       <view class="content-right">
         <template v-if="!isExpired">
-          <button 
-            :class="['action-btn', checkInButtonConfig.class]" 
-            :disabled="checkInButtonConfig.disabled"
-            @click="handleAction"
-          >
-            <text class="btn-icon">{{ checkInButtonConfig.icon }}</text>
-            <text class="btn-text">{{ checkInButtonConfig.text }}</text>
-          </button>
           <button class="action-btn secondary" @click="handleCancel">
             <text class="btn-icon">✕</text>
             <text class="btn-text">取消报名</text>
           </button>
         </template>
-       <!-- <template v-else>
-          <button class="action-btn expired" @click="handleViewDetails">
-            <text class="btn-icon">👁</text>
-            <text class="btn-text">查看详情</text>
-          </button>
-          <button class="action-btn archive" @click="handleArchive">
-            <text class="btn-icon">📁</text>
-            <text class="btn-text">归档</text>
-          </button>
-        </template> -->
       </view>
     </view>
-    
+
     <!-- 底部进度条 -->
     <view :class="['progress-section', statusClass]">
       <view class="progress-bar">
-        <view 
-          :class="['progress-fill', statusClass]" 
+        <view
+          :class="['progress-fill', statusClass]"
           :style="{ width: activityProgress + '%' }"
         ></view>
       </view>
       <text class="progress-text">
-        {{ isExpired ? '活动已完成 100%' : `活动进度 ${activityProgress}%` }}
+        {{ isExpired ? "活动已完成 100%" : `活动进度 ${activityProgress}%` }}
       </text>
     </view>
   </view>
 </template>
 
 <script setup>
-import { formatEventDate } from '@/utils/data.js'
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { formatEventDate } from "@/utils/data.js";
+import { computed, ref, onMounted, onUnmounted } from "vue";
 
 // Props
 const props = defineProps({
@@ -108,137 +97,93 @@ const props = defineProps({
     type: Object,
     default: () => ({
       id: 0,
-      title: '',
-      event_address: '',
+      title: "",
+      event_address: "",
       event_end_time: "",
       event_start_time: "",
-    })
+    }),
   },
   status: {
     type: String,
-    default: 'active',
-    validator: (value) => ['active', 'expired'].includes(value)
-  }
-})
+    default: "active",
+    validator: (value) => ["active", "expired"].includes(value),
+  },
+});
 
 // Emits
-const emit = defineEmits(['action', 'cancel', 'viewDetails', 'archive'])
+const emit = defineEmits(["cancel"]);
 
 // 响应式数据
-const currentTime = ref(new Date())
-let timer = null
+const currentTime = ref(new Date());
+let timer = null;
 
 // 生命周期
 onMounted(() => {
   // 每分钟更新一次当前时间
   timer = setInterval(() => {
-    currentTime.value = new Date()
-  }, 60000)
-})
+    currentTime.value = new Date();
+  }, 60000);
+});
 
 onUnmounted(() => {
   if (timer) {
-    clearInterval(timer)
+    clearInterval(timer);
   }
-})
+});
 
 // 计算属性
-const isExpired = computed(() => props.status === 'expired')
+const isExpired = computed(() => props.status === "expired");
 
-const statusClass = computed(() => props.status)
+const statusClass = computed(() => props.status);
 
 // 时间相关计算
 const timeStatus = computed(() => {
-  if (isExpired.value) return 'expired'
-  
-  const now = currentTime.value.getTime()
-  const startTime = new Date(props.activityData.event_start_time).getTime()
-  const endTime = new Date(props.activityData.event_end_time).getTime()
-  
-  if (now < startTime) return 'not_started'
-  if (now >= startTime && now <= endTime) return 'ongoing'
-  return 'expired'
-})
+  if (isExpired.value) return "expired";
+
+  const now = currentTime.value.getTime();
+  const startTime = new Date(props.activityData.event_start_time).getTime();
+  const endTime = new Date(props.activityData.event_end_time).getTime();
+
+  if (now < startTime) return "not_started";
+  if (now >= startTime && now <= endTime) return "ongoing";
+  return "expired";
+});
 
 const statusText = computed(() => {
   switch (timeStatus.value) {
-    case 'not_started': return '未开始'
-    case 'ongoing': return '进行中'
-    case 'expired': return '已过期'
-    default: return '进行中'
+    case "not_started":
+      return "未开始";
+    case "ongoing":
+      return "进行中";
+    case "expired":
+      return "已过期";
+    default:
+      return "进行中";
   }
-})
+});
 
 // 活动进度计算
 const activityProgress = computed(() => {
-  if (isExpired.value) return 100
-  
-  const now = currentTime.value.getTime()
-  const startTime = new Date(props.activityData.event_start_time).getTime()
-  const endTime = new Date(props.activityData.event_end_time).getTime()
-  
-  if (now < startTime) return 0
-  if (now > endTime) return 100
-  
-  const total = endTime - startTime
-  const elapsed = now - startTime
-  const progress = Math.round((elapsed / total) * 100)
-  
-  return Math.max(0, Math.min(100, progress))
-})
+  if (isExpired.value) return 100;
 
-// 签到按钮状态
-const checkInButtonConfig = computed(() => {
-  switch (timeStatus.value) {
-    case 'not_started':
-      return {
-        text: '未开始',
-        icon: '⏰',
-        disabled: true,
-        class: 'not-started'
-      }
-    case 'ongoing':
-      return {
-        text: '签到',
-        icon: '✓',
-        disabled: false,
-        class: 'primary'
-      }
-    case 'expired':
-      return {
-        text: '已结束',
-        icon: '🔒',
-        disabled: true,
-        class: 'expired'
-      }
-    default:
-      return {
-        text: '签到',
-        icon: '✓',
-        disabled: false,
-        class: 'primary'
-      }
-  }
-})
+  const now = currentTime.value.getTime();
+  const startTime = new Date(props.activityData.event_start_time).getTime();
+  const endTime = new Date(props.activityData.event_end_time).getTime();
+
+  if (now < startTime) return 0;
+  if (now > endTime) return 100;
+
+  const total = endTime - startTime;
+  const elapsed = now - startTime;
+  const progress = Math.round((elapsed / total) * 100);
+
+  return Math.max(0, Math.min(100, progress));
+});
 
 // 方法
-const handleAction = () => {
-  if (!checkInButtonConfig.value.disabled) {
-    emit('action', props.activityData)
-  }
-}
-
 const handleCancel = () => {
-  emit('cancel', props.activityData)
-}
-
-const handleViewDetails = () => {
-  emit('viewDetails', props.activityData)
-}
-
-const handleArchive = () => {
-  emit('archive', props.activityData)
-}
+  emit("cancel", props.activityData);
+};
 </script>
 
 <style scoped>
@@ -272,13 +217,18 @@ const handleArchive = () => {
 }
 
 .card-header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
 }
 
 .card-header.active::before {
@@ -286,8 +236,12 @@ const handleArchive = () => {
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .status-badge {
@@ -321,8 +275,13 @@ const handleArchive = () => {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .status-text {
@@ -572,50 +531,23 @@ const handleArchive = () => {
 }
 
 .action-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transition: left 0.5s;
 }
 
 .action-btn:active::before {
   left: 100%;
-}
-
-/* 活跃状态按钮 */
-.action-btn.primary {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-  box-shadow: 0 8rpx 24rpx rgba(239, 68, 68, 0.3);
-}
-
-.action-btn.primary:active {
-  transform: translateY(2rpx);
-  box-shadow: 0 4rpx 16rpx rgba(239, 68, 68, 0.4);
-}
-
-/* 未开始状态按钮 */
-.action-btn.not-started {
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: white;
-  box-shadow: 0 8rpx 24rpx rgba(251, 191, 36, 0.3);
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.action-btn.not-started:active {
-  transform: none;
-}
-
-/* 禁用状态 */
-.action-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 
 .action-btn.secondary {
@@ -708,12 +640,18 @@ const handleArchive = () => {
 }
 
 @keyframes progressFill {
-  from { width: 0%; }
+  from {
+    width: 0%;
+  }
 }
 
 @keyframes progressComplete {
-  from { width: 0%; }
-  to { width: 100%; }
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 .progress-text {
@@ -735,16 +673,16 @@ const handleArchive = () => {
   .title {
     font-size: 28rpx;
   }
-  
+
   .value {
     font-size: 22rpx;
   }
-  
+
   .action-btn {
     width: 160rpx;
     height: 64rpx;
   }
-  
+
   .btn-text {
     font-size: 20rpx;
   }

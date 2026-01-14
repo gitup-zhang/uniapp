@@ -27,21 +27,28 @@
   background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
 }
 .card-header.data-v-a433b5db::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
 }
 .card-header.active.data-v-a433b5db::before {
   animation: shimmer-a433b5db 3s infinite;
 }
 @keyframes shimmer-a433b5db {
-0% { transform: translateX(-100%);
+0% {
+    transform: translateX(-100%);
 }
-100% { transform: translateX(100%);
+100% {
+    transform: translateX(100%);
 }
 }
 .status-badge.data-v-a433b5db {
@@ -70,9 +77,12 @@
   box-shadow: 0 0 4rpx rgba(209, 213, 219, 0.3);
 }
 @keyframes pulse-a433b5db {
-0%, 100% { opacity: 1;
+0%,
+  100% {
+    opacity: 1;
 }
-50% { opacity: 0.6;
+50% {
+    opacity: 0.6;
 }
 }
 .status-text.data-v-a433b5db {
@@ -287,47 +297,22 @@
   white-space: nowrap;
 }
 .action-btn.data-v-a433b5db::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transition: left 0.5s;
 }
 .action-btn.data-v-a433b5db:active::before {
   left: 100%;
-}
-
-/* 活跃状态按钮 */
-.action-btn.primary.data-v-a433b5db {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-  box-shadow: 0 8rpx 24rpx rgba(239, 68, 68, 0.3);
-}
-.action-btn.primary.data-v-a433b5db:active {
-  transform: translateY(2rpx);
-  box-shadow: 0 4rpx 16rpx rgba(239, 68, 68, 0.4);
-}
-
-/* 未开始状态按钮 */
-.action-btn.not-started.data-v-a433b5db {
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: white;
-  box-shadow: 0 8rpx 24rpx rgba(251, 191, 36, 0.3);
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-.action-btn.not-started.data-v-a433b5db:active {
-  transform: none;
-}
-
-/* 禁用状态 */
-.action-btn.data-v-a433b5db:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 .action-btn.secondary.data-v-a433b5db {
   background: linear-gradient(135deg, #f8fafc, #e2e8f0);
@@ -405,13 +390,16 @@
   animation: progressComplete-a433b5db 1s ease-in-out;
 }
 @keyframes progressFill-a433b5db {
-from { width: 0%;
+from {
+    width: 0%;
 }
 }
 @keyframes progressComplete-a433b5db {
-from { width: 0%;
+from {
+    width: 0%;
 }
-to { width: 100%;
+to {
+    width: 100%;
 }
 }
 .progress-text.data-v-a433b5db {

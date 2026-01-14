@@ -54,15 +54,15 @@ const _sfc_main = {
           }, 1500);
         } else {
           common_vendor.index.showToast({
-            title: "登录失败,请重试",
-            icon: "error"
+            title: "登录失败，请重试",
+            icon: "none"
           });
         }
       } catch (error) {
         console.error("手机号登录失败:", error);
         common_vendor.index.showToast({
           title: error.message || "登录失败，请重试",
-          icon: "error"
+          icon: "none"
         });
       } finally {
         isLogging.value = false;

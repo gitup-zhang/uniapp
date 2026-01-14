@@ -7,6 +7,12 @@ export function getinfologin(params){
 	return http.post('/user/login',params)
 	
 }
+// 微信登出
+export function Wechatlayout(){
+	
+	return http.post('/user/logout')
+	
+}
 
 // 获取用户个人信息接口
 export function getinfoprofile(){

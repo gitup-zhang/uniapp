@@ -135,40 +135,36 @@ const handlePhoneAuth = async (e) => {
   
   try {
     isLogging.value = true
-	console.log("手机号信息:",e)
+    console.log("手机号信息:", e)
     
     // 调用后端接口，传递加密数据
     const loginResult = await userInfo.loginWithWeChat(
-       e.detail.encryptedData,
-       e.detail.iv
+      e.detail.encryptedData,
+      e.detail.iv
     )
-	if(loginResult){
-		 // 保存登录信息
-    // await userInfo.saveLoginInfo(loginResult)
     
-    uni.showToast({
-      title: '登录成功',
-      icon: 'success'
-    })
-    
-    // 登录成功后返回上一页或跳转到个人中心
-    setTimeout(() => {
-      goBack()
-    }, 1500)
-	}else{
-		uni.showToast({
-		  title: '登录失败,请重试',
-		  icon: 'error'
-		})
-	}
-    
-   
+    if (loginResult) {
+      uni.showToast({
+        title: '登录成功',
+        icon: 'success'
+      })
+      
+      // 登录成功后返回上一页或跳转到个人中心
+      setTimeout(() => {
+        goBack()
+      }, 1500)
+    } else {
+      uni.showToast({
+        title: '登录失败，请重试',
+        icon: 'none'
+      })
+    }
     
   } catch (error) {
     console.error('手机号登录失败:', error)
     uni.showToast({
       title: error.message || '登录失败，请重试',
-      icon: 'error'
+      icon: 'none'
     })
   } finally {
     isLogging.value = false
